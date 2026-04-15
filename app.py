@@ -57,7 +57,7 @@ if not df_kpis.empty:
         st.metric("Leads calificados", kpi['leads_calificados'], "+12 nuevos")
     with c3:
         st.metric("Registros", kpi['registros'], f"Conv. {kpi['tasa_conversion_pct']}%")
-    with col4 := c4:
+    with c4:
         st.metric("Ingresos Mes", f"${kpi['ingresos_mes']/1000:,.1f}k", f"{kpi['pagos_pendientes']} pend. bancarios", delta_color="inverse")
 
 st.markdown("---")
