@@ -42,25 +42,40 @@ except Exception as e:
     st.stop()
 
 # --- HEADER: MÉTRICAS PRINCIPALES (KPIs) ---
-# Usando tu vista v_kpis_mes
 st.title("💛 Clases de Inglés con Fla - Dashboard")
 
-query_kpis = "SELECT * FROM v_kpis_mes LIMIT 1"
-df_kpis = pd.read_sql(query_kpis, conn)
+# Intentamos forzar el esquema public.v_kpis_mes
+query_kpis = "SELECT * FROM public.v_kpis_mes LIMIT 1"
 
-if not df_kpis.empty:
-    kpi = df_kpis.iloc[0]
+try:
+    df_kpis = pd.read_sql(query_kpis, conn)
+    
+    if not df_kpis.empty:
+        kpi = df_kpis.iloc[0]
+        c1, c2, c3, c4 = st.columns(4)
+        with c1:
+            st.metric("Leads este mes", kpi['leads_nuevos_mes'], "+18% vs mes anterior")
+        with c2:
+            st.metric("Leads calificados", kpi['leads_calificados'], "+12 nuevos")
+        with c3:
+            st.metric("Registros", kpi['registros'], f"Conv. {kpi['tasa_conversion_pct']}%")
+        with c4:
+            st.metric("Ingresos Mes", f"${kpi['ingresos_mes']/1000:,.1f}k", f"{kpi['pagos_pendientes']} pend. bancarios", delta_color="inverse")
+
+except Exception as e:
+    st.sidebar.error(f"Error de base de datos: {e}")
+    # Mostrar qué tablas/vistas REALMENTE existen para debuggear
+    st.sidebar.subheader("🔍 Tablas detectadas:")
+    try:
+        debug_df = pd.read_sql("SELECT table_name FROM information_schema.views WHERE table_schema = 'public'", conn)
+        st.sidebar.write(debug_df)
+    except:
+        pass
+    
+    st.warning("⚠️ Esperando que las vistas se sincronicen o la base de datos está vacía.")
     c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.metric("Leads este mes", kpi['leads_nuevos_mes'], "+18% vs mes anterior")
-    with c2:
-        st.metric("Leads calificados", kpi['leads_calificados'], "+12 nuevos")
-    with c3:
-        st.metric("Registros", kpi['registros'], f"Conv. {kpi['tasa_conversion_pct']}%")
-    with c4:
-        st.metric("Ingresos Mes", f"${kpi['ingresos_mes']/1000:,.1f}k", f"{kpi['pagos_pendientes']} pend. bancarios", delta_color="inverse")
-
-st.markdown("---")
+    c1.metric("Leads este mes", "0")
+    c2.metric("Leads calificados", "0")
 
 # --- FILA 1: GRÁFICOS SEMANALES Y DISTRIBUCIÓN ---
 row1_col1, row1_col2 = st.columns([2, 1])
