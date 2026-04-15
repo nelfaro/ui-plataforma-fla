@@ -42,21 +42,28 @@ conn = get_connection()
 # --- HEADER / KPIs ---
 st.title("Gestión de Academia de Inglés con Fla")
 
-# Usando la vista v_kpis_mes (asumiendo que tiene estas columnas)
-df_kpis = pd.read_sql("SELECT * FROM v_kpis_mes", conn)
+try:
+    df_kpis = pd.read_sql("SELECT * FROM v_kpis_mes", conn)
+    
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Chats este mes", f"{df_kpis['chats_total'][0]}", "+18% vs mes anterior")
+    with col2:
+        st.metric("Leads calificados", f"{df_kpis['leads_calificados'][0]}", "+12 nuevos")
+    with col3:
+        st.metric("Registros confirmados", f"{df_kpis['registros'][0]}", "Conversión 55%")
+    with col4:
+        # Formateo simple para el monto de dinero
+        monto = df_kpis['pagos_suma'][0]
+        st.metric("Pagos verificados", f"${monto:,.0f}", "8 pend. bancarios")
 
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    st.metric("Chats este mes", f"{df_kpis['chats_total'][0]}", "+18% vs mes anterior")
-with col2:
-    st.metric("Leads calificados", f"{df_kpis['leads_calificados'][0]}", "+12 nuevos")
-with col3:
-    st.metric("Registros confirmados", f"{df_kpis['registros'][0]}", "Conversión 55%")
-with col4:
-    st.metric("Pagos verificados", f"${df_kpis['pagos_suma'][0]}k", "8 pend. bancarios")
-
-st.markdown("---")
-
+except Exception as e:
+    st.warning("⚠️ Las vistas de KPIs aún no están listas o la base de datos está vacía.")
+    # Valores por defecto para que la UI no rompa
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Chats este mes", "0")
+    col2.metric("Leads calificados", "0")
+    
 # --- FILA CENTRAL: GRÁFICO SEMANAL Y CLASIFICACIÓN ---
 col_left, col_right = st.columns([2, 1])
 
