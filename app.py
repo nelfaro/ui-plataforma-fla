@@ -154,7 +154,7 @@ elif menu == "💬 Chatwoot":
     st.header("💬 Gestión de Clientes")
     st.link_button(
         "Abrir Chatwoot",
-        "https://agentes-chatwoot.xjkmv6.easypanel.host/"
+        "https://asistente-ia-fla-chatwoot.x5miqk.easypanel.host/"
     )
 
 # ==========================================
