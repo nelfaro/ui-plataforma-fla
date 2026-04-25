@@ -89,11 +89,26 @@ export const getAlumnos = async (dateRange = {}) => {
   }
 };
 
+export const getAnalisisTemporal = async (dateRange = {}) => {
+  try {
+    const response = await api.get('/webhook/get-analisis-temporal', {
+      params: { ...dateRange }
+    });
+    
+    const data = response.data.data || response.data;
+    return data;
+  } catch (error) {
+    console.error('Error fetching analisis temporal:', error);
+    throw error;
+  }
+};
+
 export default {
   getKPIs,
   getWeeklyData,
   getLeadsDistribution,
   getConversionFunnel,
   getLeadsOrigin,
-  getAlumnos
+  getAlumnos,
+  getAnalisisTemporal
 };

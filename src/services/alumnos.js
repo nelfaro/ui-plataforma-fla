@@ -1,23 +1,25 @@
-import api from './api';
 import axios from 'axios';
+
+const API_KEY = import.meta.env.VITE_API_KEY || '';
+const N8N_BASE_URL = 'https://asistente-ia-fla-n8n.x5miqk.easypanel.host';
+
+// Crear instancia de axios con headers predeterminados
+const axiosInstance = axios.create({
+  headers: {
+    'x-api-key': API_KEY,
+    'Content-Type': 'application/json'
+  }
+});
+
 /**
- * Obtener un alumno por ID
- * Llama al webhook get-alumno-by-id en n8n
+ * Obtener alumno por ID
  */
 export const getAlumnoById = async (id) => {
   try {
-    // Llamar directamente sin usar el baseURL de api
-    const response = await axios.get(
-      `https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/get-alumno-by-id?id=${id}`
+    const response = await axiosInstance.get(
+      `${N8N_BASE_URL}/webhook/get-alumno-by-id?id=${id}`
     );
-
-    console.log('Respuesta getAlumnoById:', response.data);
-
-    if (response.data.success && response.data.alumno) {
-      return response.data.alumno;
-    } else {
-      throw new Error('Alumno no encontrado');
-    }
+    return response.data.alumno;
   } catch (error) {
     console.error('Error fetching alumno:', error);
     throw error;
@@ -25,55 +27,52 @@ export const getAlumnoById = async (id) => {
 };
 
 /**
- * Obtener lista de alumnos con filtros
- * Llama al webhook get-alumnos-list en n8n
+ * Actualizar datos del alumno
  */
-export const getAlumnosList = async (params = {}) => {
+export const updateAlumno = async (id, datos) => {
   try {
-    const queryString = new URLSearchParams(params).toString();
-    const response = await axios.get(
-      `https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/get-alumnos-list?${queryString}`
+    const response = await axiosInstance.post(
+      `${N8N_BASE_URL}/webhook/update-alumno`,
+      {
+        id,
+        ...datos
+      }
     );
-
-    if (response.data.items) {
-      return {
-        items: response.data.items,
-        total: response.data.total,
-        limit: response.data.limit,
-        offset: response.data.offset
-      };
-    } else {
-      throw new Error('Error al obtener lista de alumnos');
-    }
+    return response.data.alumno;
   } catch (error) {
-    console.error('Error fetching alumnos list:', error);
+    console.error('Error updating alumno:', error);
     throw error;
   }
 };
 
 /**
- * Actualizar información de un alumno
- * Llama al webhook update-alumno en n8n
+ * Registrar pago (MANUAL o MERCADO_PAGO)
  */
-export const updateAlumno = async (id, alumnoData) => {
+export const registrarPago = async (datospago) => {
   try {
-    const response = await api.post('/webhook/update-alumno', {
-      id,
-      nombre: alumnoData.nombre,
-      estado: alumnoData.estado,
-      lead_tipo: alumnoData.lead_tipo,
-      horario_clase: alumnoData.horario_clase,
-      notas: alumnoData.notas,
-      email: alumnoData.email
-    });
-
-    if (response.data.success) {
-      return response.data.alumno;
-    } else {
-      throw new Error(response.data.mensaje || 'Error al actualizar alumno');
-    }
+    const response = await axiosInstance.post(
+      `${N8N_BASE_URL}/webhook/register-pago`,
+      datospago
+    );
+    return response.data;
   } catch (error) {
-    console.error('Error updating alumno:', error);
+    console.error('Error registering pago:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener lista de alumnos con filtros, búsqueda y paginación
+ */
+export const getAlumnosList = async (params = {}) => {
+  try {
+    const queryString = new URLSearchParams(params).toString();
+    const response = await axiosInstance.get(
+      `${N8N_BASE_URL}/webhook/get-alumnos-list?${queryString}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching alumnos list:', error);
     throw error;
   }
 };
@@ -84,8 +83,8 @@ export const updateAlumno = async (id, alumnoData) => {
  */
 export const updateCupoHorario = async (horarioId, accion) => {
   try {
-    const response = await axios.post(
-      'https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/update-cupo-horario',
+    const response = await axiosInstance.post(
+      `${N8N_BASE_URL}/webhook/update-cupo-horario`,
       {
         horario_id: horarioId,
         accion: accion // 'incrementar' o 'decrementar'
@@ -99,34 +98,6 @@ export const updateCupoHorario = async (horarioId, accion) => {
     }
   } catch (error) {
     console.error('Error updating cupo horario:', error);
-    throw error;
-  }
-};
-
-/**
- * Registrar un pago para un alumno
- * Llama al webhook register-pago en n8n
- * Soporta MANUAL y MERCADO_PAGO
- */
-export const registrarPago = async (pagoData) => {
-  try {
-    const response = await api.post('/webhook/register-pago', {
-      alumno_id: pagoData.alumno_id,
-      monto: pagoData.monto,
-      fecha_pago: pagoData.fecha_pago,
-      tipo_pago: pagoData.tipo_pago, // 'MANUAL' o 'MERCADO_PAGO'
-      metodo: pagoData.metodo, // Para MANUAL: 'EFECTIVO', 'TRANSFERENCIA', 'CHEQUE', 'OTRO'
-      nota: pagoData.nota,
-      registrado_por: pagoData.registrado_por
-    });
-
-    if (response.data.success) {
-      return response.data;
-    } else {
-      throw new Error(response.data.mensaje || 'Error al registrar pago');
-    }
-  } catch (error) {
-    console.error('Error registering pago:', error);
     throw error;
   }
 };
