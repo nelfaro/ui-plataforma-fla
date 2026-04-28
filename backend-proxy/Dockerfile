@@ -2,8 +2,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY backend-proxy/package*.json ./
-RUN npm ci --omit=dev
+COPY backend-proxy/package.json ./
+RUN npm install --omit=dev
 
 COPY backend-proxy/server.js ./
 
