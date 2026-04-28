@@ -14,11 +14,10 @@ export default function DashboardPage() {
   const today = new Date();
   const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    // Usa siempre últimos 7 días (más estable)
-  const dateRange = {
+  const [dateRange, setDateRange] = useState({
     startDate: sevenDaysAgo.toISOString().split('T')[0],
     endDate: today.toISOString().split('T')[0]
-  };
+  });
 
   const { data, loading, error } = useDashboard(dateRange);
 
