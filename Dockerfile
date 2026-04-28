@@ -8,7 +8,7 @@ RUN npm install --no-audit
 COPY . .
 
 # Declarar build args para que Vite los reciba durante el build
-ARG VITE_API_BASE_URL=/api
+ARG VITE_API_BASE_URL=https://asistente-ia-fla-backend-proxy.x5miqk.easypanel.host/api
 ARG VITE_CUSTOMER_NAME
 ARG VITE_CUSTOMER_PRIMARY_COLOR
 ARG VITE_CUSTOMER_SECONDARY_COLOR
