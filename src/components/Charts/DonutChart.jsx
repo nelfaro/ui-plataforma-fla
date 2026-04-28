@@ -18,8 +18,7 @@ export const DonutChart = ({ data, height = 300 }) => {
     CHART_COLORS.purple
   ];
 
-  // Si data no es un array, retorna vacío
-  if (!data || !Array.isArray(data) || data.length === 0) {
+  if (!data || !Array.isArray(data) || data.length === 0 || !data.some(d => d.total > 0)) {
     return (
       <div className="flex items-center justify-center h-80 bg-gray-50 rounded">
         <p className="text-gray-500">Sin datos disponibles</p>

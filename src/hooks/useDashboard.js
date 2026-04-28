@@ -12,7 +12,7 @@ export const useDashboard = (dateRange = {}) => {
         setLoading(true);
         setError(null);
 
-        const [kpis, weekly, distribution, funnel, origin, alumnos] = await Promise.all([
+        const results = await Promise.allSettled([
           dashboardService.getKPIs(dateRange),
           dashboardService.getWeeklyData(dateRange),
           dashboardService.getLeadsDistribution(dateRange),
@@ -21,13 +21,23 @@ export const useDashboard = (dateRange = {}) => {
           dashboardService.getAlumnos(dateRange)
         ]);
 
+        const endpoints = ['kpis', 'weekly', 'distribution', 'funnel', 'origin', 'alumnos'];
+        results.forEach((r, i) => {
+          if (r.status === 'rejected') console.warn(`[Dashboard] Endpoint '${endpoints[i]}' falló:`, r.reason);
+        });
+
+        const getValue = (result, fallback) =>
+          result.status === 'fulfilled' ? result.value : fallback;
+
+        const [kpis, weekly, distribution, funnel, origin, alumnos] = results;
+
         setData({
-          kpis,
-          weekly: Array.isArray(weekly) ? weekly : [],
-          distribution: Array.isArray(distribution) ? distribution : [],
-          funnel: Array.isArray(funnel) ? funnel : [],
-          origin: Array.isArray(origin) ? origin : [],
-          alumnos: Array.isArray(alumnos) ? alumnos : []
+          kpis: getValue(kpis, {}),
+          weekly: Array.isArray(getValue(weekly, [])) ? getValue(weekly, []) : [],
+          distribution: Array.isArray(getValue(distribution, [])) ? getValue(distribution, []) : [],
+          funnel: Array.isArray(getValue(funnel, [])) ? getValue(funnel, []) : [],
+          origin: Array.isArray(getValue(origin, [])) ? getValue(origin, []) : [],
+          alumnos: Array.isArray(getValue(alumnos, [])) ? getValue(alumnos, []) : []
         });
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
