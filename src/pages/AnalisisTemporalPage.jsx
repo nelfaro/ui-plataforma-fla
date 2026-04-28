@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MainLayout } from '../components/Layout/MainLayout';
 import { Card } from '../components/UI/Card';
+import { getAnalisisTemporal } from '../services/dashboard';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Calendar, TrendingUp, Users, DollarSign } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -23,16 +24,20 @@ export default function AnalisisTemporalPage() {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
+
+        if (new Date(startDate) > new Date(endDate)) {
+        toast.error('La fecha "Desde" no puede ser posterior a "Hasta"');
+        return;
+        }
+        
         setLoading(true);
 
-        const response = await axios.get(
-          `https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/get-analisis-temporal?startDate=${startDate}&endDate=${endDate}`
-        );
+        const data = await getAnalisisTemporal({ startDate, endDate });
 
-        console.log('Datos recibidos:', response.data);
+        console.log('Datos recibidos:', data);
 
-        if (response.data.items) {
-          const items = response.data.items;
+        if (data.items) {
+          const items = data.items;
           setDataNuevos(items.nuevos_por_semana || []);
           setDataConversion(items.conversion_por_semana || []);
           setDataIngresos(items.ingresos_acumulados || []);
