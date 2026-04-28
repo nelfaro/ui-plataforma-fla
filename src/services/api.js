@@ -1,32 +1,20 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../config/constants';
 
-const API_KEY = import.meta.env.VITE_API_KEY || '';
-
-console.log('API_KEY loaded:', API_KEY ? 'YES' : 'NO');
-console.log('N8N_BASE_URL:', N8N_BASE_URL);
-
-// Crear instancia axios con baseURL correcto
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
   headers: {
-    'Content-Type': 'application/json',
-    'x-api-key': API_KEY
+    'Content-Type': 'application/json'
   }
 });
 
-// Interceptor para agregar token y API key a requests
+// Interceptor para agregar token JWT a requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  
-  // Asegurar que siempre incluya API key
-  config.headers['x-api-key'] = API_KEY;
-  
   return config;
 });
 
