@@ -10,6 +10,22 @@ import { Button } from '../components/UI/Button';
 import { Card } from '../components/UI/Card';
 import { TrendingUp, Users, CheckCircle, DollarSign } from 'lucide-react';
 
+const buildWeeklySkeleton = (startDate, endDate) => {
+  const weeks = [];
+  const current = new Date(startDate + 'T00:00:00');
+  const end = new Date(endDate + 'T00:00:00');
+
+  while (current <= end) {
+    weeks.push({
+      name: `${current.getDate()}/${current.getMonth() + 1}`,
+      chats: 0,
+      registros: 0
+    });
+    current.setDate(current.getDate() + 7);
+  }
+  return weeks;
+};
+
 export default function DashboardPage() {
   const today = new Date();
   const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -184,7 +200,14 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <h3 className="font-semibold text-gray-900 mb-4">📊 Chats y conversiones por semana</h3>
-                <BarChart data={data?.weekly || []} height={300} />
+                <BarChart
+                  data={
+                    data?.weekly?.length > 0
+                      ? data.weekly
+                      : buildWeeklySkeleton(dateRange.startDate, dateRange.endDate)
+                  }
+                  height={300}
+                />
               </Card>
 
               <Card>
