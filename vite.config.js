@@ -10,8 +10,7 @@ export default defineConfig({
         target: 'https://asistente-ia-fla-n8n.x5miqk.easypanel.host',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-        logLevel: 'debug'
+        rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
   }

@@ -5,7 +5,7 @@
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 export const CHATWOOT_URL = import.meta.env.VITE_CHATWOOT_URL || 'https://asistente-ia-fla-chatwoot.x5miqk.easypanel.host';
 export const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL || 'https://asistente-ia-fla-puentewhatsapp.x5miqk.easypanel.host';
-
+export const API_KEY = import.meta.env.VITE_API_KEY || '';
 // Timeouts
 export const API_TIMEOUT = parseInt(import.meta.env.VITE_API_TIMEOUT || '30000', 10);
 

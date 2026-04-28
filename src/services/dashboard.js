@@ -96,18 +96,6 @@ export const getAnalisisTemporal = async (dateRange = {}) => {
     });
     
     const data = response.data.data || response.data;
-    
-    // Limpiar y deduplicar datos
-    if (data.items) {
-      return {
-        items: {
-          nuevos_por_semana: [...new Map(data.items.nuevos_por_semana.map(item => [item.semana, item])).values()],
-          conversion_por_semana: [...new Map(data.items.conversion_por_semana.map(item => [item.semana, item])).values()].filter(item => item.conversion !== null),
-          ingresos_acumulados: [...new Map(data.items.ingresos_acumulados.map(item => [item.mes, item])).values()]
-        }
-      };
-    }
-    
     return data;
   } catch (error) {
     console.error('Error fetching analisis temporal:', error);
@@ -123,5 +111,4 @@ export default {
   getLeadsOrigin,
   getAlumnos,
   getAnalisisTemporal
-
 };
