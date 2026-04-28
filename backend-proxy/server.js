@@ -27,8 +27,7 @@ const N8N_BASE_URL = process.env.N8N_BASE_URL;
 const API_KEY = process.env.API_KEY;
 
 if (!N8N_BASE_URL) {
-  console.error('❌ N8N_BASE_URL no está definida');
-  process.exit(1);
+  console.warn('⚠️  N8N_BASE_URL no está definida — las llamadas a webhooks fallarán');
 }
 
 // Proxy dinámico para todos los webhooks
