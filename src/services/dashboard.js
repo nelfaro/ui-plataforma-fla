@@ -1,9 +1,15 @@
 import api from './api';
 
+const convertYearMonthToDateRange = (year, month) => {
+  const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+  const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+  return { startDate, endDate };
+};
+
 export const getKPIs = async (dateRange = {}) => {
   try {
     const params = dateRange.year && dateRange.month
-      ? { year: dateRange.year, month: dateRange.month }
+      ? convertYearMonthToDateRange(dateRange.year, dateRange.month)
       : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
     const response = await api.get('/webhook/get-kpis', { params });
@@ -17,7 +23,7 @@ export const getKPIs = async (dateRange = {}) => {
 export const getWeeklyData = async (dateRange = {}) => {
   try {
     const params = dateRange.year && dateRange.month
-      ? { year: dateRange.year, month: dateRange.month }
+      ? convertYearMonthToDateRange(dateRange.year, dateRange.month)
       : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
     const response = await api.get('/webhook/get-analytics-weekly', { params });
@@ -32,8 +38,8 @@ export const getWeeklyData = async (dateRange = {}) => {
 export const getLeadsDistribution = async (dateRange = {}) => {
   try {
     const params = dateRange.year && dateRange.month
-      ? { year: dateRange.year, month: dateRange.month }
-      : { ...dateRange };
+      ? convertYearMonthToDateRange(dateRange.year, dateRange.month)
+      : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
     const response = await api.get('/webhook/get-leads-distribution', { params });
 
@@ -48,8 +54,8 @@ export const getLeadsDistribution = async (dateRange = {}) => {
 export const getConversionFunnel = async (dateRange = {}) => {
   try {
     const params = dateRange.year && dateRange.month
-      ? { year: dateRange.year, month: dateRange.month }
-      : { ...dateRange };
+      ? convertYearMonthToDateRange(dateRange.year, dateRange.month)
+      : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
     const response = await api.get('/webhook/get-conversion-funnel', { params });
 
@@ -64,8 +70,8 @@ export const getConversionFunnel = async (dateRange = {}) => {
 export const getLeadsOrigin = async (dateRange = {}) => {
   try {
     const params = dateRange.year && dateRange.month
-      ? { year: dateRange.year, month: dateRange.month }
-      : { ...dateRange };
+      ? convertYearMonthToDateRange(dateRange.year, dateRange.month)
+      : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
     const response = await api.get('/webhook/get-leads-origin', { params });
 
@@ -80,8 +86,8 @@ export const getLeadsOrigin = async (dateRange = {}) => {
 export const getAlumnos = async (dateRange = {}) => {
   try {
     const params = dateRange.year && dateRange.month
-      ? { year: dateRange.year, month: dateRange.month }
-      : { ...dateRange };
+      ? convertYearMonthToDateRange(dateRange.year, dateRange.month)
+      : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
     const response = await api.get('/webhook/get-alumnos', { params });
 
@@ -110,8 +116,8 @@ export const getAnalisisTemporal = async (dateRange = {}) => {
 export const getFunnelByOrigin = async (dateRange = {}) => {
   try {
     const params = dateRange.year && dateRange.month
-      ? { year: dateRange.year, month: dateRange.month }
-      : { ...dateRange };
+      ? convertYearMonthToDateRange(dateRange.year, dateRange.month)
+      : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
     const response = await api.get('/webhook/get-funnel-by-origin', { params });
 
