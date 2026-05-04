@@ -4,54 +4,54 @@ import { KpiCard } from '../components/Cards/KpiCard';
 import { BarChart } from '../components/Charts/BarChart';
 import { DonutChart } from '../components/Charts/DonutChart';
 import { FunnelChart } from '../components/Charts/FunnelChart';
+import { FunnelByOrigin } from '../components/Charts/FunnelByOrigin';
 import { PieChart } from '../components/Charts/PieChart';
 import { useDashboard } from '../hooks/useDashboard';
 import { Button } from '../components/UI/Button';
 import { Card } from '../components/UI/Card';
 import { TrendingUp, Users, CheckCircle, DollarSign } from 'lucide-react';
+import { getMonthPeriods } from '../utils/dateUtils';
 
-const buildWeeklySkeleton = (startDate, endDate) => {
-  const weeks = [];
-  const current = new Date(startDate + 'T00:00:00');
-  const end = new Date(endDate + 'T00:00:00');
-
-  while (current <= end) {
-    weeks.push({
-      name: `${current.getDate()}/${current.getMonth() + 1}`,
-      chats: 0,
-      registros: 0
-    });
-    current.setDate(current.getDate() + 7);
-  }
-  return weeks;
+const buildFourWeeksSkeleton = (year, month) => {
+  return getMonthPeriods(new Date(year, month - 1));
 };
 
 export default function DashboardPage() {
   const today = new Date();
-  const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-  const [dateRange, setDateRange] = useState({
-    startDate: sevenDaysAgo.toISOString().split('T')[0],
-    endDate: today.toISOString().split('T')[0]
+  const [periodConfig, setPeriodConfig] = useState({
+    year: today.getFullYear(),
+    month: today.getMonth() + 1
   });
+
+  const [activeTab, setActiveTab] = useState('metrics');
+
+  const dateRange = {
+    year: periodConfig.year,
+    month: periodConfig.month,
+    startDate: `${periodConfig.year}-${String(periodConfig.month).padStart(2, '0')}-01`,
+    endDate: new Date(periodConfig.year, periodConfig.month, 0).toISOString().split('T')[0]
+  };
 
   const { data, loading, error } = useDashboard(dateRange);
 
-  const handleDateChange = (e) => {
-    const { name, value } = e.target;
-    setDateRange(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleMonthChange = (direction) => {
+    setPeriodConfig(prev => {
+      const newMonth = prev.month + direction;
+      if (newMonth < 1) {
+        return { year: prev.year - 1, month: 12 };
+      } else if (newMonth > 12) {
+        return { year: prev.year + 1, month: 1 };
+      }
+      return { ...prev, month: newMonth };
+    });
   };
 
-  const handlePreset = (days) => {
-    const end = new Date();
-    const start = new Date(end.getTime() - days * 24 * 60 * 60 * 1000);
-    
-    setDateRange({
-      startDate: start.toISOString().split('T')[0],
-      endDate: end.toISOString().split('T')[0]
+  const handleCurrentMonth = () => {
+    const now = new Date();
+    setPeriodConfig({
+      year: now.getFullYear(),
+      month: now.getMonth() + 1
     });
   };
 
@@ -82,78 +82,75 @@ export default function DashboardPage() {
           <p className="text-gray-600">Gestión de Academia de Inglés con Fla</p>
         </div>
 
-        {/* Selector de fechas */}
+        {/* Selector de Mes/Año */}
         <Card variant="bordered">
           <div className="space-y-4">
-            <h3 className="font-semibold text-gray-900">Período de análisis</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Desde
-                </label>
-                <input
-                  type="date"
-                  name="startDate"
-                  value={dateRange.startDate}
-                  onChange={handleDateChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hasta
-                </label>
-                <input
-                  type="date"
-                  name="endDate"
-                  value={dateRange.endDate}
-                  onChange={handleDateChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
+            <h3 className="font-semibold text-gray-900">📅 Período de análisis: 4 semanas del mes</h3>
+            <p className="text-sm text-gray-600">Semana 1 (1-7) | Semana 2 (8-14) | Semana 3 (15-21) | Semana 4 (22-31)</p>
 
-            {/* Botones de preset */}
-            <div className="flex flex-wrap gap-2">
-              <Button 
+            <div className="flex items-center gap-4">
+              <Button
                 size="sm"
                 variant="ghost"
-                onClick={() => handlePreset(7)}
+                onClick={() => handleMonthChange(-1)}
               >
-                Últimos 7 días
+                ← Anterior
               </Button>
-              <Button 
+
+              <div className="flex-1 text-center">
+                <input
+                  type="month"
+                  value={`${periodConfig.year}-${String(periodConfig.month).padStart(2, '0')}`}
+                  onChange={(e) => {
+                    const [year, month] = e.target.value.split('-');
+                    setPeriodConfig({ year: parseInt(year), month: parseInt(month) });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center font-semibold"
+                />
+              </div>
+
+              <Button
                 size="sm"
                 variant="ghost"
-                onClick={() => handlePreset(30)}
+                onClick={() => handleMonthChange(1)}
               >
-                Últimos 30 días
+                Siguiente →
               </Button>
-              <Button 
+
+              <Button
                 size="sm"
-                variant="ghost"
-                onClick={() => handlePreset(90)}
+                variant="primary"
+                onClick={handleCurrentMonth}
               >
-                Últimos 90 días
-              </Button>
-              <Button 
-                size="sm"
-                variant="ghost"
-                onClick={() => {
-                  const today = new Date().toISOString().split('T')[0];
-                  setDateRange({
-                    startDate: today,
-                    endDate: today
-                  });
-                }}
-              >
-                Hoy
+                Mes actual
               </Button>
             </div>
           </div>
         </Card>
+
+        {/* Tabs de análisis */}
+        <div className="flex border-b border-gray-200 gap-0">
+          <button
+            onClick={() => setActiveTab('metrics')}
+            className={`px-6 py-3 font-semibold transition-colors ${
+              activeTab === 'metrics'
+                ? 'border-b-2 border-blue-500 text-blue-600'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            📊 Métricas generales
+          </button>
+          <button
+            onClick={() => setActiveTab('origin')}
+            className={`px-6 py-3 font-semibold transition-colors ${
+              activeTab === 'origin'
+                ? 'border-b-2 border-blue-500 text-blue-600'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            🌍 Funnel por origen
+          </button>
+        </div>
 
         {loading ? (
           <div className="flex items-center justify-center h-96">
@@ -196,15 +193,16 @@ export default function DashboardPage() {
               />
             </div>
 
-            {/* Gráficos */}
+            {/* TAB: Métricas Generales */}
+            {activeTab === 'metrics' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
-                <h3 className="font-semibold text-gray-900 mb-4">📊 Chats y conversiones por semana</h3>
+                <h3 className="font-semibold text-gray-900 mb-4">📊 Chats y conversiones por semana (4 semanas/mes)</h3>
                 <BarChart
                   data={
                     data?.weekly?.length > 0
                       ? data.weekly
-                      : buildWeeklySkeleton(dateRange.startDate, dateRange.endDate)
+                      : buildFourWeeksSkeleton(periodConfig.year, periodConfig.month)
                   }
                   height={300}
                 />
@@ -273,6 +271,18 @@ export default function DashboardPage() {
                 </div>
               </div>
             </Card>
+            )}
+
+            {/* TAB: Funnel por Origen */}
+            {activeTab === 'origin' && (
+              <Card className="mt-6">
+                <h3 className="font-semibold text-gray-900 mb-6">🌍 Análisis de Conversión por Origen</h3>
+                <p className="text-sm text-gray-600 mb-6">
+                  Comparación de prospectos nuevos vs conversión entre leads provenientes de recomendación vs búsqueda orgánica.
+                </p>
+                <FunnelByOrigin data={data?.funnelByOrigin || []} />
+              </Card>
+            )}
           </>
         )}
       </div>

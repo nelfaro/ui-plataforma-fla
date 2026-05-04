@@ -1,7 +1,40 @@
-FROM python:3.10-slim
-RUN apt-get update && apt-get install -y libpq-dev gcc
+FROM node:20-slim AS builder
+
 WORKDIR /app
+
+COPY package.json ./
+RUN npm install --no-audit
+
 COPY . .
-RUN pip install -r requirements.txt
-EXPOSE 8501
-CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+
+# Declarar build args para que Vite los reciba durante el build
+ARG VITE_API_BASE_URL=https://asistente-ia-fla-backend-proxy.x5miqk.easypanel.host/api
+ARG VITE_CUSTOMER_NAME
+ARG VITE_CUSTOMER_PRIMARY_COLOR
+ARG VITE_CUSTOMER_SECONDARY_COLOR
+ARG VITE_CHATWOOT_URL
+ARG VITE_WHATSAPP_URL
+ARG VITE_API_TIMEOUT=30000
+ARG VITE_DEBUG_MODE=false
+
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_CUSTOMER_NAME=$VITE_CUSTOMER_NAME
+ENV VITE_CUSTOMER_PRIMARY_COLOR=$VITE_CUSTOMER_PRIMARY_COLOR
+ENV VITE_CUSTOMER_SECONDARY_COLOR=$VITE_CUSTOMER_SECONDARY_COLOR
+ENV VITE_CHATWOOT_URL=$VITE_CHATWOOT_URL
+ENV VITE_WHATSAPP_URL=$VITE_WHATSAPP_URL
+ENV VITE_API_TIMEOUT=$VITE_API_TIMEOUT
+ENV VITE_DEBUG_MODE=$VITE_DEBUG_MODE
+
+RUN npm run build
+
+# Stage 2: Nginx
+FROM nginx:alpine
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY default.conf /etc/nginx/conf.d/default.conf
+
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

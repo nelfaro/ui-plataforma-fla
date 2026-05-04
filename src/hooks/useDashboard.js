@@ -18,10 +18,11 @@ export const useDashboard = (dateRange = {}) => {
           dashboardService.getLeadsDistribution(dateRange),
           dashboardService.getConversionFunnel(dateRange),
           dashboardService.getLeadsOrigin(dateRange),
-          dashboardService.getAlumnos(dateRange)
+          dashboardService.getAlumnos(dateRange),
+          dashboardService.getFunnelByOrigin(dateRange)
         ]);
 
-        const endpoints = ['kpis', 'weekly', 'distribution', 'funnel', 'origin', 'alumnos'];
+        const endpoints = ['kpis', 'weekly', 'distribution', 'funnel', 'origin', 'alumnos', 'funnelByOrigin'];
         results.forEach((r, i) => {
           if (r.status === 'rejected') console.warn(`[Dashboard] Endpoint '${endpoints[i]}' falló:`, r.reason);
         });
@@ -29,7 +30,7 @@ export const useDashboard = (dateRange = {}) => {
         const getValue = (result, fallback) =>
           result.status === 'fulfilled' ? result.value : fallback;
 
-        const [kpis, weekly, distribution, funnel, origin, alumnos] = results;
+        const [kpis, weekly, distribution, funnel, origin, alumnos, funnelByOrigin] = results;
 
         setData({
           kpis: getValue(kpis, {}),
@@ -37,7 +38,8 @@ export const useDashboard = (dateRange = {}) => {
           distribution: Array.isArray(getValue(distribution, [])) ? getValue(distribution, []) : [],
           funnel: Array.isArray(getValue(funnel, [])) ? getValue(funnel, []) : [],
           origin: Array.isArray(getValue(origin, [])) ? getValue(origin, []) : [],
-          alumnos: Array.isArray(getValue(alumnos, [])) ? getValue(alumnos, []) : []
+          alumnos: Array.isArray(getValue(alumnos, [])) ? getValue(alumnos, []) : [],
+          funnelByOrigin: Array.isArray(getValue(funnelByOrigin, [])) ? getValue(funnelByOrigin, []) : []
         });
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
@@ -48,7 +50,7 @@ export const useDashboard = (dateRange = {}) => {
     };
 
     fetchDashboardData();
-  }, [dateRange.startDate, dateRange.endDate]);
+  }, [dateRange.year, dateRange.month]);
 
   return { data, loading, error };
 };

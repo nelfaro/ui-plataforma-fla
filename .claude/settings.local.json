@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(git add *)",
+      "Bash(git stash *)",
+      "Bash(git pull *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git show *)",
+      "Read(//tmp/**)",
+      "WebFetch(domain:asistente-ia-fla-frontend.x5miqk.easypanel.host)",
+      "Bash(git checkout *)",
+      "PowerShell($file = Get-Content \"c:\\\\Proyectos\\\\Scal IA \\(Startup\\)\\\\Ingles con Fla\\\\n8n-workflows-backup 28-04-26\\\\Academia_Ingles_Cerebro_IA.json\" -Raw | ConvertFrom-Json; $file.nodes | Select-Object -Property @{N='Name';E={$_.name}}, @{N='Type';E={$_.type}} | Format-Table -AutoSize)"
+    ]
+  }
+}

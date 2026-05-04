@@ -2,12 +2,11 @@ import api from './api';
 
 export const getKPIs = async (dateRange = {}) => {
   try {
-    const response = await api.get('/webhook/get-kpis', {
-      params: { 
-        startDate: dateRange.startDate,
-        endDate: dateRange.endDate
-      }
-    });
+    const params = dateRange.year && dateRange.month
+      ? { year: dateRange.year, month: dateRange.month }
+      : { startDate: dateRange.startDate, endDate: dateRange.endDate };
+
+    const response = await api.get('/webhook/get-kpis', { params });
     return response.data;
   } catch (error) {
     console.error('Error fetching KPIs:', error);
@@ -17,12 +16,11 @@ export const getKPIs = async (dateRange = {}) => {
 
 export const getWeeklyData = async (dateRange = {}) => {
   try {
-    const response = await api.get('/webhook/get-analytics-weekly', {
-      params: { 
-        startDate: dateRange.startDate,
-        endDate: dateRange.endDate
-      }
-    });
+    const params = dateRange.year && dateRange.month
+      ? { year: dateRange.year, month: dateRange.month }
+      : { startDate: dateRange.startDate, endDate: dateRange.endDate };
+
+    const response = await api.get('/webhook/get-analytics-weekly', { params });
     const data = Array.isArray(response.data) ? response.data : [response.data];
     return data;
   } catch (error) {
@@ -33,11 +31,12 @@ export const getWeeklyData = async (dateRange = {}) => {
 
 export const getLeadsDistribution = async (dateRange = {}) => {
   try {
-    const response = await api.get('/webhook/get-leads-distribution', {
-      params: { ...dateRange }
-    });
-    
-    // Obtener el array de items
+    const params = dateRange.year && dateRange.month
+      ? { year: dateRange.year, month: dateRange.month }
+      : { ...dateRange };
+
+    const response = await api.get('/webhook/get-leads-distribution', { params });
+
     const data = response.data.items || response.data;
     return Array.isArray(data) ? data : [data];
   } catch (error) {
@@ -48,10 +47,12 @@ export const getLeadsDistribution = async (dateRange = {}) => {
 
 export const getConversionFunnel = async (dateRange = {}) => {
   try {
-    const response = await api.get('/webhook/get-conversion-funnel', {
-      params: { ...dateRange }
-    });
-    
+    const params = dateRange.year && dateRange.month
+      ? { year: dateRange.year, month: dateRange.month }
+      : { ...dateRange };
+
+    const response = await api.get('/webhook/get-conversion-funnel', { params });
+
     const data = response.data.items || response.data;
     return Array.isArray(data) ? data : [data];
   } catch (error) {
@@ -62,10 +63,12 @@ export const getConversionFunnel = async (dateRange = {}) => {
 
 export const getLeadsOrigin = async (dateRange = {}) => {
   try {
-    const response = await api.get('/webhook/get-leads-origin', {
-      params: { ...dateRange }
-    });
-    
+    const params = dateRange.year && dateRange.month
+      ? { year: dateRange.year, month: dateRange.month }
+      : { ...dateRange };
+
+    const response = await api.get('/webhook/get-leads-origin', { params });
+
     const data = response.data.items || response.data;
     return Array.isArray(data) ? data : [data];
   } catch (error) {
@@ -76,11 +79,12 @@ export const getLeadsOrigin = async (dateRange = {}) => {
 
 export const getAlumnos = async (dateRange = {}) => {
   try {
-    const response = await api.get('/webhook/get-alumnos', {
-      params: { ...dateRange }
-    });
-    
-    // Si retorna {items: [...]} extrae el array
+    const params = dateRange.year && dateRange.month
+      ? { year: dateRange.year, month: dateRange.month }
+      : { ...dateRange };
+
+    const response = await api.get('/webhook/get-alumnos', { params });
+
     const data = response.data.items || response.data;
     return Array.isArray(data) ? data : [data];
   } catch (error) {
@@ -94,11 +98,27 @@ export const getAnalisisTemporal = async (dateRange = {}) => {
     const response = await api.get('/webhook/get-analisis-temporal', {
       params: { ...dateRange }
     });
-    
+
     const data = response.data.data || response.data;
     return data;
   } catch (error) {
     console.error('Error fetching analisis temporal:', error);
+    throw error;
+  }
+};
+
+export const getFunnelByOrigin = async (dateRange = {}) => {
+  try {
+    const params = dateRange.year && dateRange.month
+      ? { year: dateRange.year, month: dateRange.month }
+      : { ...dateRange };
+
+    const response = await api.get('/webhook/get-funnel-by-origin', { params });
+
+    const data = response.data.items || response.data;
+    return Array.isArray(data) ? data : [data];
+  } catch (error) {
+    console.error('Error fetching funnel by origin:', error);
     throw error;
   }
 };
@@ -110,5 +130,6 @@ export default {
   getConversionFunnel,
   getLeadsOrigin,
   getAlumnos,
-  getAnalisisTemporal
+  getAnalisisTemporal,
+  getFunnelByOrigin
 };
