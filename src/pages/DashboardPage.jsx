@@ -195,82 +195,84 @@ export default function DashboardPage() {
 
             {/* TAB: Métricas Generales */}
             {activeTab === 'metrics' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <h3 className="font-semibold text-gray-900 mb-4">📊 Chats y conversiones por semana (4 semanas/mes)</h3>
-                <BarChart
-                  data={
-                    data?.weekly?.length > 0
-                      ? data.weekly
-                      : buildFourWeeksSkeleton(periodConfig.year, periodConfig.month)
-                  }
-                  height={300}
-                />
-              </Card>
+              <>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <h3 className="font-semibold text-gray-900 mb-4">📊 Chats y conversiones por semana (4 semanas/mes)</h3>
+                    <BarChart
+                      data={
+                        data?.weekly?.length > 0
+                          ? data.weekly
+                          : buildFourWeeksSkeleton(periodConfig.year, periodConfig.month)
+                      }
+                      height={300}
+                    />
+                  </Card>
 
-              <Card>
-                <h3 className="font-semibold text-gray-900 mb-4">🎯 Clasificación de leads</h3>
-                <DonutChart data={data?.distribution || []} height={300} />
-              </Card>
+                  <Card>
+                    <h3 className="font-semibold text-gray-900 mb-4">🎯 Clasificación de leads</h3>
+                    <DonutChart data={data?.distribution || []} height={300} />
+                  </Card>
 
-              <Card className="overflow-hidden">
-                <h3 className="font-semibold text-gray-900 mb-4">📈 Funnel de conversión</h3>
-                <FunnelChart data={data?.funnel || []} height={300} />
-              </Card>
+                  <Card className="overflow-hidden">
+                    <h3 className="font-semibold text-gray-900 mb-4">📈 Funnel de conversión</h3>
+                    <FunnelChart data={data?.funnel || []} height={300} />
+                  </Card>
 
-              <Card>
-                <h3 className="font-semibold text-gray-900 mb-4">🌎 Origen de leads</h3>
-                <PieChart data={data?.origin || []} height={300} />
-              </Card>
-            </div>
-
-            {/* Tabla de alumnos */}
-            <Card>
-              <h3 className="font-semibold text-gray-900 mb-4">👥 Últimas consultas atendidas</h3>
-              {data?.alumnos && data.alumnos.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50 border-b border-gray-200">
-                      <tr>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-700">Nombre</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-700">Tipo</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-700">Origen</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-700">Estado</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-700">Intención</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data.alumnos.map((alumno, idx) => (
-                        <tr key={idx} className="border-b border-gray-200 hover:bg-gray-50">
-                          <td className="px-4 py-3 text-gray-900">{alumno.nombre}</td>
-                          <td className="px-4 py-3 text-gray-600">{alumno.lead_tipo}</td>
-                          <td className="px-4 py-3 text-gray-600">{alumno.origen}</td>
-                          <td className="px-4 py-3">
-                            <span className="inline-block px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                              {alumno.estado}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-gray-600">{alumno.intencion}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <Card>
+                    <h3 className="font-semibold text-gray-900 mb-4">🌎 Origen de leads</h3>
+                    <PieChart data={data?.origin || []} height={300} />
+                  </Card>
                 </div>
-              ) : (
-                <p className="text-gray-500 text-center py-4">Sin datos disponibles</p>
-              )}
-            </Card>
 
-            {/* Banner agente */}
-            <Card variant="bordered" className="bg-yellow-50 border-yellow-200">
-              <div className="flex items-start gap-4">
-                <div className="text-2xl">🤖</div>
-                <div>
-                  <h4 className="font-semibold text-gray-900">Asistente Fla será Activo</h4>
-                  <p className="text-gray-700 mt-1">Respondiendo actualmente a 14 clientes en tiempo real vía WhatsApp.</p>
-                </div>
-              </div>
-            </Card>
+                {/* Tabla de alumnos */}
+                <Card>
+                  <h3 className="font-semibold text-gray-900 mb-4">👥 Últimas consultas atendidas</h3>
+                  {data?.alumnos && data.alumnos.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-50 border-b border-gray-200">
+                          <tr>
+                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Nombre</th>
+                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Tipo</th>
+                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Origen</th>
+                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Estado</th>
+                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Intención</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {data.alumnos.map((alumno, idx) => (
+                            <tr key={idx} className="border-b border-gray-200 hover:bg-gray-50">
+                              <td className="px-4 py-3 text-gray-900">{alumno.nombre}</td>
+                              <td className="px-4 py-3 text-gray-600">{alumno.lead_tipo}</td>
+                              <td className="px-4 py-3 text-gray-600">{alumno.origen}</td>
+                              <td className="px-4 py-3">
+                                <span className="inline-block px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                                  {alumno.estado}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-gray-600">{alumno.intencion}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">Sin datos disponibles</p>
+                  )}
+                </Card>
+
+                {/* Banner agente */}
+                <Card variant="bordered" className="bg-yellow-50 border-yellow-200">
+                  <div className="flex items-start gap-4">
+                    <div className="text-2xl">🤖</div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Asistente Fla será Activo</h4>
+                      <p className="text-gray-700 mt-1">Respondiendo actualmente a 14 clientes en tiempo real vía WhatsApp.</p>
+                    </div>
+                  </div>
+                </Card>
+              </>
             )}
 
             {/* TAB: Funnel por Origen */}
