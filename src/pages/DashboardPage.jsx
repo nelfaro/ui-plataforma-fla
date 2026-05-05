@@ -164,7 +164,7 @@ export default function DashboardPage() {
                 color="blue"
               />
               <KpiCard
-                label="Leads calificados"
+                label="Conversaciones atendidas"
                 value={data?.kpis?.leads_calificados || 0}
                 trend="+12 nuevos"
                 trendLabel="este mes"
@@ -178,7 +178,7 @@ export default function DashboardPage() {
                 color="purple"
               />
               <KpiCard
-                label="Ingresos del mes"
+                label="Ingresos"
                 value={`$${data?.kpis?.ingresos_mes || 0}`}
                 trend="8 pagos pendientes"
                 trendLabel=""
