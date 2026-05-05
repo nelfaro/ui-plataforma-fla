@@ -13,7 +13,7 @@ export const FunnelByOrigin = ({ data = [] }) => {
 
   // Datos filtrados
   const filteredData = selectedOrigin
-    ? data.filter(item => item.origin === selectedOrigin)
+    ? data.filter(item => (item.origin || item.origen) === selectedOrigin)
     : data;
 
   // Cálculos generales
