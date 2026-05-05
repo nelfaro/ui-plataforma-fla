@@ -18,40 +18,30 @@ const buildFourWeeksSkeleton = (year, month) => {
 
 export default function DashboardPage() {
   const today = new Date();
+  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+  const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
   const [periodConfig, setPeriodConfig] = useState({
-    year: today.getFullYear(),
-    month: today.getMonth() + 1
+    startDate: firstDay.toISOString().split('T')[0],
+    endDate: lastDay.toISOString().split('T')[0]
   });
 
   const [activeTab, setActiveTab] = useState('metrics');
 
   const dateRange = {
-    year: periodConfig.year,
-    month: periodConfig.month,
-    startDate: `${periodConfig.year}-${String(periodConfig.month).padStart(2, '0')}-01`,
-    endDate: new Date(periodConfig.year, periodConfig.month, 0).toISOString().split('T')[0]
+    startDate: periodConfig.startDate,
+    endDate: periodConfig.endDate
   };
 
   const { data, loading, error } = useDashboard(dateRange);
 
-  const handleMonthChange = (direction) => {
-    setPeriodConfig(prev => {
-      const newMonth = prev.month + direction;
-      if (newMonth < 1) {
-        return { year: prev.year - 1, month: 12 };
-      } else if (newMonth > 12) {
-        return { year: prev.year + 1, month: 1 };
-      }
-      return { ...prev, month: newMonth };
-    });
-  };
-
   const handleCurrentMonth = () => {
     const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     setPeriodConfig({
-      year: now.getFullYear(),
-      month: now.getMonth() + 1
+      startDate: firstDay.toISOString().split('T')[0],
+      endDate: lastDay.toISOString().split('T')[0]
     });
   };
 
@@ -82,48 +72,51 @@ export default function DashboardPage() {
           <p className="text-gray-600">Gestión de Academia de Inglés con Fla</p>
         </div>
 
-        {/* Selector de Mes/Año */}
+        {/* Selector de Rango de Fechas */}
         <Card variant="bordered">
           <div className="space-y-4">
-            <h3 className="font-semibold text-gray-900">📅 Período de análisis: 4 semanas del mes</h3>
-            <p className="text-sm text-gray-600">Semana 1 (1-7) | Semana 2 (8-14) | Semana 3 (15-21) | Semana 4 (22-31)</p>
+            <h3 className="font-semibold text-gray-900">📅 Período de análisis</h3>
 
-            <div className="flex items-center gap-4">
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => handleMonthChange(-1)}
-              >
-                ← Anterior
-              </Button>
-
-              <div className="flex-1 text-center">
+            <div className="flex flex-col md:flex-row items-center gap-4">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Desde</label>
                 <input
-                  type="month"
-                  value={`${periodConfig.year}-${String(periodConfig.month).padStart(2, '0')}`}
+                  type="date"
+                  value={periodConfig.startDate}
                   onChange={(e) => {
-                    const [year, month] = e.target.value.split('-');
-                    setPeriodConfig({ year: parseInt(year), month: parseInt(month) });
+                    setPeriodConfig(prev => ({
+                      ...prev,
+                      startDate: e.target.value
+                    }));
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center font-semibold"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => handleMonthChange(1)}
-              >
-                Siguiente →
-              </Button>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Hasta</label>
+                <input
+                  type="date"
+                  value={periodConfig.endDate}
+                  onChange={(e) => {
+                    setPeriodConfig(prev => ({
+                      ...prev,
+                      endDate: e.target.value
+                    }));
+                  }}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
 
-              <Button
-                size="sm"
-                variant="primary"
-                onClick={handleCurrentMonth}
-              >
-                Mes actual
-              </Button>
+              <div className="flex items-end gap-2">
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={handleCurrentMonth}
+                >
+                  Mes actual
+                </Button>
+              </div>
             </div>
           </div>
         </Card>
@@ -203,7 +196,10 @@ export default function DashboardPage() {
                       data={
                         data?.weekly?.length > 0
                           ? data.weekly
-                          : buildFourWeeksSkeleton(periodConfig.year, periodConfig.month)
+                          : buildFourWeeksSkeleton(
+                              new Date(periodConfig.startDate).getFullYear(),
+                              new Date(periodConfig.startDate).getMonth() + 1
+                            )
                       }
                       height={300}
                     />
