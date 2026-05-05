@@ -19,11 +19,10 @@ const buildFourWeeksSkeleton = (year, month) => {
 export default function DashboardPage() {
   const today = new Date();
   const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-  const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
   const [periodConfig, setPeriodConfig] = useState({
     startDate: firstDay.toISOString().split('T')[0],
-    endDate: lastDay.toISOString().split('T')[0]
+    endDate: today.toISOString().split('T')[0]
   });
 
   const [activeTab, setActiveTab] = useState('metrics');
@@ -38,10 +37,9 @@ export default function DashboardPage() {
   const handleCurrentMonth = () => {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     setPeriodConfig({
       startDate: firstDay.toISOString().split('T')[0],
-      endDate: lastDay.toISOString().split('T')[0]
+      endDate: now.toISOString().split('T')[0]
     });
   };
 
