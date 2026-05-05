@@ -150,7 +150,7 @@ export const FunnelByOrigin = ({ data = [] }) => {
                 <div>
                   <p className="text-gray-600">Pendientes en Nutriendo</p>
                   <p className="font-semibold text-gray-900">
-                    {item.nutriendo - item.conversion}
+                    {Math.max(0, item.nutriendo - item.conversion)}
                   </p>
                 </div>
               </div>
