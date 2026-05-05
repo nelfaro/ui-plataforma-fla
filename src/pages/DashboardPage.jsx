@@ -157,29 +157,37 @@ export default function DashboardPage() {
               <KpiCard
                 label="Chats este mes"
                 value={data?.kpis?.leads_nuevos_mes || 0}
-                trend="+18%"
-                trendLabel="vs mes anterior"
+                trend={data?.kpis?.leads_nuevos_variacion !== undefined && data?.kpis?.leads_nuevos_variacion !== null
+                  ? (data.kpis.leads_nuevos_variacion === 0 ? "0%" : `${data.kpis.leads_nuevos_variacion > 0 ? "+" : ""}${data.kpis.leads_nuevos_variacion}%`)
+                  : "0%"}
+                trendLabel="vs 30 días antes"
                 color="blue"
               />
               <KpiCard
                 label="Conversaciones atendidas"
-                value={data?.kpis?.leads_calificados || 0}
-                trend="+12 nuevos"
-                trendLabel="este mes"
+                value={data?.kpis?.conversaciones_atendidas || 0}
+                trend={data?.kpis?.conversaciones_variacion !== undefined && data?.kpis?.conversaciones_variacion !== null
+                  ? (data.kpis.conversaciones_variacion === 0 ? "0%" : `${data.kpis.conversaciones_variacion > 0 ? "+" : ""}${data.kpis.conversaciones_variacion}%`)
+                  : "0%"}
+                trendLabel="vs 30 días antes"
                 color="green"
               />
               <KpiCard
                 label="Registros confirmados"
                 value={data?.kpis?.registrados || 0}
-                trend="0%"
-                trendLabel="conversión"
+                trend={data?.kpis?.registrados_variacion !== undefined && data?.kpis?.registrados_variacion !== null
+                  ? (data.kpis.registrados_variacion === 0 ? "0%" : `${data.kpis.registrados_variacion > 0 ? "+" : ""}${data.kpis.registrados_variacion}%`)
+                  : "0%"}
+                trendLabel="vs 30 días antes"
                 color="purple"
               />
               <KpiCard
                 label="Ingresos"
                 value={`$${data?.kpis?.ingresos_mes || 0}`}
-                trend="8 pagos pendientes"
-                trendLabel=""
+                trend={data?.kpis?.ingresos_variacion !== undefined && data?.kpis?.ingresos_variacion !== null
+                  ? (data.kpis.ingresos_variacion === 0 ? "0%" : `${data.kpis.ingresos_variacion > 0 ? "+" : ""}${data.kpis.ingresos_variacion}%`)
+                  : "0%"}
+                trendLabel="vs 30 días antes"
                 color="orange"
               />
             </div>
