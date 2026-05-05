@@ -99,6 +99,35 @@ export const getAlumnos = async (dateRange = {}) => {
   }
 };
 
+export const getFunnelByOrigin = async (dateRange = {}) => {
+  try {
+    const params = dateRange.year && dateRange.month
+      ? convertYearMonthToDateRange(dateRange.year, dateRange.month)
+      : { startDate: dateRange.startDate, endDate: dateRange.endDate };
+
+    const response = await api.get('/webhook/get-funnel-by-origin', { params });
+
+    const data = response.data.items || response.data || [];
+
+    if (Array.isArray(data)) {
+      return data.map(item => ({
+        origin: item.origen || item.origin || 'Unknown',
+        nuevos: item.etapas?.Nuevos || 0,
+        nutriendo: item.etapas?.Nutriendo || 0,
+        conversion: item.etapas?.Conversión || 0,
+        tasa_conversion: item.etapas?.Nuevos > 0
+          ? Math.round((item.etapas?.Conversión || 0) / item.etapas?.Nuevos * 100)
+          : 0
+      }));
+    }
+
+    return Array.isArray(data) ? data : [data];
+  } catch (error) {
+    console.error('Error fetching funnel by origin:', error);
+    throw error;
+  }
+};
+
 export const getAnalisisTemporal = async (dateRange = {}) => {
   try {
     const response = await api.get('/webhook/get-analisis-temporal', {
@@ -109,22 +138,6 @@ export const getAnalisisTemporal = async (dateRange = {}) => {
     return data;
   } catch (error) {
     console.error('Error fetching analisis temporal:', error);
-    throw error;
-  }
-};
-
-export const getFunnelByOrigin = async (dateRange = {}) => {
-  try {
-    const params = dateRange.year && dateRange.month
-      ? convertYearMonthToDateRange(dateRange.year, dateRange.month)
-      : { startDate: dateRange.startDate, endDate: dateRange.endDate };
-
-    const response = await api.get('/webhook/get-funnel-by-origin', { params });
-
-    const data = response.data.items || response.data;
-    return Array.isArray(data) ? data : [data];
-  } catch (error) {
-    console.error('Error fetching funnel by origin:', error);
     throw error;
   }
 };
