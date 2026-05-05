@@ -26,6 +26,21 @@ export const PieChart = ({ data, height = 300 }) => {
     );
   }
 
+  const CustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const entry = payload[0].payload;
+      const label = entry.origen || entry.lead_tipo;
+      return (
+        <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
+          <p className="font-semibold text-gray-900">{label}</p>
+          <p className="text-sm text-gray-600">{entry.total} registros</p>
+          <p className="text-sm font-medium text-blue-600">{entry.porcentaje || 0}% del total</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <ResponsiveContainer width="100%" height={height}>
       <RechartsPieChart>
@@ -35,21 +50,15 @@ export const PieChart = ({ data, height = 300 }) => {
           cy="50%"
           outerRadius={100}
           dataKey="total"
-          nameKey="origen"  // o "origen" según corresponda
-          label={(entry) => entry.lead_tipo || entry.origen}  // ← MOSTRAR NOMBRE
+          nameKey="origen"
+          label={(entry) => `${entry.origen || entry.lead_tipo} (${entry.porcentaje || 0}%)`}
         >
           {data.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
           ))}
         </Pie>
-        <Tooltip 
-          contentStyle={{
-            backgroundColor: '#fff',
-            border: '1px solid #e5e7eb',
-            borderRadius: '8px'
-          }}
-        />
-        <Legend 
+        <Tooltip content={<CustomTooltip />} />
+        <Legend
           layout="vertical"
           align="right"
           verticalAlign="middle"
