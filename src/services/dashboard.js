@@ -112,12 +112,14 @@ export const getFunnelByOrigin = async (dateRange = {}) => {
     if (Array.isArray(data)) {
       return data.map(item => ({
         origin: item.origen || item.origin || 'Unknown',
-        nuevos: item.etapas?.Nuevos || 0,
-        nutriendo: item.etapas?.Nutriendo || 0,
-        conversion: item.etapas?.Conversión || 0,
-        tasa_conversion: item.etapas?.Nuevos > 0
-          ? Math.round((item.etapas?.Conversión || 0) / item.etapas?.Nuevos * 100)
-          : 0
+        nuevos: item.nuevos || item.etapas?.Nuevos || 0,
+        nutriendo: item.nutriendo || item.etapas?.Nutriendo || 0,
+        conversion: item.conversion || item.etapas?.Conversión || 0,
+        tasa_conversion: item.tasa_conversion !== undefined
+          ? item.tasa_conversion
+          : (item.etapas?.Nuevos > 0
+              ? Math.round((item.etapas?.Conversión || 0) / item.etapas?.Nuevos * 100)
+              : 0)
       }));
     }
 
