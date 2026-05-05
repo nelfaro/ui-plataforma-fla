@@ -19,14 +19,13 @@ export const FunnelChart = ({ data, height = 400 }) => {
     );
   }
 
-  // Filtrar datos con cantidad > 0
+  // Filtrar datos con cantidad > 0 (mantener orden del funnel)
   const filteredData = data
     .map(item => ({
       ...item,
       cantidad: parseInt(item.cantidad) || 0
     }))
-    .filter(item => item.cantidad > 0)
-    .sort((a, b) => b.cantidad - a.cantidad);
+    .filter(item => item.cantidad > 0);
 
   if (filteredData.length === 0) {
     return (
