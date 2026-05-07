@@ -31,7 +31,8 @@ export const DocumentsPage = () => {
         const data = await documentsService.getLastFile();
         setLastFile(data);
       } catch (err) {
-        console.error('Error fetching last file:', err);
+        console.warn('Last file endpoint not available:', err.message);
+        // No mostrar error, solo continuar sin el banner
       }
     };
     fetchLastFile();
