@@ -12,6 +12,7 @@ import AlumnoDetallePage from './pages/AlumnoDetallePage';
 import DirectorioAlumnosPage from './pages/DirectorioAlumnosPage';
 import AnalisisTemporalPage from './pages/AnalisisTemporalPage';
 import GestionHorariosPage from './pages/GestionHorariosPage';
+import LeadsPage from './pages/LeadsPage';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuthContext();
@@ -74,10 +75,18 @@ const AppRoutes = () => {
             }
           />
           {/*AnalisisTemporalPage*/}
-          <Route 
-            path="/analisis-temporal" 
+          <Route
+            path="/analisis-temporal"
             element={
               <AnalisisTemporalPage />
+            }
+          />
+
+          {/*LeadsPage*/}
+          <Route
+            path="/leads"
+            element={
+              <LeadsPage />
             }
           />
 

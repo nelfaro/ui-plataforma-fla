@@ -9,7 +9,8 @@ import {
   X,
   Users,
   TrendingUp,
-  Clock
+  Clock,
+  Target
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -44,6 +45,11 @@ export const Sidebar = ({ isOpen, onClose }) => {
     to: '/analisis-temporal',
     label: 'Análisis Temporal',
     icon: TrendingUp  // Importa de lucide-react
+    },
+    {
+      to: '/leads',
+      label: 'Leads / Pipeline',
+      icon: Target
     },
     {
       label: 'Chatwoot',
