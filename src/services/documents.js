@@ -4,7 +4,7 @@ import axios from 'axios';
 // Obtener último archivo procesado
 export const getLastFile = async () => {
   try {
-    const response = await api.get('/api/v1/documents/last');
+    const response = await api.get('/v1/documents/last');
     return response.data;
   } catch (error) {
     console.error('Error fetching last file:', error);
