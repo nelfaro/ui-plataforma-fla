@@ -29,7 +29,11 @@ export const createItem = async (data) => {
 
 export const updateItem = async (id, data) => {
   try {
-    const response = await axios.put(`${N8N_BASE_URL}/conocimiento-put/${id}`, data);
+    const response = await axios.post(`${N8N_BASE_URL}/conocimiento-post`, {
+      ...data,
+      id,
+      _action: 'update'
+    });
     return response.data;
   } catch (error) {
     console.error('Error updating conocimiento item:', error);
@@ -39,7 +43,10 @@ export const updateItem = async (id, data) => {
 
 export const deleteItem = async (id) => {
   try {
-    const response = await axios.delete(`${N8N_BASE_URL}/conocimiento-delete/${id}`);
+    const response = await axios.post(`${N8N_BASE_URL}/conocimiento-post`, {
+      id,
+      _action: 'delete'
+    });
     return response.data;
   } catch (error) {
     console.error('Error deleting conocimiento item:', error);
