@@ -1,0 +1,129 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "path": "rag-academia-query",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -600,
+        200
+      ],
+      "id": "webhook-query",
+      "name": "Webhook",
+      "webhookId": "rag-academia-query"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { pregunta, lead_tipo, whatsapp } = $input.first().json;\n\n// Mapeo de lead_tipo a categorías para filtrar\nconst categoriasMap = {\n  'KIDS': ['KIDS', 'GENERAL', 'METODOLOGIA'],\n  'KIDS-ADOLESCENTES': ['KIDS', 'GENERAL', 'METODOLOGIA'],\n  'ADULTO': ['ADULTOS', 'GENERAL', 'METODOLOGIA', 'PRECIOS', 'PARTICULARES'],\n  'PERSONALIZADO': ['PARTICULARES', 'GENERAL', 'METODOLOGIA', 'PRECIOS'],\n  'AU_PAIR': ['AU_PAIR', 'GENERAL', 'METODOLOGIA', 'PRECIOS']\n};\n\nconst categorias = categoriasMap[lead_tipo] || ['GENERAL'];\n\nreturn [{\n  json: {\n    pregunta: pregunta || '',\n    lead_tipo: lead_tipo || 'GENERAL',\n    whatsapp: whatsapp || '',\n    categorias: categorias,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        200
+      ],
+      "id": "prepare-query",
+      "name": "Preparar Query"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -200,
+        200
+      ],
+      "id": "embeddings-query",
+      "name": "Embeddings OpenAI (Query)"
+    },
+    {
+      "parameters": {
+        "mode": "query",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "academia",
+          "mode": "id"
+        },
+        "topK": 3,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        200
+      ],
+      "id": "qdrant-query",
+      "name": "Qdrant Query"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = $input.all();\nconst pregunta = $('Preparar Query').item.json.pregunta;\nconst lead_tipo = $('Preparar Query').item.json.lead_tipo;\nconst categorias = $('Preparar Query').item.json.categorias;\n\n// Procesar resultados del RAG\nlet contenido = '';\nlet fuentes = [];\n\nresults.forEach(result => {\n  if (result.json && result.json.pageContent) {\n    contenido += result.json.pageContent + '\\n\\n';\n    \n    // Extraer metadata si existe\n    if (result.json.metadata) {\n      const meta = result.json.metadata;\n      if (meta.titulo && !fuentes.includes(meta.titulo)) {\n        fuentes.push(meta.titulo);\n      }\n    }\n  }\n});\n\n// Si no hay resultados, responder con info genérica\nif (!contenido.trim()) {\n  contenido = `No encontré información específica sobre \"${pregunta}\" en la base de datos. Por favor, consultá directamente a Fla para más detalles.`;\n}\n\nreturn [{\n  json: {\n    exito: true,\n    pregunta: pregunta,\n    lead_tipo: lead_tipo,\n    contenido: contenido.trim(),\n    fuentes: fuentes.length > 0 ? fuentes.join(', ') : 'Base de datos general',\n    cantidad_resultados: results.length\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        200
+      ],
+      "id": "format-results",
+      "name": "Formatear Resultados"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Preparar Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Query": {
+      "main": [
+        [
+          {
+            "node": "Embeddings OpenAI (Query)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI (Query)": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Query",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Query": {
+      "main": [
+        [
+          {
+            "node": "Formatear Resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

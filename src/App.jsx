@@ -13,6 +13,7 @@ import DirectorioAlumnosPage from './pages/DirectorioAlumnosPage';
 import AnalisisTemporalPage from './pages/AnalisisTemporalPage';
 import GestionHorariosPage from './pages/GestionHorariosPage';
 import LeadsPage from './pages/LeadsPage';
+import ConocimientoPage from './pages/ConocimientoPage';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuthContext();
@@ -96,6 +97,16 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute>
                 <DocumentsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Conocimiento */}
+          <Route
+            path="/conocimiento"
+            element={
+              <ProtectedRoute>
+                <ConocimientoPage />
               </ProtectedRoute>
             }
           />

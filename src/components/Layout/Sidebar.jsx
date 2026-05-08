@@ -10,7 +10,8 @@ import {
   Users,
   TrendingUp,
   Clock,
-  Target
+  Target,
+  BookOpen
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -35,6 +36,11 @@ export const Sidebar = ({ isOpen, onClose }) => {
       label: 'Documentos',
       to: '/documents',
       icon: FileText
+    },
+    {
+      label: 'Base de Conocimiento',
+      to: '/conocimiento',
+      icon: BookOpen
     },
     {
     to: '/horarios',
