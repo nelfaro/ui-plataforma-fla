@@ -210,7 +210,7 @@ export const ConocimientoPage = () => {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-gray-600 text-sm">
-                        {item.contenido.substring(0, 60)}...
+                          {item.contenido ? item.contenido.substring(0, 60) : '—'}...
                       </td>
                       <td className="px-4 py-3">
                         <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
