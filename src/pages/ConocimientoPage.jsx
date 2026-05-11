@@ -189,7 +189,7 @@ export const ConocimientoPage = () => {
               <p className="text-gray-500">No hay items en esta categoría</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-auto max-h-96">
               <table className="w-full">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-200">
