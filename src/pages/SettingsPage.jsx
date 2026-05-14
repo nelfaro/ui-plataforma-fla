@@ -5,7 +5,7 @@ import { Button } from '../components/UI/Button';
 import { Input } from '../components/UI/Input';
 import { useNotification } from '../context/NotificationContext';
 import { getConfiguracion, updateConfiguracion } from '../services/academia';
-import { Settings, Bank, MapPin, BookOpen } from 'lucide-react';
+import { Settings, CreditCard, MapPin, BookOpen } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
@@ -161,7 +161,7 @@ export default function SettingsPage() {
         {/* Sección 3: Datos Bancarios */}
         <Card>
           <div className="flex items-center gap-2 mb-6">
-            <Bank className="w-5 h-5 text-purple-600" />
+            <CreditCard className="w-5 h-5 text-purple-600" />
             <h2 className="text-2xl font-bold">Datos Bancarios</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
