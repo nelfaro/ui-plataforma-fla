@@ -1,0 +1,96 @@
+{
+  "name": "get-alumnos-list",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "get-alumnos-list",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        0
+      ],
+      "id": "webhook-alumnos",
+      "webhookId": "get-alumnos-list-webhook"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, nombre, nombre_contacto, email, telefono, categoria, lead_tipo, estado, created_at, updated_at, horario_clase, pago_estado, ultimo_pago FROM alumnos ORDER BY created_at DESC;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "postgres-select",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "7vZZbkZhFbmui4On",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const alumnos = $input.all().map(item => item.json);\n\nreturn [{\n  json: {\n    alumnos: alumnos\n  }\n}];"
+      },
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        0
+      ],
+      "id": "format-response"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "get-alumnos-list-v1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "get-alumnos-list-instance"
+  },
+  "id": "get-alumnos-list-workflow",
+  "tags": []
+}
