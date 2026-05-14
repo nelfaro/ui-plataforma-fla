@@ -1,4 +1,13 @@
-import api from './api';
+import axios from 'axios';
+
+const N8N_BASE_URL = 'https://asistente-ia-fla-n8n.x5miqk.easypanel.host';
+
+// Crear instancia de axios con headers predeterminados
+const axiosInstance = axios.create({
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
 
 const convertYearMonthToDateRange = (year, month) => {
   const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
@@ -12,7 +21,10 @@ export const getKPIs = async (dateRange = {}) => {
       ? convertYearMonthToDateRange(dateRange.year, dateRange.month)
       : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
-    const response = await api.get('/webhook/get-kpis', { params });
+    const response = await axiosInstance.get(
+      `${N8N_BASE_URL}/webhook/get-kpis`,
+      { params }
+    );
     return response.data;
   } catch (error) {
     console.error('Error fetching KPIs:', error);
@@ -26,7 +38,10 @@ export const getWeeklyData = async (dateRange = {}) => {
       ? convertYearMonthToDateRange(dateRange.year, dateRange.month)
       : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
-    const response = await api.get('/webhook/get-analytics-weekly', { params });
+    const response = await axiosInstance.get(
+      `${N8N_BASE_URL}/webhook/get-analytics-weekly`,
+      { params }
+    );
     const data = Array.isArray(response.data) ? response.data : [response.data];
     return data;
   } catch (error) {
@@ -41,7 +56,10 @@ export const getLeadsDistribution = async (dateRange = {}) => {
       ? convertYearMonthToDateRange(dateRange.year, dateRange.month)
       : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
-    const response = await api.get('/webhook/get-leads-distribution', { params });
+    const response = await axiosInstance.get(
+      `${N8N_BASE_URL}/webhook/get-leads-distribution`,
+      { params }
+    );
 
     const data = response.data.items || response.data;
     return Array.isArray(data) ? data : [data];
@@ -57,7 +75,10 @@ export const getConversionFunnel = async (dateRange = {}) => {
       ? convertYearMonthToDateRange(dateRange.year, dateRange.month)
       : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
-    const response = await api.get('/webhook/get-conversion-funnel', { params });
+    const response = await axiosInstance.get(
+      `${N8N_BASE_URL}/webhook/get-conversion-funnel`,
+      { params }
+    );
 
     const data = response.data.items || response.data;
     return Array.isArray(data) ? data : [data];
@@ -73,7 +94,10 @@ export const getLeadsOrigin = async (dateRange = {}) => {
       ? convertYearMonthToDateRange(dateRange.year, dateRange.month)
       : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
-    const response = await api.get('/webhook/get-leads-origin', { params });
+    const response = await axiosInstance.get(
+      `${N8N_BASE_URL}/webhook/get-leads-origin`,
+      { params }
+    );
 
     const data = response.data.items || response.data;
     return Array.isArray(data) ? data : [data];
@@ -89,7 +113,10 @@ export const getAlumnos = async (dateRange = {}) => {
       ? convertYearMonthToDateRange(dateRange.year, dateRange.month)
       : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
-    const response = await api.get('/webhook/get-alumnos', { params });
+    const response = await axiosInstance.get(
+      `${N8N_BASE_URL}/webhook/get-alumnos`,
+      { params }
+    );
 
     const data = response.data.items || response.data;
     return Array.isArray(data) ? data : [data];
@@ -105,7 +132,10 @@ export const getFunnelByOrigin = async (dateRange = {}) => {
       ? convertYearMonthToDateRange(dateRange.year, dateRange.month)
       : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
-    const response = await api.get('/webhook/get-funnel-by-origin', { params });
+    const response = await axiosInstance.get(
+      `${N8N_BASE_URL}/webhook/get-funnel-by-origin`,
+      { params }
+    );
 
     const data = response.data.items || response.data || [];
 
@@ -132,11 +162,14 @@ export const getFunnelByOrigin = async (dateRange = {}) => {
 
 export const getAnalisisTemporal = async (dateRange = {}) => {
   try {
-    const response = await api.get('/webhook/get-analisis-temporal', {
-      params: { ...dateRange }
-    });
+    const response = await axiosInstance.get(
+      `${N8N_BASE_URL}/webhook/get-analisis-temporal`,
+      { params: { ...dateRange } }
+    );
 
-    const data = response.data.data || response.data;
+    // El workflow devuelve { items: { nuevos_por_semana, conversion_por_semana, ingresos_acumulados } }
+    // Extraer el contenido de items
+    const data = response.data.items || response.data;
     return data;
   } catch (error) {
     console.error('Error fetching analisis temporal:', error);
