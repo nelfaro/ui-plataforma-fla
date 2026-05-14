@@ -53,6 +53,13 @@ export default function AlumnosPage() {
     { id: 'temporal', label: '📊 Análisis Temporal' }
   ];
 
+  // Filtrar alumnos por rango de fechas
+  const alumnosFiltrados = alumnos.filter(a => {
+    if (!a.created_at) return true;
+    const createdDate = new Date(a.created_at).toISOString().split('T')[0];
+    return createdDate >= dateRange.startDate && createdDate <= dateRange.endDate;
+  });
+
   // Preparar datos para pagos (alumnos activos)
   const pagosData = alumnos
     .filter(a => a.estado === 'ACTIVO' || a.estado === 'ACTIVOS')
@@ -245,86 +252,139 @@ export default function AlumnosPage() {
 
         {/* TAB 3: Funnel por Categoría */}
         {activeTab === 'funnel' && (
-          <Card>
-            <h2 className="text-xl font-bold mb-4">Funnel de Conversión por Categoría</h2>
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Seleccionar Categoría:</label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {categorias.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
-
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <p className="text-gray-500">Cargando datos...</p>
+          <div className="space-y-4">
+            <Card>
+              <h2 className="text-xl font-bold mb-4">Funnel de Conversión por Categoría</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Seleccionar Categoría:</label>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {categorias.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col justify-end gap-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Desde:</label>
+                      <input
+                        type="date"
+                        value={dateRange.startDate}
+                        onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Hasta:</label>
+                      <input
+                        type="date"
+                        value={dateRange.endDate}
+                        onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <div className="space-y-6">
-                {(() => {
-                  const alumnosCat = alumnosPorCategoria[selectedCategory] || [];
-                  const total = alumnosCat.length || 1;
-                  const activos = alumnosCat.filter(a => a.estado === 'ACTIVO' || a.estado === 'ACTIVOS').length;
-                  const calientes = alumnosCat.filter(a => a.estado === 'CALIENTE').length;
-                  const tibios = alumnosCat.filter(a => a.estado === 'TIBIO').length;
-                  const frios = alumnosCat.filter(a => a.estado === 'FRIO').length;
+            </Card>
 
-                  return [
-                    { etapa: 'Total', cantidad: total, color: '#3B82F6' },
-                    { etapa: 'Calientes', cantidad: calientes, color: '#A855F7' },
-                    { etapa: 'Tibios', cantidad: tibios, color: '#F59E0B' },
-                    { etapa: 'Activos', cantidad: activos, color: '#10B981' }
-                  ].map((item, idx) => (
-                    <div key={idx}>
-                      <div className="flex justify-between mb-2">
-                        <span className="font-medium text-gray-700">{item.etapa}</span>
-                        <span className="font-bold text-gray-900">{item.cantidad}</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-8">
-                        <div
-                          className="h-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                          style={{
-                            width: `${(item.cantidad / (total || 1)) * 100}%`,
-                            backgroundColor: item.color
-                          }}
-                        >
-                          {((item.cantidad / (total || 1)) * 100).toFixed(0)}%
+            <Card>
+              {loading ? (
+                <div className="flex justify-center py-8">
+                  <p className="text-gray-500">Cargando datos...</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {(() => {
+                    const alumnosCat = alumnosFiltrados.filter(a => a.categoria === selectedCategory || a.lead_tipo === selectedCategory);
+                    const total = alumnosCat.length || 1;
+                    const activos = alumnosCat.filter(a => a.estado === 'ACTIVO' || a.estado === 'ACTIVOS').length;
+                    const calientes = alumnosCat.filter(a => a.estado === 'CALIENTE').length;
+                    const tibios = alumnosCat.filter(a => a.estado === 'TIBIO').length;
+                    const frios = alumnosCat.filter(a => a.estado === 'FRIO').length;
+
+                    return [
+                      { etapa: 'Total', cantidad: total, color: '#3B82F6' },
+                      { etapa: 'Calientes', cantidad: calientes, color: '#A855F7' },
+                      { etapa: 'Tibios', cantidad: tibios, color: '#F59E0B' },
+                      { etapa: 'Activos', cantidad: activos, color: '#10B981' }
+                    ].map((item, idx) => (
+                      <div key={idx}>
+                        <div className="flex justify-between mb-2">
+                          <span className="font-medium text-gray-700">{item.etapa}</span>
+                          <span className="font-bold text-gray-900">{item.cantidad}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-8">
+                          <div
+                            className="h-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
+                            style={{
+                              width: `${(item.cantidad / (total || 1)) * 100}%`,
+                              backgroundColor: item.color
+                            }}
+                          >
+                            {((item.cantidad / (total || 1)) * 100).toFixed(0)}%
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ));
-                })()}
-              </div>
-            )}
-          </Card>
+                    ));
+                  })()}
+                </div>
+              )}
+            </Card>
+          </div>
         )}
 
         {/* TAB 4: Estado de Pagos */}
         {activeTab === 'pagos' && (
           <div className="space-y-4">
+            {/* Selector de fechas */}
+            <Card>
+              <h3 className="text-lg font-bold mb-4">Filtrar por período</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Desde:</label>
+                  <input
+                    type="date"
+                    value={dateRange.startDate}
+                    onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Hasta:</label>
+                  <input
+                    type="date"
+                    value={dateRange.endDate}
+                    onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+            </Card>
+
             {/* Resumen de Pagos */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card className="bg-green-50 border-green-200">
                 <div className="text-center">
                   <p className="text-gray-600 text-sm font-medium">Alumnos Pagados</p>
-                  <p className="text-3xl font-bold text-green-600 mt-2">{alumnos.filter(a => a.pago_estado === 'PAGADO').length}</p>
+                  <p className="text-3xl font-bold text-green-600 mt-2">{alumnosFiltrados.filter(a => a.pago_estado === 'PAGADO').length}</p>
                 </div>
               </Card>
               <Card className="bg-yellow-50 border-yellow-200">
                 <div className="text-center">
                   <p className="text-gray-600 text-sm font-medium">Pagos Pendientes</p>
-                  <p className="text-3xl font-bold text-yellow-600 mt-2">{alumnos.filter(a => a.pago_estado === 'PENDIENTE').length}</p>
+                  <p className="text-3xl font-bold text-yellow-600 mt-2">{alumnosFiltrados.filter(a => a.pago_estado === 'PENDIENTE').length}</p>
                 </div>
               </Card>
               <Card className="bg-red-50 border-red-200">
                 <div className="text-center">
                   <p className="text-gray-600 text-sm font-medium">Vencidos</p>
-                  <p className="text-3xl font-bold text-red-600 mt-2">{alumnos.filter(a => a.pago_estado === 'VENCIDO').length}</p>
+                  <p className="text-3xl font-bold text-red-600 mt-2">{alumnosFiltrados.filter(a => a.pago_estado === 'VENCIDO').length}</p>
                 </div>
               </Card>
             </div>
@@ -389,6 +449,33 @@ export default function AlumnosPage() {
         {activeTab === 'temporal' && (
           <div className="space-y-4">
             <Card>
+              <h3 className="text-lg font-bold mb-4">Filtrar por período</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Desde:</label>
+                  <input
+                    type="date"
+                    value={dateRange.startDate}
+                    onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Hasta:</label>
+                  <input
+                    type="date"
+                    value={dateRange.endDate}
+                    onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">
+                Alumnos en período: {alumnosFiltrados.length}
+              </p>
+            </Card>
+
+            <Card>
               <h3 className="text-lg font-bold mb-4">📈 Alumnos Nuevos por Semana</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={alumnosNuevosData}>
@@ -402,20 +489,24 @@ export default function AlumnosPage() {
             </Card>
 
             <Card>
-              <h3 className="text-lg font-bold mb-4">📊 Conversión por Semana</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={conversionData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="semana" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="conversion" stroke="#10B981" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
+              <h3 className="text-lg font-bold mb-4">📊 Estado de Alumnos en Período</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: 'Total', color: 'bg-blue-100 text-blue-800', count: alumnosFiltrados.length },
+                  { label: 'Activos', color: 'bg-green-100 text-green-800', count: alumnosFiltrados.filter(a => a.estado === 'ACTIVO' || a.estado === 'ACTIVOS').length },
+                  { label: 'Calientes', color: 'bg-orange-100 text-orange-800', count: alumnosFiltrados.filter(a => a.estado === 'CALIENTE').length },
+                  { label: 'Tibios', color: 'bg-yellow-100 text-yellow-800', count: alumnosFiltrados.filter(a => a.estado === 'TIBIO').length }
+                ].map((item, idx) => (
+                  <div key={idx} className={`p-4 rounded-lg ${item.color}`}>
+                    <p className="text-sm font-medium opacity-75">{item.label}</p>
+                    <p className="text-2xl font-bold">{item.count}</p>
+                  </div>
+                ))}
+              </div>
             </Card>
 
             <Card>
-              <h3 className="text-lg font-bold mb-4">💰 Ingresos Acumulados</h3>
+              <h3 className="text-lg font-bold mb-4">💰 Ingresos Acumulados (Ejemplo)</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={ingresosData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -428,26 +519,25 @@ export default function AlumnosPage() {
             </Card>
 
             <Card>
-              <h3 className="text-lg font-bold mb-4">Filtrar por período</h3>
-              <div className="flex gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Desde:</label>
-                  <input 
-                    type="date" 
-                    value={dateRange.startDate}
-                    onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Hasta:</label>
-                  <input 
-                    type="date" 
-                    value={dateRange.endDate}
-                    onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+              <h3 className="text-lg font-bold mb-4">Análisis por Categoría</h3>
+              <div className="space-y-4">
+                {categorias.map(cat => {
+                  const alumnosCat = alumnosFiltrados.filter(a => a.categoria === cat || a.lead_tipo === cat);
+                  return (
+                    <div key={cat}>
+                      <div className="flex justify-between mb-2">
+                        <span className="font-medium text-gray-700">{cat}</span>
+                        <span className="font-bold text-gray-900">{alumnosCat.length}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-blue-600 h-2 rounded-full"
+                          style={{ width: `${Math.min((alumnosCat.length / Math.max(alumnosFiltrados.length, 1)) * 100, 100)}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </Card>
           </div>
