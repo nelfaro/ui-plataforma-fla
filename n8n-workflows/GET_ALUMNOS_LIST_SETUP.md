@@ -2,7 +2,7 @@
 
 ## 📋 Descripción General
 
-Este workflow obtiene la lista completa de alumnos desde la tabla PostgreSQL `alumnos` para que la UI pueda mostrar la gestión de alumnos con todos los datos reales.
+Este workflow obtiene la lista de alumnos desde PostgreSQL con soporte para búsqueda, filtrado y paginación. Es usado por la página de Gestión de Alumnos en la UI.
 
 ---
 
@@ -10,8 +10,12 @@ Este workflow obtiene la lista completa de alumnos desde la tabla PostgreSQL `al
 
 ### Nodos del flujo:
 ```
-Webhook (GET) → Postgres (Query) → Format Response (Code)
+Webhook (GET) → arma query (Code) → Select Alumnos (Postgres) → respuesta (Code)
+                                 ↓
+                         Count Total (Postgres)
 ```
+
+---
 
 ### **Nodo 1: Webhook**
 - **Tipo:** Webhook
@@ -19,65 +23,134 @@ Webhook (GET) → Postgres (Query) → Format Response (Code)
 - **Ruta:** `/get-alumnos-list`
 - **Descripción:** Punto de entrada para solicitar la lista de alumnos
 
-**Configuración:**
+**Parámetros de Query soportados:**
+- `search` (opcional): Busca en nombre, whatsapp, email
+- `estado` (opcional): Filtra por estado del alumno
+- `lead_tipo` (opcional): Filtra por categoría/tipo de lead
+- `limit` (opcional, default=50): Cantidad de registros por página
+- `offset` (opcional, default=0): Desplazamiento para paginación
+
+**Ejemplos:**
 ```
-- HTTP Method: GET
-- Path: get-alumnos-list
+GET /get-alumnos-list
+GET /get-alumnos-list?search=Juan
+GET /get-alumnos-list?estado=ACTIVO&lead_tipo=KIDS
+GET /get-alumnos-list?limit=20&offset=0
 ```
 
 ---
 
-### **Nodo 2: Execute a SQL query (Postgres)**
-- **Tipo:** Postgres
-- **Operación:** Execute Query
-- **Query:**
-```sql
-SELECT id, nombre, nombre_contacto, email, telefono, categoria, lead_tipo, estado, created_at, updated_at, horario_clase, pago_estado, ultimo_pago FROM alumnos ORDER BY created_at DESC;
-```
-
-**Configuración:**
-- Credencial: `postgres` (tu conexión PostgreSQL)
-- Query: La SQL anterior
-- Retorna un array con todos los alumnos
-
----
-
-### **Nodo 3: Format Response (Code)**
+### **Nodo 2: arma query (Code)**
 - **Tipo:** Code
-- **Código:**
+- **Descripción:** Construye dinámicamente las queries SQL con los filtros recibidos
+
+**Código:**
 ```javascript
-const alumnos = $input.all().map(item => item.json);
+const input = $input.first().json;
+const query = input.query || {};
+const { search, estado, lead_tipo, limit = 50, offset = 0 } = query;
+
+const searchPattern = search ? `%${search}%` : '%';
+
+const queryList = `SELECT id, nombre, whatsapp, email, estado, lead_tipo, 
+       horario_clase, foto_url, fecha_registro, ultimo_contacto
+FROM alumnos
+WHERE (nombre ILIKE '${searchPattern}' OR whatsapp ILIKE '${searchPattern}' OR email ILIKE '${searchPattern}')
+AND (${estado ? `estado = '${estado}'` : 'true'})
+AND (${lead_tipo ? `lead_tipo = '${lead_tipo}'` : 'true'})
+ORDER BY fecha_registro DESC
+LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)};`;
+
+const queryCount = `SELECT COUNT(*) as total
+FROM alumnos
+WHERE (nombre ILIKE '${searchPattern}' OR whatsapp ILIKE '${searchPattern}' OR email ILIKE '${searchPattern}')
+AND (${estado ? `estado = '${estado}'` : 'true'})
+AND (${lead_tipo ? `lead_tipo = '${lead_tipo}'` : 'true'});`;
 
 return [{
   json: {
-    alumnos: alumnos
+    queryList,
+    queryCount,
+    limit,
+    offset
   }
 }];
 ```
 
-**Descripción:** Envuelve la respuesta en un objeto `{ alumnos: [...] }`
+**Salida:** Objeto con las dos queries construidas y los parámetros de paginación.
+
+---
+
+### **Nodo 3: Select Alumnos (Postgres)**
+- **Tipo:** Postgres
+- **Operación:** Execute Query
+- **Query:** `{{ $('arma query').first().json.queryList }}`
+
+**Retorna:** Array de alumnos con los campos:
+- `id`: ID del alumno
+- `nombre`: Nombre completo
+- `whatsapp`: Número de WhatsApp
+- `email`: Email
+- `estado`: Estado (NUEVO, ACTIVO, BAJA, etc.)
+- `lead_tipo`: Categoría (KIDS, ADULTOS, AU_PAIR, etc.)
+- `horario_clase`: Horario asignado
+- `foto_url`: URL de foto de perfil
+- `fecha_registro`: Fecha de registro
+- `ultimo_contacto`: Último contacto
+
+---
+
+### **Nodo 4: Count Total (Postgres)**
+- **Tipo:** Postgres
+- **Operación:** Execute Query
+- **Query:** `{{ $('arma query').first().json.queryCount }}`
+
+**Retorna:** Un objeto con `total` (cantidad total de registros que coinciden con los filtros)
+
+---
+
+### **Nodo 5: respuesta (Code)**
+- **Tipo:** Code
+- **Descripción:** Formatea la respuesta final
+
+**Código:**
+```javascript
+const items = $('Select Alumnos').all().map(row => row.json);
+const totalData = $('Count Total').first().json;
+const total = totalData.total;
+const limit = $input.first().json.limit;
+const offset = $input.first().json.offset;
+
+return [{
+  json: {
+    items,
+    total,
+    limit,
+    offset
+  }
+}];
+```
 
 **Respuesta al usuario:**
 ```json
 {
-  "alumnos": [
+  "items": [
     {
       "id": 1,
       "nombre": "Juan Pérez",
-      "nombre_contacto": "Carlos Pérez",
+      "whatsapp": "+54 9 376 123456",
       "email": "juan@email.com",
-      "telefono": "+54 9 376 ...",
-      "categoria": "KIDS",
-      "lead_tipo": "KIDS",
       "estado": "ACTIVO",
-      "created_at": "2026-05-14T10:30:45.123Z",
-      "updated_at": "2026-05-14T10:30:45.123Z",
+      "lead_tipo": "KIDS",
       "horario_clase": "Miércoles 16:00",
-      "pago_estado": "PAGADO",
-      "ultimo_pago": "2026-05-10"
-    },
-    ...
-  ]
+      "foto_url": "https://...",
+      "fecha_registro": "2026-05-14T10:30:45.123Z",
+      "ultimo_contacto": "2026-05-14T15:00:00.000Z"
+    }
+  ],
+  "total": 45,
+  "limit": 50,
+  "offset": 0
 }
 ```
 
@@ -85,34 +158,31 @@ return [{
 
 ## ✅ CHECKLIST DE CONFIGURACIÓN
 
-- [ ] Workflow creado en n8n
-- [ ] Webhook GET configurado en path `/get-alumnos-list`
-- [ ] Credencial PostgreSQL conectada
-- [ ] Nodo Postgres ejecuta la query SELECT correcta
-- [ ] Format Response envuelve en `{ alumnos: [...] }`
-- [ ] Workflow está activo (Active: true)
+- [x] Workflow creado en n8n (en backup del 28-04-26)
+- [x] Webhook GET configurado en path `/get-alumnos-list`
+- [x] Credencial PostgreSQL conectada
+- [x] Nodos Postgres ejecutan queries dinámicas
+- [x] Soporte para búsqueda, filtrado y paginación
+- [x] Workflow está activo
+- [x] Servicio React convertido a estructura correcta: `alumnos` en lugar de `items`
 
 ---
 
 ## 🧪 TESTING
 
-### Test GET
+### Test GET sin filtros
 ```bash
-curl -X GET "https://tu-n8n.com/webhook/get-alumnos-list"
+curl -X GET "https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/get-alumnos-list"
 ```
 
-Esperado:
-```json
-{
-  "alumnos": [
-    {
-      "id": 1,
-      "nombre": "Juan Pérez",
-      ...
-    },
-    ...
-  ]
-}
+### Test con búsqueda
+```bash
+curl -X GET "https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/get-alumnos-list?search=Juan"
+```
+
+### Test con filtros
+```bash
+curl -X GET "https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/get-alumnos-list?estado=ACTIVO&lead_tipo=KIDS&limit=20"
 ```
 
 ---
@@ -121,23 +191,26 @@ Esperado:
 
 ### Desde React (AlumnosPage):
 ```javascript
-// GET - Cargar lista de alumnos
+// El servicio convierte la respuesta a:
+// { alumnos: [...], total, limit, offset }
 const response = await getAlumnosList();
-const alumnos = response.alumnos;
+const alumnosList = response.alumnos || [];
 
-// Los alumnos se muestran en:
-// - Tab "Por Categoría": agrupa por categoria/lead_tipo
-// - Tab "Por Horario": agrupa por horario_clase
-// - Tab "Funnel por Categoría": cuenta por estado
-// - Tab "Estado de Pagos": filtra por estado = 'ACTIVO' y muestra pago_estado
-// - Tab "Análisis Temporal": filtra por fecha created_at
+// Con filtros y paginación:
+const response = await getAlumnosList({
+  search: 'Juan',
+  estado: 'ACTIVO',
+  lead_tipo: 'KIDS',
+  limit: 20,
+  offset: 0
+});
 ```
 
 ---
 
 ## ⚠️ Notas Importantes
 
-1. **Campos devueltos:** La query retorna los principales campos de la tabla alumnos
-2. **Ordenamiento:** Los alumnos se ordenan por fecha de creación descendente (más nuevos primero)
-3. **Sin filtros:** Este endpoint devuelve TODOS los alumnos sin filtros. Los filtros se aplican en React.
-4. **Performance:** Si hay muchos alumnos, considera agregar paginación en el futuro
+1. **Búsqueda:** Usa ILIKE para búsqueda case-insensitive en nombre, whatsapp y email
+2. **Filtros:** Son opcionales, si no se especifican trae todos los registros
+3. **Paginación:** Importante para grandes volúmenes de datos
+4. **Performance:** Los índices en BD deben estar optimizados para fields: nombre, whatsapp, email, estado, lead_tipo

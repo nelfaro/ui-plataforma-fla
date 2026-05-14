@@ -70,7 +70,14 @@ export const getAlumnosList = async (params = {}) => {
     const response = await axiosInstance.get(
       `${N8N_BASE_URL}/webhook/get-alumnos-list?${queryString}`
     );
-    return response.data;
+    // El workflow devuelve { items: [...], total, limit, offset }
+    // Lo convertimos a { alumnos: [...] } para compatibilidad con AlumnosPage
+    return {
+      alumnos: response.data.items || [],
+      total: response.data.total || 0,
+      limit: response.data.limit || 50,
+      offset: response.data.offset || 0
+    };
   } catch (error) {
     console.error('Error fetching alumnos list:', error);
     throw error;
