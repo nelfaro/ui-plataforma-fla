@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage';
 import DocumentsPage from './pages/DocumentsPage';
 import ChatwootPage from './pages/ChatwootPage';
 import WhatsAppPage from './pages/WhatsAppPage';
+import SettingsPage from './pages/SettingsPage';
 import AlumnosPage from './pages/AlumnosPage';
 import AlumnoDetallePage from './pages/AlumnoDetallePage';
 import DirectorioAlumnosPage from './pages/DirectorioAlumnosPage';
@@ -127,6 +128,16 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute>
                 <WhatsAppPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Settings */}
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
               </ProtectedRoute>
             }
           />

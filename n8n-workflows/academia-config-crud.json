@@ -1,0 +1,135 @@
+{
+  "name": "academia-config-crud",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "academia-config",
+        "httpMethod": "GET"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [50, 100]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "query": {
+          "parameters": []
+        },
+        "url": "={{ $env.POSTGRES_URL }}",
+        "authentication": "none",
+        "options": {}
+      },
+      "name": "Get Config",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 4.1,
+      "position": [250, 100]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM academia_config ORDER BY id DESC LIMIT 1",
+        "nodeCredentialType": "postgres"
+      },
+      "name": "Postgres",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 4.1,
+      "position": [250, 100],
+      "credentials": {
+          "postgres": "postgres_credential"
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "return [{ json: { config: $input.first().json } }];"
+      },
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 100]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST"
+      },
+      "name": "Webhook Update",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [50, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const body = $input.first().json.body;\nconst query = `\n  UPDATE academia_config SET \n    nombre_academia = $1,\n    nombre_profe = $2,\n    email = $3,\n    telefono = $4,\n    ubicacion_direccion = $5,\n    ubicacion_localidad = $6,\n    horario_atencion = $7,\n    banco = $8,\n    cbu = $9,\n    alias = $10,\n    linktree_url = $11,\n    instagram = $12,\n    facebook = $13,\n    politica_cancelacion = $14,\n    politica_recuperacion = $15,\n    politica_reembolso = $16,\n    updated_at = NOW()\n  WHERE id = 1\n  RETURNING *;\n`;\nreturn [{\n  json: {\n    query: query,\n    values: [\n      body.nombre_academia,\n      body.nombre_profe,\n      body.email,\n      body.telefono,\n      body.ubicacion_direccion,\n      body.ubicacion_localidad,\n      body.horario_atencion,\n      body.banco,\n      body.cbu,\n      body.alias,\n      body.linktree_url,\n      body.instagram,\n      body.facebook,\n      body.politica_cancelacion,\n      body.politica_recuperacion,\n      body.politica_reembolso\n    ]\n  }\n}];"
+      },
+      "name": "Build Update Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "nodeCredentialType": "postgres"
+      },
+      "name": "Execute Update",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 4.1,
+      "position": [450, 300],
+      "credentials": {
+          "postgres": "postgres_credential"
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "return [{ json: { success: true, config: $input.first().json } }];"
+      },
+      "name": "Format Update Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": [
+      {
+        "node": "Postgres",
+        "type": "main",
+        "index": 0,
+        "data": {}
+      }
+    ],
+    "Postgres": [
+      {
+        "node": "Format Response",
+        "type": "main",
+        "index": 0,
+        "data": {}
+      }
+    ],
+    "Webhook Update": [
+      {
+        "node": "Build Update Query",
+        "type": "main",
+        "index": 0,
+        "data": {}
+      }
+    ],
+    "Build Update Query": [
+      {
+        "node": "Execute Update",
+        "type": "main",
+        "index": 0,
+        "data": {}
+      }
+    ],
+    "Execute Update": [
+      {
+        "node": "Format Update Response",
+        "type": "main",
+        "index": 0,
+        "data": {}
+      }
+    ]
+  }
+}
