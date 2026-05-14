@@ -2,7 +2,6 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   BarChart3,
-  FileText,
   MessageSquare,
   Smartphone,
   Settings,
@@ -31,11 +30,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
     to: '/directorio',
     label: 'Directorio de Alumnos',
     icon: Users
-    },
-    {
-      label: 'Documentos',
-      to: '/documents',
-      icon: FileText
     },
     {
       label: 'Base de Conocimiento',
