@@ -3,133 +3,238 @@
   "nodes": [
     {
       "parameters": {
-        "path": "academia-config",
-        "httpMethod": "GET"
-      },
-      "name": "Webhook",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1,
-      "position": [50, 100]
-    },
-    {
-      "parameters": {
-        "method": "GET",
-        "query": {
-          "parameters": []
-        },
-        "url": "={{ $env.POSTGRES_URL }}",
-        "authentication": "none",
-        "options": {}
-      },
-      "name": "Get Config",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 4.1,
-      "position": [250, 100]
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT * FROM academia_config ORDER BY id DESC LIMIT 1",
-        "nodeCredentialType": "postgres"
-      },
-      "name": "Postgres",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 4.1,
-      "position": [250, 100],
-      "credentials": {
-          "postgres": "postgres_credential"
-      }
-    },
-    {
-      "parameters": {
-        "functionCode": "return [{ json: { config: $input.first().json } }];"
-      },
-      "name": "Format Response",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [450, 100]
-    },
-    {
-      "parameters": {
-        "httpMethod": "POST"
-      },
-      "name": "Webhook Update",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1,
-      "position": [50, 300]
-    },
-    {
-      "parameters": {
-        "functionCode": "const body = $input.first().json.body;\nconst query = `\n  UPDATE academia_config SET \n    nombre_academia = $1,\n    nombre_profe = $2,\n    email = $3,\n    telefono = $4,\n    ubicacion_direccion = $5,\n    ubicacion_localidad = $6,\n    horario_atencion = $7,\n    banco = $8,\n    cbu = $9,\n    alias = $10,\n    linktree_url = $11,\n    instagram = $12,\n    facebook = $13,\n    politica_cancelacion = $14,\n    politica_recuperacion = $15,\n    politica_reembolso = $16,\n    updated_at = NOW()\n  WHERE id = 1\n  RETURNING *;\n`;\nreturn [{\n  json: {\n    query: query,\n    values: [\n      body.nombre_academia,\n      body.nombre_profe,\n      body.email,\n      body.telefono,\n      body.ubicacion_direccion,\n      body.ubicacion_localidad,\n      body.horario_atencion,\n      body.banco,\n      body.cbu,\n      body.alias,\n      body.linktree_url,\n      body.instagram,\n      body.facebook,\n      body.politica_cancelacion,\n      body.politica_recuperacion,\n      body.politica_reembolso\n    ]\n  }\n}];"
+        "jsCode": "const body = $input.first().json.body;\n\nconst query = `\n  UPDATE academia_config SET \n    nombre_academia = $1,\n    nombre_profe = $2,\n    email = $3,\n    telefono = $4,\n    ubicacion_direccion = $5,\n    ubicacion_localidad = $6,\n    horario_atencion = $7,\n    banco = $8,\n    cbu = $9,\n    alias = $10,\n    linktree_url = $11,\n    instagram = $12,\n    facebook = $13,\n    politica_cancelacion = $14,\n    politica_recuperacion = $15,\n    politica_reembolso = $16,\n    updated_at = NOW()\n  WHERE id = 1\n  RETURNING *;\n`;\n\nreturn [{\n  json: {\n    query: query,\n    values: [\n      body.nombre_academia,\n      body.nombre_profe,\n      body.email,\n      body.telefono,\n      body.ubicacion_direccion,\n      body.ubicacion_localidad,\n      body.horario_atencion,\n      body.banco,\n      body.cbu,\n      body.alias,\n      body.linktree_url,\n      body.instagram,\n      body.facebook,\n      body.politica_cancelacion,\n      body.politica_recuperacion,\n      body.politica_reembolso\n    ]\n  }\n}];"
       },
       "name": "Build Update Query",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [250, 300]
+      "position": [
+        -96,
+        320
+      ],
+      "id": "67f8fa09-2fba-437a-942c-d01d26e6bb8b"
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "nodeCredentialType": "postgres"
-      },
-      "name": "Execute Update",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 4.1,
-      "position": [450, 300],
-      "credentials": {
-          "postgres": "postgres_credential"
-      }
-    },
-    {
-      "parameters": {
-        "functionCode": "return [{ json: { success: true, config: $input.first().json } }];"
+        "jsCode": "return [{\n  json: {\n    success: true,\n    config: $input.first().json\n  }\n}];"
       },
       "name": "Format Update Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [650, 300]
+      "position": [
+        368,
+        320
+      ],
+      "id": "030b3af0-6217-4720-9336-281f9b6b59c8"
+    },
+    {
+      "parameters": {
+        "path": "academia-config",
+        "options": {}
+      },
+      "name": "Webhook-GET-Academia",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        112
+      ],
+      "id": "95541732-6e20-4b76-9906-49b69d1d2c00",
+      "webhookId": "24982c65-b575-4e26-b2e4-f50bd9550845"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "academia-config",
+        "options": {}
+      },
+      "name": "Webhook-POST-Academia",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        320
+      ],
+      "id": "61e61b6e-4ddd-421f-92a3-943c5f3d207b",
+      "webhookId": "52941bcf-8add-4021-a089-09a37ccbb67e"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM academia_config ORDER BY id DESC LIMIT 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        144,
+        112
+      ],
+      "id": "5119229d-b6fc-4776-be3c-2ce6a6055312",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "7vZZbkZhFbmui4On",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    config: $input.first().json\n  }\n}];"
+      },
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        112
+      ],
+      "id": "a809f8a9-9ac2-4287-9e50-08516540cc47"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: {} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        112
+      ],
+      "id": "aa132070-c45b-4b34-b5f4-51f6127215d6",
+      "name": "Get config"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $input.first().json.query }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        144,
+        320
+      ],
+      "id": "db927b71-472a-4ff8-9dbd-e39a8614bbc5",
+      "name": "Execute a SQL query1",
+      "credentials": {
+        "postgres": {
+          "id": "7vZZbkZhFbmui4On",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -336,
+        -80
+      ],
+      "id": "17468f1f-b3b3-4510-9ed6-4b7800c74a25",
+      "name": "When Executed by Another Workflow"
     }
   ],
+  "pinData": {},
   "connections": {
-    "Webhook": [
-      {
-        "node": "Postgres",
-        "type": "main",
-        "index": 0,
-        "data": {}
-      }
-    ],
-    "Postgres": [
-      {
-        "node": "Format Response",
-        "type": "main",
-        "index": 0,
-        "data": {}
-      }
-    ],
-    "Webhook Update": [
-      {
-        "node": "Build Update Query",
-        "type": "main",
-        "index": 0,
-        "data": {}
-      }
-    ],
-    "Build Update Query": [
-      {
-        "node": "Execute Update",
-        "type": "main",
-        "index": 0,
-        "data": {}
-      }
-    ],
-    "Execute Update": [
-      {
-        "node": "Format Update Response",
-        "type": "main",
-        "index": 0,
-        "data": {}
-      }
-    ]
-  }
+    "Webhook-GET-Academia": {
+      "main": [
+        [
+          {
+            "node": "Get config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        []
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get config": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook-POST-Academia": {
+      "main": [
+        [
+          {
+            "node": "Build Update Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Update Query": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query1": {
+      "main": [
+        [
+          {
+            "node": "Format Update Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Get config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b7031c8d-a992-4859-97db-19e14aa32ef4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f4802d3c2c5422c1c22bebcbf4214605a665c7e251fd858859b294104b3e805e"
+  },
+  "id": "FOXwye1BSBjp92e7",
+  "tags": []
 }
