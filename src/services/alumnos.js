@@ -1,7 +1,8 @@
 import axios from 'axios';
 
+// Usar proxy local de Easypanel (evita CORS)
+const API_BASE_URL = '/api/webhook';
 const API_KEY = import.meta.env.VITE_API_KEY || '';
-const N8N_BASE_URL = 'https://asistente-ia-fla-n8n.x5miqk.easypanel.host';
 
 // Crear instancia de axios con headers predeterminados
 const axiosInstance = axios.create({
@@ -17,7 +18,7 @@ const axiosInstance = axios.create({
 export const getAlumnoById = async (id) => {
   try {
     const response = await axiosInstance.get(
-      `${N8N_BASE_URL}/webhook/get-alumno-by-id?id=${id}`
+      `${API_BASE_URL}/get-alumno-by-id?id=${id}`
     );
     return response.data.alumno;
   } catch (error) {
@@ -32,7 +33,7 @@ export const getAlumnoById = async (id) => {
 export const updateAlumno = async (id, datos) => {
   try {
     const response = await axiosInstance.post(
-      `${N8N_BASE_URL}/webhook/update-alumno`,
+      `${API_BASE_URL}/update-alumno`,
       {
         id,
         ...datos
@@ -51,7 +52,7 @@ export const updateAlumno = async (id, datos) => {
 export const registrarPago = async (datospago) => {
   try {
     const response = await axiosInstance.post(
-      `${N8N_BASE_URL}/webhook/register-pago`,
+      `${API_BASE_URL}/register-pago`,
       datospago
     );
     return response.data;
@@ -68,7 +69,7 @@ export const getAlumnosList = async (params = {}) => {
   try {
     const queryString = new URLSearchParams(params).toString();
     const response = await axiosInstance.get(
-      `${N8N_BASE_URL}/webhook/get-alumnos-list?${queryString}`
+      `${API_BASE_URL}/get-alumnos-list?${queryString}`
     );
     // El workflow devuelve { items: [...], total, limit, offset }
     // Lo convertimos a { alumnos: [...] } para compatibilidad con AlumnosPage
@@ -91,7 +92,7 @@ export const getAlumnosList = async (params = {}) => {
 export const updateCupoHorario = async (horarioId, accion) => {
   try {
     const response = await axiosInstance.post(
-      `${N8N_BASE_URL}/webhook/update-cupo-horario`,
+      `${API_BASE_URL}/update-cupo-horario`,
       {
         horario_id: horarioId,
         accion: accion // 'incrementar' o 'decrementar'

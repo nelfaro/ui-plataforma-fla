@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const N8N_BASE_URL = 'https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook';
+// Usar proxy local de Easypanel (evita CORS)
+const API_BASE_URL = '/api/webhook';
 
 export const getItems = async (categoria = '', segmento = '') => {
   try {
@@ -8,7 +9,7 @@ export const getItems = async (categoria = '', segmento = '') => {
     if (categoria) params.append('categoria', categoria);
     if (segmento) params.append('segmento', segmento);
     const queryString = params.toString();
-    const url = `${N8N_BASE_URL}/conocimiento-get${queryString ? '?' + queryString : ''}`;
+    const url = `${API_BASE_URL}/conocimiento-get${queryString ? '?' + queryString : ''}`;
     const response = await axios.get(url);
     return response.data;
   } catch (error) {
@@ -19,7 +20,7 @@ export const getItems = async (categoria = '', segmento = '') => {
 
 export const createItem = async (data) => {
   try {
-    const response = await axios.post(`${N8N_BASE_URL}/conocimiento-post`, data);
+    const response = await axios.post(`${API_BASE_URL}/conocimiento-post`, data);
     return response.data;
   } catch (error) {
     console.error('Error creating conocimiento item:', error);
@@ -29,7 +30,7 @@ export const createItem = async (data) => {
 
 export const updateItem = async (id, data) => {
   try {
-    const response = await axios.post(`${N8N_BASE_URL}/conocimiento-post`, {
+    const response = await axios.post(`${API_BASE_URL}/conocimiento-post`, {
       ...data,
       id,
       _action: 'update'
@@ -43,7 +44,7 @@ export const updateItem = async (id, data) => {
 
 export const deleteItem = async (id) => {
   try {
-    const response = await axios.post(`${N8N_BASE_URL}/conocimiento-post`, {
+    const response = await axios.post(`${API_BASE_URL}/conocimiento-post`, {
       id,
       _action: 'delete'
     });
