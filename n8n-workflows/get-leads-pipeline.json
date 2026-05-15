@@ -1,0 +1,51 @@
+{
+  "name": "get-leads-pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "get-leads-pipeline",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.0,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "query": "SELECT \n  id, \n  nombre, \n  whatsapp, \n  estado, \n  estado_motivo, \n  estado_fecha,\n  nivel, \n  origen, \n  lead_tipo, \n  objetivo, \n  resumen, \n  tags,\n  primera_consulta, \n  ultimo_contacto, \n  completitud\nFROM alumnos\nWHERE ($1::text IS NULL OR estado = $1)\n  AND ($2::text IS NULL OR origen = $2)\n  AND ($3::text IS NULL OR lead_tipo = $3)\nORDER BY ultimo_contacto DESC NULLS LAST\nLIMIT 100",
+        "options": {}
+      },
+      "credentials": {
+        "postgres": "postgres_db"
+      },
+      "id": "2",
+      "name": "PostgreSQL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1.0,
+      "position": [550, 300]
+    },
+    {
+      "parameters": {
+        "jsonOutput": "={{ { \"items\": $2.queryResult, \"total\": $2.queryResult.length } }}",
+        "options": {}
+      },
+      "id": "3",
+      "name": "Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.0,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "PostgreSQL", "type": "main", "index": 0}]]
+    },
+    "PostgreSQL": {
+      "main": [[{"node": "Response", "type": "main", "index": 0}]]
+    }
+  }
+}
