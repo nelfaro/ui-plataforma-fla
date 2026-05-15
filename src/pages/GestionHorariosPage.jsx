@@ -48,7 +48,7 @@ export default function GestionHorariosPage() {
     try {
       setLoading(true);
       const response = await axios.get(
-        'https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/get-horarios'
+        '/api/webhook/get-horarios'
       );
 
       if (response.data.items) {
@@ -79,7 +79,7 @@ export default function GestionHorariosPage() {
       if (editingId) {
         // Actualizar
         await axios.post(
-          'https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/update-horario',
+          '/api/webhook/update-horario',
           {
             id: editingId,
             nombre: formData.nombre,
@@ -99,7 +99,7 @@ export default function GestionHorariosPage() {
       } else {
         // Crear
         await axios.post(
-          'https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/create-horario',
+          '/api/webhook/create-horario',
           {
             nombre: formData.nombre,
             tipo: formData.tipo,
@@ -152,7 +152,7 @@ export default function GestionHorariosPage() {
 
     try {
       await axios.post(
-        'https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/delete-horario',
+        '/api/webhook/delete-horario',
         { id }
       );
       toast.success('Horario eliminado');

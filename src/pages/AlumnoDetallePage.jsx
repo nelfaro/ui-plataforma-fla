@@ -36,7 +36,7 @@ export default function AlumnoDetallePage() {
 
         // Cargar horarios disponibles
         const response = await axios.get(
-          'https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/get-horarios'
+          '/api/webhook/get-horarios'
         );
         if (response.data.items) {
           setHorariosDisponibles(response.data.items);
