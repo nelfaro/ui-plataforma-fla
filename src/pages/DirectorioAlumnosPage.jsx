@@ -20,16 +20,13 @@ export default function DirectorioAlumnosPage() {
   // Estados y categorías disponibles
   const estados = [
     'NUEVO',
-    'CONSULTÓ',
-    'INTERESADO',
-    'NUTRIENDO',
+    'FRIO',
+    'TIBIO',
+    'CALIENTE',
     'REGISTRADO',
     'ACTIVO',
     'PAUSADO',
-    'BAJA',
-    'LISTA_ESPERA',
-    'PAGO_PENDIENTE',
-    'FRIO'
+    'BAJA'
   ];
 
   const categorias = ['KIDS', 'ADULTO', 'ADOLESCENTE', 'AU_PAIR', 'CORPORATIVO'];
@@ -90,10 +87,9 @@ export default function DirectorioAlumnosPage() {
       PAUSADO: 'bg-yellow-100 text-yellow-800',
       BAJA: 'bg-red-100 text-red-800',
       NUEVO: 'bg-purple-100 text-purple-800',
-      CONSULTÓ: 'bg-indigo-100 text-indigo-800',
-      INTERESADO: 'bg-cyan-100 text-cyan-800',
-      PAGO_PENDIENTE: 'bg-orange-100 text-orange-800',
-      FRIO: 'bg-gray-100 text-gray-800'
+      FRIO: 'bg-gray-100 text-gray-800',
+      TIBIO: 'bg-orange-100 text-orange-800',
+      CALIENTE: 'bg-red-100 text-red-800'
     };
     return badges[estado] || 'bg-gray-100 text-gray-800';
   };
