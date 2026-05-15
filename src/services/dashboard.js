@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const N8N_BASE_URL = 'https://asistente-ia-fla-n8n.x5miqk.easypanel.host';
+// Usar proxy local de Easypanel (evita CORS)
+const API_BASE_URL = '/api/webhook';
 
 // Crear instancia de axios con headers predeterminados
 const axiosInstance = axios.create({
@@ -22,7 +23,7 @@ export const getKPIs = async (dateRange = {}) => {
       : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
     const response = await axiosInstance.get(
-      `${N8N_BASE_URL}/webhook/get-kpis`,
+      `${API_BASE_URL}/get-kpis`,
       { params }
     );
     return response.data;
@@ -39,7 +40,7 @@ export const getWeeklyData = async (dateRange = {}) => {
       : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
     const response = await axiosInstance.get(
-      `${N8N_BASE_URL}/webhook/get-analytics-weekly`,
+      `${API_BASE_URL}/get-analytics-weekly`,
       { params }
     );
     const data = Array.isArray(response.data) ? response.data : [response.data];
@@ -57,7 +58,7 @@ export const getLeadsDistribution = async (dateRange = {}) => {
       : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
     const response = await axiosInstance.get(
-      `${N8N_BASE_URL}/webhook/get-leads-distribution`,
+      `${API_BASE_URL}/get-leads-distribution`,
       { params }
     );
 
@@ -76,7 +77,7 @@ export const getConversionFunnel = async (dateRange = {}) => {
       : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
     const response = await axiosInstance.get(
-      `${N8N_BASE_URL}/webhook/get-conversion-funnel`,
+      `${API_BASE_URL}/get-conversion-funnel`,
       { params }
     );
 
@@ -95,7 +96,7 @@ export const getLeadsOrigin = async (dateRange = {}) => {
       : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
     const response = await axiosInstance.get(
-      `${N8N_BASE_URL}/webhook/get-leads-origin`,
+      `${API_BASE_URL}/get-leads-origin`,
       { params }
     );
 
@@ -114,7 +115,7 @@ export const getAlumnos = async (dateRange = {}) => {
       : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
     const response = await axiosInstance.get(
-      `${N8N_BASE_URL}/webhook/get-alumnos`,
+      `${API_BASE_URL}/get-alumnos`,
       { params }
     );
 
@@ -133,7 +134,7 @@ export const getFunnelByOrigin = async (dateRange = {}) => {
       : { startDate: dateRange.startDate, endDate: dateRange.endDate };
 
     const response = await axiosInstance.get(
-      `${N8N_BASE_URL}/webhook/get-funnel-by-origin`,
+      `${API_BASE_URL}/get-funnel-by-origin`,
       { params }
     );
 
@@ -163,7 +164,7 @@ export const getFunnelByOrigin = async (dateRange = {}) => {
 export const getAnalisisTemporal = async (dateRange = {}) => {
   try {
     const response = await axiosInstance.get(
-      `${N8N_BASE_URL}/webhook/get-analisis-temporal`,
+      `${API_BASE_URL}/get-analisis-temporal`,
       { params: { ...dateRange } }
     );
 

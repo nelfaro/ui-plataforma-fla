@@ -33,7 +33,8 @@ export const uploadRAGFile = async (file) => {
 
 // Subir documento al RAG con categorías
 export const uploadDocumentoRAG = async (file, categorias, titulo = '') => {
-  const N8N_BASE_URL = 'https://asistente-ia-fla-n8n.x5miqk.easypanel.host';
+  // Usar proxy local de Easypanel (evita CORS)
+  const API_BASE_URL = '/api/webhook';
 
   try {
     const formData = new FormData();
@@ -42,7 +43,7 @@ export const uploadDocumentoRAG = async (file, categorias, titulo = '') => {
     if (titulo) formData.append('titulo', titulo);
 
     const response = await axios.post(
-      `${N8N_BASE_URL}/webhook/subir-rag-docs`,
+      `${API_BASE_URL}/subir-rag-docs`,
       formData,
       {
         headers: {
