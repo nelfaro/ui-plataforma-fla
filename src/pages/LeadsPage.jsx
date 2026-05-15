@@ -4,16 +4,18 @@ import { Card } from '../components/UI/Card';
 import { getLeadsPipeline } from '../services/leads';
 import toast from 'react-hot-toast';
 
-const ESTADOS = ['FRIO', 'TIBIO', 'CALIENTE', 'ACTIVO'];
+// Estados de LEADS (pre-venta)
+// Cuando un lead se convierte (REGISTRADO), se mueve a tabla alumnos
+const ESTADOS = ['NUEVO', 'FRIO', 'TIBIO', 'CALIENTE'];
 const ORIGENES = ['RECOMENDACION', 'INSTAGRAM', 'FACEBOOK', 'TIKTOK', 'ORGANICO'];
 const TIPOS = ['KIDS', 'ADULTO', 'ADOLESCENTE', 'AU_PAIR'];
 
 const getEstadoBadgeColor = (estado) => {
   const colorMap = {
+    'NUEVO': 'bg-purple-100 text-purple-800',
     'FRIO': 'bg-gray-100 text-gray-800',
     'TIBIO': 'bg-yellow-100 text-yellow-800',
-    'CALIENTE': 'bg-orange-100 text-orange-800',
-    'ACTIVO': 'bg-green-100 text-green-800'
+    'CALIENTE': 'bg-orange-100 text-orange-800'
   };
   return colorMap[estado] || 'bg-gray-100 text-gray-800';
 };
@@ -46,7 +48,7 @@ export default function LeadsPage() {
     total: 0,
     frio: 0,
     seguimiento: 0,
-    activo: 0
+    nuevo: 0
   });
 
   useEffect(() => {
@@ -69,9 +71,9 @@ export default function LeadsPage() {
       const total = items.length;
       const frio = items.filter(l => l.estado === 'FRIO').length;
       const seguimiento = items.filter(l => l.estado === 'TIBIO' || l.estado === 'CALIENTE').length;
-      const activo = items.filter(l => l.estado === 'ACTIVO').length;
+      const nuevo = items.filter(l => l.estado === 'NUEVO').length;
 
-      setKpis({ total, frio, seguimiento, activo });
+      setKpis({ total, frio, seguimiento, nuevo });
     } catch (error) {
       console.error('Error al cargar leads:', error);
       toast.error('Error al cargar los leads');
@@ -105,10 +107,10 @@ export default function LeadsPage() {
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard label="Total contactos" value={kpis.total} color="bg-blue-50" />
+          <KpiCard label="Total leads" value={kpis.total} color="bg-blue-50" />
+          <KpiCard label="NUEVO" value={kpis.nuevo} color="bg-purple-50" />
           <KpiCard label="FRIO" value={kpis.frio} color="bg-gray-50" />
-          <KpiCard label="En seguimiento" value={kpis.seguimiento} color="bg-purple-50" />
-          <KpiCard label="ACTIVO" value={kpis.activo} color="bg-green-50" />
+          <KpiCard label="En seguimiento" value={kpis.seguimiento} color="bg-yellow-50" />
         </div>
 
         {/* Filtros */}

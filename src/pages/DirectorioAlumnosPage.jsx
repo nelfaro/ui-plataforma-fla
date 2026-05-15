@@ -17,12 +17,9 @@ export default function DirectorioAlumnosPage() {
   const [offset, setOffset] = useState(0);
   const [total, setTotal] = useState(0);
 
-  // Estados y categorías disponibles
+  // Estados disponibles para alumnos (post-venta)
+  // Los leads (NUEVO/FRIO/TIBIO/CALIENTE) están en tabla separada
   const estados = [
-    'NUEVO',
-    'FRIO',
-    'TIBIO',
-    'CALIENTE',
     'REGISTRADO',
     'ACTIVO',
     'PAUSADO',
@@ -82,14 +79,10 @@ export default function DirectorioAlumnosPage() {
 
   const getEstadoBadge = (estado) => {
     const badges = {
-      ACTIVO: 'bg-green-100 text-green-800',
       REGISTRADO: 'bg-blue-100 text-blue-800',
+      ACTIVO: 'bg-green-100 text-green-800',
       PAUSADO: 'bg-yellow-100 text-yellow-800',
-      BAJA: 'bg-red-100 text-red-800',
-      NUEVO: 'bg-purple-100 text-purple-800',
-      FRIO: 'bg-gray-100 text-gray-800',
-      TIBIO: 'bg-orange-100 text-orange-800',
-      CALIENTE: 'bg-red-100 text-red-800'
+      BAJA: 'bg-red-100 text-red-800'
     };
     return badges[estado] || 'bg-gray-100 text-gray-800';
   };
