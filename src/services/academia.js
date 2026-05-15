@@ -1,10 +1,11 @@
 import axios from 'axios';
 
-const N8N_BASE_URL = 'https://asistente-ia-fla-n8n.x5miqk.easypanel.host';
+// Usar proxy local de Easypanel en lugar de acceder directamente a n8n (evita CORS)
+const API_BASE_URL = '/api/webhook';
 
 export const getConfiguracion = async () => {
   try {
-    const response = await axios.get(`${N8N_BASE_URL}/webhook/get-academia-config`);
+    const response = await axios.get(`${API_BASE_URL}/get-academia-config`);
     return response.data;
   } catch (error) {
     console.error('Error fetching academia config:', error);
@@ -14,7 +15,7 @@ export const getConfiguracion = async () => {
 
 export const updateConfiguracion = async (data) => {
   try {
-    const response = await axios.post(`${N8N_BASE_URL}/webhook/update-academia-config`, data);
+    const response = await axios.post(`${API_BASE_URL}/update-academia-config`, data);
     return response.data;
   } catch (error) {
     console.error('Error updating academia config:', error);
