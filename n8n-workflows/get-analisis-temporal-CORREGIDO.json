@@ -1,0 +1,151 @@
+{
+  "updatedAt":"2026-05-15T10:00:00.000Z",
+  "createdAt":"2026-04-24T00:26:37.613Z",
+  "id":"S8LQLjNhsRIt5GLr",
+  "name":"get-analisis-temporal",
+  "active":true,
+  "isArchived":false,
+  "nodes":[
+    {
+      "parameters":{
+        "path":"get-analisis-temporal",
+        "responseMode":"lastNode",
+        "options":{}
+      },
+      "type":"n8n-nodes-base.webhook",
+      "typeVersion":2.1,
+      "position":[-176,0],
+      "id":"6d08f90a-089c-4f65-b985-2e201392ff32",
+      "name":"Webhook",
+      "webhookId":"2277cb99-3489-4ee3-9207-337a58d49ec8"
+    },
+    {
+      "parameters":{
+        "jsCode":"const input = $input.first().json;\nconst query = input.query || {};\nconst { startDate, endDate } = query;\n\nconst start = startDate || '2026-01-01';\nconst end = endDate || '2026-04-23';\n\nconst queryNuevos = `WITH semanas AS (\n  SELECT generate_series(\n    DATE_TRUNC('week', '${start}'::date),\n    DATE_TRUNC('week', '${end}'::date),\n    '1 week'::interval\n  )::date as semana_inicio\n)\nSELECT \n  TO_CHAR(s.semana_inicio, 'YYYY-IW') as semana,\n  COUNT(a.id)::integer as nuevos\nFROM semanas s\nLEFT JOIN alumnos a ON DATE_TRUNC('week', a.fecha_registro) = s.semana_inicio\nGROUP BY s.semana_inicio\nORDER BY s.semana_inicio ASC;`;\n\nconst queryConversion = `WITH semanas AS (\n  SELECT generate_series(\n    DATE_TRUNC('week', '${start}'::date),\n    DATE_TRUNC('week', '${end}'::date),\n    '1 week'::interval\n  )::date as semana_inicio\n),\nnuevos_por_semana AS (\n  SELECT \n    DATE_TRUNC('week', a.fecha_registro)::date as semana_inicio,\n    COUNT(a.id)::integer as total_nuevos\n  FROM alumnos a\n  WHERE a.fecha_registro IS NOT NULL\n  GROUP BY DATE_TRUNC('week', a.fecha_registro)\n),\nconvertidos_por_semana AS (\n  SELECT \n    DATE_TRUNC('week', a.fecha_activacion)::date as semana_inicio,\n    COUNT(a.id)::integer as total_convertidos\n  FROM alumnos a\n  WHERE a.fecha_activacion IS NOT NULL AND a.estado = 'ACTIVO'\n  GROUP BY DATE_TRUNC('week', a.fecha_activacion)\n)\nSELECT \n  TO_CHAR(s.semana_inicio, 'YYYY-IW') as semana,\n  ROUND(\n    100.0 * COALESCE(c.total_convertidos, 0) / NULLIF(COALESCE(n.total_nuevos, 0), 0),\n    1\n  )::integer as conversion\nFROM semanas s\nLEFT JOIN nuevos_por_semana n ON n.semana_inicio = s.semana_inicio\nLEFT JOIN convertidos_por_semana c ON c.semana_inicio = s.semana_inicio\nGROUP BY s.semana_inicio, n.total_nuevos, c.total_convertidos\nORDER BY s.semana_inicio ASC;`;\n\nconst queryIngresos = `SELECT \n  TO_CHAR(DATE_TRUNC('month', p.fecha_pago), 'YYYY-MM') as mes,\n  COALESCE(SUM(p.monto), 0)::decimal as ingresos\nFROM pagos_manuales p\nWHERE p.fecha_pago BETWEEN '${start}'::date AND '${end}'::date\nGROUP BY DATE_TRUNC('month', p.fecha_pago)\nORDER BY mes ASC;`;\n\nreturn [{\n  json: {\n    queryNuevos,\n    queryConversion,\n    queryIngresos\n  }\n}];"
+      },
+      "type":"n8n-nodes-base.code",
+      "typeVersion":2,
+      "position":[208,0],
+      "id":"c1e15426-5a6e-4ad4-84f0-51771bd776d3",
+      "name":"arma query"
+    },
+    {
+      "parameters":{
+        "operation":"executeQuery",
+        "query":"{{ $('arma query').first().json.queryNuevos }}",
+        "options":{}
+      },
+      "type":"n8n-nodes-base.postgres",
+      "typeVersion":2.6,
+      "position":[416,0],
+      "id":"3865aea0-4dfe-4600-b6b2-a578f61e2ab3",
+      "name":"nuevos",
+      "credentials":{
+        "postgres":{
+          "id":"7vZZbkZhFbmui4On",
+          "name":"Postgres account"
+        }
+      }
+    },
+    {
+      "parameters":{
+        "operation":"executeQuery",
+        "query":"{{ $('arma query').first().json.queryConversion }}",
+        "options":{}
+      },
+      "type":"n8n-nodes-base.postgres",
+      "typeVersion":2.6,
+      "position":[624,0],
+      "id":"6ad9d9cd-6fa0-488b-86e0-5f04aa0e5395",
+      "name":"conversion",
+      "credentials":{
+        "postgres":{
+          "id":"7vZZbkZhFbmui4On",
+          "name":"Postgres account"
+        }
+      }
+    },
+    {
+      "parameters":{
+        "operation":"executeQuery",
+        "query":"{{ $('arma query').first().json.queryIngresos }}",
+        "options":{}
+      },
+      "type":"n8n-nodes-base.postgres",
+      "typeVersion":2.6,
+      "position":[832,0],
+      "id":"fa07970d-baa6-478e-bf14-11ccc9da4371",
+      "name":"ingresos",
+      "credentials":{
+        "postgres":{
+          "id":"7vZZbkZhFbmui4On",
+          "name":"Postgres account"
+        }
+      }
+    },
+    {
+      "parameters":{
+        "jsCode":"const nuevos = $('nuevos').all().map(row => row.json);\nconst conversion = $('conversion').all().map(row => row.json);\nconst ingresos = $('ingresos').all().map(row => row.json);\n\nreturn [{\n  json: {\n    items: {\n      nuevos_por_semana: nuevos,\n      conversion_por_semana: conversion,\n      ingresos_acumulados: ingresos\n    }\n  }\n}];"
+      },
+      "type":"n8n-nodes-base.code",
+      "typeVersion":2,
+      "position":[1040,0],
+      "id":"b666d08c-24dc-40f4-9f62-82e8ddeb118f",
+      "name":"respuesta"
+    },
+    {
+      "parameters":{
+        "url":"https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/auth-validate",
+        "sendBody":true,
+        "specifyBody":"json",
+        "jsonBody":"={{ $input.first().json }}",
+        "options":{}
+      },
+      "type":"n8n-nodes-base.httpRequest",
+      "typeVersion":4.4,
+      "position":[16,-192],
+      "id":"3cdfa54d-0e98-4099-8016-447a67e3b3ee",
+      "name":"Validador",
+      "disabled":true
+    }
+  ],
+  "connections":{
+    "Webhook":{
+      "main":[[{"node":"arma query","type":"main","index":0}]]
+    },
+    "arma query":{
+      "main":[[{"node":"nuevos","type":"main","index":0}]]
+    },
+    "nuevos":{
+      "main":[[{"node":"conversion","type":"main","index":0}]]
+    },
+    "conversion":{
+      "main":[[{"node":"ingresos","type":"main","index":0}]]
+    },
+    "ingresos":{
+      "main":[[{"node":"respuesta","type":"main","index":0}]]
+    },
+    "Validador":{
+      "main":[[]]
+    }
+  },
+  "settings":{
+    "executionOrder":"v1",
+    "binaryMode":"separate"
+  },
+  "staticData":null,
+  "meta":{
+    "templateCredsSetupCompleted":true
+  },
+  "versionId":"90e2c9ff-05b1-4ec7-a95e-c833b17be5cb-corregido",
+  "activeVersionId":"90e2c9ff-05b1-4ec7-a95e-c833b17be5cb-corregido",
+  "triggerCount":1,
+  "shared":[{
+    "updatedAt":"2026-04-24T00:26:37.616Z",
+    "createdAt":"2026-04-24T00:26:37.616Z",
+    "role":"workflow:owner",
+    "workflowId":"S8LQLjNhsRIt5GLr",
+    "projectId":"vcSsmFzAF5xR3jXm"
+  }],
+  "tags":[]
+}
