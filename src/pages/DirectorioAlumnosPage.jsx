@@ -42,11 +42,7 @@ export default function DirectorioAlumnosPage() {
         };
 
         const resultado = await getAlumnosList(params);
-        console.log('Resultado de API:', resultado); // 👈 DEBUG
-        console.log('Items:', resultado.items);     // 👈 DEBUG
-        console.log('Total:', resultado.total);     // 👈 DEBUG
-        
-        setAlumnos(resultado.items || []);
+        setAlumnos(resultado.alumnos || []);
         setTotal(resultado.total || 0);
       } catch (error) {
         console.error('Error:', error);
