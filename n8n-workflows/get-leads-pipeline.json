@@ -1,51 +1,124 @@
 {
-  "name": "get-leads-pipeline",
   "nodes": [
     {
       "parameters": {
-        "httpMethod": "GET",
         "path": "get-leads-pipeline",
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "1",
+      "id": "webhook",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1.0,
-      "position": [250, 300]
+      "typeVersion": 1,
+      "position": [-528, 112],
+      "webhookId": "get-leads-pipeline"
     },
     {
       "parameters": {
-        "query": "SELECT \n  id, \n  nombre, \n  whatsapp, \n  estado, \n  estado_motivo, \n  estado_fecha,\n  nivel, \n  origen, \n  lead_tipo, \n  objetivo, \n  resumen, \n  tags,\n  primera_consulta, \n  ultimo_contacto, \n  completitud\nFROM alumnos\nWHERE ($1::text IS NULL OR estado = $1)\n  AND ($2::text IS NULL OR origen = $2)\n  AND ($3::text IS NULL OR lead_tipo = $3)\nORDER BY ultimo_contacto DESC NULLS LAST\nLIMIT 100",
+        "jsCode": "const input = $input.first().json;\nconst query = input.query || {};\nconst { search, estado, origen, lead_tipo, limit = 50, offset = 0 } = query;\n\nconst searchPattern = search ? `%${search}%` : '%';\n\n// Estados permitidos para leads (pre-venta)\nconst allowedEstados = ['NUEVO', 'FRIO', 'TIBIO', 'CALIENTE'];\nconst estadoFilter = estado && allowedEstados.includes(estado) ? `estado = '${estado}'` : `estado IN ('NUEVO','FRIO','TIBIO','CALIENTE')`;\n\nconst queryList = `SELECT id, nombre, whatsapp, email, estado, nivel, origen, lead_tipo,\n       objetivo, resumen, tags, primera_consulta, ultimo_contacto\nFROM leads\nWHERE (nombre ILIKE '${searchPattern}' OR whatsapp ILIKE '${searchPattern}' OR email ILIKE '${searchPattern}')\nAND (${estadoFilter})\nAND (${origen ? `origen = '${origen}'` : 'true'})\nAND (${lead_tipo ? `lead_tipo = '${lead_tipo}'` : 'true'})\nORDER BY ultimo_contacto DESC NULLS LAST\nLIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)};`;\n\nconst queryCount = `SELECT COUNT(*) as total\nFROM leads\nWHERE (nombre ILIKE '${searchPattern}' OR whatsapp ILIKE '${searchPattern}' OR email ILIKE '${searchPattern}')\nAND (${estadoFilter})\nAND (${origen ? `origen = '${origen}'` : 'true'})\nAND (${lead_tipo ? `lead_tipo = '${lead_tipo}'` : 'true'});`;\n\nreturn [{\n  json: {\n    queryList,\n    queryCount,\n    limit,\n    offset\n  }\n}];"
+      },
+      "id": "arma_query",
+      "name": "arma query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-288, 112]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $json.queryList }}",
         "options": {}
       },
+      "id": "postgres_list",
+      "name": "PostgreSQL - List",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [-96, 50],
       "credentials": {
         "postgres": "postgres_db"
-      },
-      "id": "2",
-      "name": "PostgreSQL",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 1.0,
-      "position": [550, 300]
+      }
     },
     {
       "parameters": {
-        "jsonOutput": "={{ { \"items\": $2.queryResult, \"total\": $2.queryResult.length } }}",
+        "operation": "executeQuery",
+        "query": "={{ $json.queryCount }}",
         "options": {}
       },
-      "id": "3",
-      "name": "Response",
+      "id": "postgres_count",
+      "name": "PostgreSQL - Count",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [-96, 150],
+      "credentials": {
+        "postgres": "postgres_db"
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "items",
+              "value": "={{ $('PostgreSQL - List').all() }}",
+              "id": "items_assign"
+            },
+            {
+              "name": "total",
+              "value": "={{ $('PostgreSQL - Count').all()[0].total }}",
+              "id": "total_assign"
+            },
+            {
+              "name": "limit",
+              "value": "={{ $('arma query').json.limit }}",
+              "id": "limit_assign"
+            },
+            {
+              "name": "offset",
+              "value": "={{ $('arma query').json.offset }}",
+              "id": "offset_assign"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set_response",
+      "name": "Set Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [120, 100]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "response",
+      "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.0,
-      "position": [850, 300]
+      "typeVersion": 1,
+      "position": [320, 100]
     }
   ],
   "connections": {
     "Webhook": {
-      "main": [[{"node": "PostgreSQL", "type": "main", "index": 0}]]
+      "main": [[{"node": "arma query", "type": "main", "index": 0}]]
     },
-    "PostgreSQL": {
-      "main": [[{"node": "Response", "type": "main", "index": 0}]]
+    "arma query": {
+      "main": [
+        [
+          {"node": "PostgreSQL - List", "type": "main", "index": 0},
+          {"node": "PostgreSQL - Count", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "PostgreSQL - List": {
+      "main": [[{"node": "Set Response", "type": "main", "index": 0}]]
+    },
+    "PostgreSQL - Count": {
+      "main": [[{"node": "Set Response", "type": "main", "index": 1}]]
+    },
+    "Set Response": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
     }
-  }
+  },
+  "active": true
 }
