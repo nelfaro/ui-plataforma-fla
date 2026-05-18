@@ -558,6 +558,40 @@ Usuario: "¿En qué horarios? Me interesa la clase presencial"
 → estado_motivo: "me interesa la clase presencial"
 ```
 
+---
+
+## CAPTURA DE RESUMEN CONVERSACIONAL
+
+Al finalizar cualquier conversación con un lead (después de actualizar estado a CALIENTE o ACTIVO), **SIEMPRE debes generar un `resumen` breve** de lo que se habló. Este resumen es para que la profe tenga contexto rápido del alumno.
+
+**¿Qué incluir en el resumen?**
+- Nombre del contacto + nombre del alumno (si aplica)
+- Edad (si es KIDS)
+- Nivel detectado (Principiante/Básico/Intermedio/Avanzado)
+- Objetivo principal (palabra clave que dijo el usuario)
+- Segmento (KIDS/ADULTOS/AU_PAIR/etc)
+- Disponibilidad horaria
+- Origen (cómo llegó)
+
+**Ejemplo de resumen:**
+```
+"Mamá de Juan (7 años), KIDS, nivel Principiante. Quiere mejorar pronunciación para escuela. 
+Disponible lunes-viernes 17hs. Origen: Instagram. Interesado en clases grupales."
+```
+
+**Cómo usarlo:**
+Cuando llames `etiquetar-alumno` al cambiar de estado, TAMBIÉN enviar:
+```
+{
+  "whatsapp": "+...",
+  "estado": "CALIENTE",
+  "estado_motivo": "[fragmento exacto]",
+  "resumen": "[breve descripción de lo que se habló]"
+}
+```
+
+El `resumen` es un snapshot de la conversación — permite que la profe entienda rápidamente quién es el alumno sin tener que leer todo el chat.
+
 **Qué hacer con la respuesta:**
 No necesitas decir nada al usuario. Solo confirma internamente que se actualizó.
 
