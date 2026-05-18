@@ -1,0 +1,77 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "path": "actualizar-lead",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [-528, 112],
+      "webhookId": "actualizar-lead"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst { whatsapp, estado_motivo, resumen } = input;\n\nif (!whatsapp) {\n  return [{ json: { error: 'whatsapp es requerido' } }];\n}\n\nconst updateFields = [];\nif (estado_motivo) updateFields.push(`estado_motivo = '${estado_motivo.replace(/'/g, \"''\")}' `);\nif (resumen) updateFields.push(`resumen = '${resumen.replace(/'/g, \"''\")}' `);\nupdateFields.push(`updated_at = NOW()`);\n\nconst query = `UPDATE leads\nSET ${updateFields.join(', ')}\nWHERE whatsapp = '${whatsapp}'\nRETURNING *;`;\n\nreturn [{\n  json: {\n    query,\n    whatsapp,\n    estado_motivo,\n    resumen\n  }\n}];"
+      },
+      "id": "arma_query",
+      "name": "arma query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-288, 112]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $json.query }}",
+        "options": {}
+      },
+      "id": "postgres_update",
+      "name": "PostgreSQL - Update",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [-96, 112],
+      "credentials": {
+        "postgres": "postgres_db"
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $input.first().json;\nconst data = result.map(row => row.json);\n\nreturn [{\n  json: {\n    success: true,\n    message: `Lead actualizado`,\n    lead: data[0] || null\n  }\n}];"
+      },
+      "id": "format_response",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [120, 112]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "response",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [320, 112]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "arma query", "type": "main", "index": 0}]]
+    },
+    "arma query": {
+      "main": [[{"node": "PostgreSQL - Update", "type": "main", "index": 0}]]
+    },
+    "PostgreSQL - Update": {
+      "main": [[{"node": "Format Response", "type": "main", "index": 0}]]
+    },
+    "Format Response": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    }
+  },
+  "active": true
+}
