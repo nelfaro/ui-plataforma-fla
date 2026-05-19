@@ -19,10 +19,11 @@ export const useDashboard = (dateRange = {}) => {
           dashboardService.getConversionFunnel(dateRange),
           dashboardService.getLeadsOrigin(dateRange),
           dashboardService.getAlumnos(dateRange),
-          dashboardService.getFunnelByOrigin(dateRange)
+          dashboardService.getFunnelByOrigin(dateRange),
+          dashboardService.getUltimaActividad()
         ]);
 
-        const endpoints = ['kpis', 'weekly', 'distribution', 'funnel', 'origin', 'alumnos', 'funnelByOrigin'];
+        const endpoints = ['kpis', 'weekly', 'distribution', 'funnel', 'origin', 'alumnos', 'funnelByOrigin', 'ultimaActividad'];
         results.forEach((r, i) => {
           if (r.status === 'rejected') console.warn(`[Dashboard] Endpoint '${endpoints[i]}' falló:`, r.reason);
         });
@@ -30,8 +31,9 @@ export const useDashboard = (dateRange = {}) => {
         const getValue = (result, fallback) =>
           result.status === 'fulfilled' ? result.value : fallback;
 
-        const [kpis, weekly, distribution, funnel, origin, alumnos, funnelByOrigin] = results;
+        const [kpis, weekly, distribution, funnel, origin, alumnos, funnelByOrigin, ultimaActividad] = results;
 
+        const ultimaActData = getValue(ultimaActividad, {});
         setData({
           kpis: getValue(kpis, {}),
           weekly: Array.isArray(getValue(weekly, [])) ? getValue(weekly, []) : [],
@@ -39,7 +41,8 @@ export const useDashboard = (dateRange = {}) => {
           funnel: Array.isArray(getValue(funnel, [])) ? getValue(funnel, []) : [],
           origin: Array.isArray(getValue(origin, [])) ? getValue(origin, []) : [],
           alumnos: Array.isArray(getValue(alumnos, [])) ? getValue(alumnos, []) : [],
-          funnelByOrigin: Array.isArray(getValue(funnelByOrigin, [])) ? getValue(funnelByOrigin, []) : []
+          funnelByOrigin: Array.isArray(getValue(funnelByOrigin, [])) ? getValue(funnelByOrigin, []) : [],
+          ultimaActividad: ultimaActData?.texto || 'Sin datos'
         });
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
@@ -50,7 +53,7 @@ export const useDashboard = (dateRange = {}) => {
     };
 
     fetchDashboardData();
-  }, [dateRange.year, dateRange.month]);
+  }, [dateRange.startDate, dateRange.endDate]);
 
   return { data, loading, error };
 };

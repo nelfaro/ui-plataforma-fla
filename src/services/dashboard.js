@@ -178,6 +178,38 @@ export const getAnalisisTemporal = async (dateRange = {}) => {
   }
 };
 
+export const getUltimaActividad = async () => {
+  try {
+    const response = await axiosInstance.get(
+      `${API_BASE_URL}/ultima-actividad-agente`
+    );
+    const data = response.data;
+
+    if (data?.timestamp) {
+      const fecha = new Date(data.timestamp);
+      const ahora = new Date();
+      const difMs = ahora - fecha;
+      const difMinutos = Math.floor(difMs / (1000 * 60));
+      const difHoras = Math.floor(difMs / (1000 * 60 * 60));
+      const difDias = Math.floor(difMs / (1000 * 60 * 60 * 24));
+
+      if (difMinutos < 5) {
+        return { texto: 'Activo ahora', tipo: 'active' };
+      } else if (difMinutos < 60) {
+        return { texto: `Hace ${difMinutos} minutos`, tipo: 'active' };
+      } else if (difHoras < 24) {
+        return { texto: `Hace ${difHoras} hora${difHoras > 1 ? 's' : ''}`, tipo: 'warning' };
+      } else {
+        return { texto: `Hace ${difDias} día${difDias > 1 ? 's' : ''}`, tipo: 'inactive' };
+      }
+    }
+    return { texto: 'Sin registros', tipo: 'inactive' };
+  } catch (error) {
+    console.error('Error fetching ultima actividad:', error);
+    return { texto: 'Sin datos', tipo: 'inactive' };
+  }
+};
+
 export default {
   getKPIs,
   getWeeklyData,
@@ -186,5 +218,6 @@ export default {
   getLeadsOrigin,
   getAlumnos,
   getAnalisisTemporal,
-  getFunnelByOrigin
+  getFunnelByOrigin,
+  getUltimaActividad
 };

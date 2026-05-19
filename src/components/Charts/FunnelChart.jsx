@@ -19,15 +19,21 @@ export const FunnelChart = ({ data, height = 400 }) => {
     );
   }
 
-  // Filtrar datos con cantidad > 0 (mantener orden del funnel)
-  const filteredData = data
-    .map(item => ({
-      ...item,
-      cantidad: parseInt(item.cantidad) || 0
-    }))
-    .filter(item => item.cantidad > 0);
+  // Asegurar que siempre existan las 5 etapas del funnel
+  const etapasEsperadas = ['NUEVO', 'FRIO', 'TIBIO', 'CALIENTE', 'ACTIVO'];
+  const dataMap = {};
 
-  if (filteredData.length === 0) {
+  data.forEach(item => {
+    dataMap[item.etapa] = parseInt(item.cantidad) || 0;
+  });
+
+  const filteredData = etapasEsperadas.map(etapa => ({
+    etapa,
+    cantidad: dataMap[etapa] || 0
+  }));
+
+  // Si todos son 0, mostrar mensaje
+  if (filteredData.every(item => item.cantidad === 0)) {
     return (
       <div className="flex items-center justify-center h-80 bg-gray-50 rounded">
         <p className="text-gray-500">Sin datos disponibles</p>

@@ -51,7 +51,6 @@ export const DonutChart = ({ data, height = 300 }) => {
           outerRadius={100}
           dataKey="total"
           nameKey="lead_tipo"
-          label={(entry) => `${entry.lead_tipo || entry.origen} (${entry.porcentaje || 0}%)`}
         >
           {data.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
