@@ -50,6 +50,7 @@ export const PieChart = ({ data, height = 300 }) => {
           outerRadius={100}
           dataKey="total"
           nameKey="origen"
+          label={(entry) => `${entry.origen} (${entry.porcentaje || 0}%)`}
         >
           {data.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
