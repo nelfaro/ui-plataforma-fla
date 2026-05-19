@@ -4,7 +4,6 @@ import {
   Pie,
   Cell,
   ResponsiveContainer,
-  Legend,
   Tooltip
 } from 'recharts';
 import { CHART_COLORS } from '../../config/constants';
@@ -57,12 +56,6 @@ export const DonutChart = ({ data, height = 300 }) => {
           ))}
         </Pie>
         <Tooltip content={<CustomTooltip />} />
-        <Legend
-          layout="vertical"
-          align="right"
-          verticalAlign="middle"
-          wrapperStyle={{ paddingLeft: '20px' }}
-        />
       </PieChart>
     </ResponsiveContainer>
   );
