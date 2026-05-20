@@ -28,7 +28,7 @@ export const DonutChart = ({ data, height = 300 }) => {
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const entry = payload[0].payload;
-      const label = entry.lead_tipo || entry.origen;
+      const label = entry.origen;
       return (
         <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
           <p className="font-semibold text-gray-900">{label}</p>
@@ -49,11 +49,8 @@ export const DonutChart = ({ data, height = 300 }) => {
           cy="50%"
           outerRadius={100}
           dataKey="total"
-          nameKey="lead_tipo"
-          label={(entry) => {
-            const name = entry.lead_tipo || entry.nombre || entry.tipo || entry.category || 'Sin nombre';
-            return `${name} (${entry.porcentaje || 0}%)`;
-          }}
+          nameKey="origen"
+          label={(entry) => `${entry.origen} (${entry.porcentaje || 0}%)`}
         >
           {data.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
