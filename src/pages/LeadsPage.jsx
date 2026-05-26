@@ -41,7 +41,7 @@ export default function LeadsPage() {
   const [filtros, setFiltros] = useState({
     estado: '',
     origen: '',
-    lead_tipo: ''
+    categoria: ''
   });
 
   const [kpis, setKpis] = useState({
@@ -151,8 +151,8 @@ export default function LeadsPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
               <select
-                value={filtros.lead_tipo}
-                onChange={(e) => handleFiltroChange('lead_tipo', e.target.value)}
+                value={filtros.categoria}
+                onChange={(e) => handleFiltroChange('categoria', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Todos</option>
@@ -211,7 +211,7 @@ export default function LeadsPage() {
                         {lead.nivel || 'No especificado'}
                       </td>
                       <td className="px-4 py-3 text-gray-600">
-                        {lead.lead_tipo || '-'}
+                        {lead.categoria || '-'}
                       </td>
                       <td className="px-4 py-3 text-gray-600">
                         {lead.origen || '-'}

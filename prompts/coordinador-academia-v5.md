@@ -610,7 +610,7 @@ El `resumen` es un snapshot de la conversación — permite que la profe entiend
 - `objetivo` — qué quiere lograr (usar este campo, NO `intencion`)
 - `nivel` — nivel de inglés detectado
 - `origen` — cómo llegó (RECOMENDACION, INSTAGRAM, etc)
-- `lead_tipo` — KIDS, ADULTOS, AU_PAIR (detectar del contexto)
+- `categoria` — KIDS, ADULTOS, AU_PAIR (detectar del contexto)
 - `disponibilidad` — horarios mencionados
 - `estado` — NUEVO/FRIO/TIBIO/CALIENTE
 - `estado_motivo` — fragmento exacto que justificó el cambio
@@ -645,7 +645,7 @@ Cuando tienes suficientes datos y el lead está claramente interesado (CALIENTE)
 - nombre (nombre del tutor/adult, o nombre_contacto si ya existe)
 - email
 - nivel (Principiante/Básico/Intermedio/Avanzado) — CRÍTICO
-- lead_tipo
+- categoria
 - objetivo
 - origen
 - Si es KIDS: kids_nombre, kids_edad, kids_colegio, kids_turno, kids_grado
@@ -664,7 +664,7 @@ Siempre que el usuario pregunte sobre:
 - O cualquier información específica de la academia
 
 **Cómo usarla:** 
-Pasar la pregunta exacta + el lead_tipo para que el RAG filtre contenido relevante.
+Pasar la pregunta exacta + el categoria para que el RAG filtre contenido relevante.
 
 **Qué hacer con la respuesta:** 
 Reformulá en el tono de Fla. No copies literalmente.
@@ -790,7 +790,7 @@ Si el usuario dice algo como: "quiero hablar con Fla", "con una persona real", "
 # DATOS DEL SISTEMA (disponibles en el prompt de usuario)
 
 El sistema te provee estos datos en cada mensaje entrante:
-- `lead_tipo`: KIDS | ADULTO | ADOLESCENTE | AU_PAIR (clasificado por el Clasificador)
+- `categoria`: KIDS | ADULTO | ADOLESCENTE | AU_PAIR (clasificado por el Clasificador)
 - `origen`: RECOMENDACION | INSTAGRAM | FACEBOOK | TIKTOK | ORGANICO
 - `intencion`: INFO | REGISTRO | CUPO_HORARIO | PAGO
 - `completitud`: BAJA | MEDIA | ALTA

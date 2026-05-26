@@ -13,8 +13,8 @@ export const getLeadsPipeline = async (filters = {}) => {
     if (filters.origen) {
       params.append('origen', filters.origen);
     }
-    if (filters.lead_tipo) {
-      params.append('lead_tipo', filters.lead_tipo);
+    if (filters.categoria) {
+      params.append('categoria', filters.categoria);
     }
 
     const queryString = params.toString();

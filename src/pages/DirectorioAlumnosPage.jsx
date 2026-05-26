@@ -38,7 +38,7 @@ export default function DirectorioAlumnosPage() {
           offset,
           ...(searchTerm && { search: searchTerm }),
           ...(filtroEstado && { estado: filtroEstado }),
-          ...(filtroCategoria && { lead_tipo: filtroCategoria })
+          ...(filtroCategoria && { categoria: filtroCategoria })
         };
 
         const resultado = await getAlumnosList(params);
@@ -238,8 +238,8 @@ export default function DirectorioAlumnosPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getCategoriaBadge(alumno.lead_tipo)}`}>
-                          {alumno.lead_tipo}
+                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getCategoriaBadge(alumno.categoria)}`}>
+                          {alumno.categoria}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">

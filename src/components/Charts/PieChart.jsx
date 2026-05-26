@@ -28,7 +28,7 @@ export const PieChart = ({ data, height = 300 }) => {
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const entry = payload[0].payload;
-      const label = entry.origen || entry.lead_tipo;
+      const label = entry.origen || entry.categoria;
       return (
         <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
           <p className="font-semibold text-gray-900">{label}</p>

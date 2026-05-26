@@ -209,7 +209,7 @@ export default function AlumnoDetallePage() {
                 </div>
                 <div className="flex items-center gap-2 text-gray-700">
                   <User size={18} className="text-blue-600" />
-                  <span>{alumno.lead_tipo}</span>
+                  <span>{alumno.categoria}</span>
                 </div>
               </div>
             </div>
@@ -286,8 +286,8 @@ export default function AlumnoDetallePage() {
                 <label className="text-sm font-medium text-gray-700">Categoría</label>
                 {editMode ? (
                   <select
-                    value={formData.lead_tipo}
-                    onChange={(e) => handleEditChange('lead_tipo', e.target.value)}
+                    value={formData.categoria}
+                    onChange={(e) => handleEditChange('categoria', e.target.value)}
                     className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option>KIDS</option>
@@ -297,7 +297,7 @@ export default function AlumnoDetallePage() {
                     <option>CORPORATIVO</option>
                   </select>
                 ) : (
-                  <p className="text-gray-900 font-medium">{alumno.lead_tipo}</p>
+                  <p className="text-gray-900 font-medium">{alumno.categoria}</p>
                 )}
               </div>
             </div>

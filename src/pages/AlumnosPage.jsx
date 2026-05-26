@@ -42,7 +42,7 @@ export default function AlumnosPage() {
       // Agrupar por categoría
       const agrupado = {};
       categorias.forEach(cat => {
-        agrupado[cat] = alumnosList.filter(a => a.categoria === cat || a.lead_tipo === cat);
+        agrupado[cat] = alumnosList.filter(a => a.categoria === cat || a.categoria === cat);
       });
       setAlumnosPorCategoria(agrupado);
     } catch (error) {
@@ -334,7 +334,7 @@ export default function AlumnosPage() {
               ) : (
                 <div className="space-y-6">
                   {(() => {
-                    const alumnosCat = alumnosFiltrados.filter(a => a.categoria === selectedCategory || a.lead_tipo === selectedCategory);
+                    const alumnosCat = alumnosFiltrados.filter(a => a.categoria === selectedCategory || a.categoria === selectedCategory);
                     const total = alumnosCat.length || 1;
                     const activos = alumnosCat.filter(a => a.estado === 'ACTIVO' || a.estado === 'ACTIVOS').length;
                     const calientes = alumnosCat.filter(a => a.estado === 'CALIENTE').length;
@@ -555,7 +555,7 @@ export default function AlumnosPage() {
               <h3 className="text-lg font-bold mb-4">Análisis por Categoría</h3>
               <div className="space-y-4">
                 {categorias.map(cat => {
-                  const alumnosCat = alumnosFiltrados.filter(a => a.categoria === cat || a.lead_tipo === cat);
+                  const alumnosCat = alumnosFiltrados.filter(a => a.categoria === cat || a.categoria === cat);
                   return (
                     <div key={cat}>
                       <div className="flex justify-between mb-2">
