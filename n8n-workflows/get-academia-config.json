@@ -1,0 +1,64 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "path": "get-academia-config",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [-528, 112],
+      "webhookId": "get-academia-config"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM academia_config LIMIT 1;",
+        "options": {}
+      },
+      "id": "postgres_query",
+      "name": "PostgreSQL - Query",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [-288, 112],
+      "credentials": {
+        "postgres": "postgres_db"
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $input.first().json;\n\nconst config = {\n  nombre_academia: result.nombre_academia || '',\n  nombre_profe: result.nombre_profe || '',\n  email: result.email || '',\n  telefono: result.telefono || '',\n  ubicacion_direccion: result.ubicacion_direccion || '',\n  ubicacion_localidad: result.ubicacion_localidad || '',\n  horario_atencion: result.horario_atencion || '',\n  banco: result.banco || '',\n  cbu: result.cbu || '',\n  alias: result.alias || '',\n  linktree_url: result.linktree_url || '',\n  instagram: result.instagram || '',\n  facebook: result.facebook || '',\n  politica_cancelacion: result.politica_cancelacion || '',\n  politica_recuperacion: result.politica_recuperacion || '',\n  politica_reembolso: result.politica_reembolso || ''\n};\n\nreturn [{\n  json: {\n    config\n  }\n}];"
+      },
+      "id": "format_response",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-96, 112]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "response",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [120, 112]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "postgres_query", "type": "main", "index": 0}]]
+    },
+    "postgres_query": {
+      "main": [[{"node": "format_response", "type": "main", "index": 0}]]
+    },
+    "format_response": {
+      "main": [[{"node": "response", "type": "main", "index": 0}]]
+    }
+  },
+  "active": true
+}
