@@ -25,7 +25,7 @@ export const WhatsAppPage = () => {
           </div>
 
           <iframe
-            src=https://asistente-ia-fla-puentewhatsapp.x5miqk.easypanel.host
+            src={ WHATSAPP_URL }
             title="WhatsApp QR"
             className="w-full h-96 border border-gray-200 rounded-lg"
           />
