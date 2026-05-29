@@ -8,12 +8,12 @@ DELETE FROM alumnos;
 -- Cargar datos reales
 INSERT INTO alumnos (nombre, whatsapp, email, fecha_nacimiento, categoria, tutor, estado)
 VALUES
-('Micaela Stephanie Gigena', '54 9 2494 01-1941', 'micag561@gmail.com', '07/06', 'ADULTO', NULL, 'ACTIVO'),
-('Siomara Abba', '54 9 3385 43-0519', 'abbasiomara@gmail.com.ar', '13/07', 'ADULTO', NULL, 'ACTIVO'),
-('Griselda Aquino', '54 9 3794 74-4217', NULL, '09/06', 'ADULTO', NULL, 'ACTIVO'),
-('Esteban', '54 9 3385 43-6755', 'elopezfainbinda@gmail.com', '20/10', 'ADULTO', NULL, 'ACTIVO'),
-('Sofia', NULL, NULL, NULL, 'ADULTO', NULL, 'ACTIVO'),
-('Facundo Miño', NULL, NULL, NULL, 'ADULTO', NULL, 'ACTIVO'),
+('Micaela Stephanie Gigena', '54 9 2494 01-1941', 'micag561@gmail.com', '07/06', 'ADULTOS', NULL, 'ACTIVO'),
+('Siomara Abba', '54 9 3385 43-0519', 'abbasiomara@gmail.com.ar', '13/07', 'ADULTOS', NULL, 'ACTIVO'),
+('Griselda Aquino', '54 9 3794 74-4217', NULL, '09/06', 'ADULTOS', NULL, 'ACTIVO'),
+('Esteban', '54 9 3385 43-6755', 'elopezfainbinda@gmail.com', '20/10', 'ADULTOS', NULL, 'ACTIVO'),
+('Sofia', NULL, NULL, NULL, 'ADULTOS', NULL, 'ACTIVO'),
+('Facundo Miño', NULL, NULL, NULL, 'ADULTOS', NULL, 'ACTIVO'),
 ('Gaby Manarinno', '54 9 221 623-5115', NULL, NULL, 'PERSONALIZADO', NULL, 'ACTIVO'),
 ('Gabriel Vigo', '54 9 11 5729-1381', NULL, NULL, 'PERSONALIZADO', NULL, 'ACTIVO'),
 ('Araceli', NULL, NULL, NULL, 'PERSONALIZADO', NULL, 'ACTIVO'),
