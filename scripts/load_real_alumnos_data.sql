@@ -4,7 +4,6 @@
 
 -- Limpiar tabla de prueba
 DELETE FROM alumnos;
-ALTER SEQUENCE alumnos_id_seq RESTART WITH 1;
 
 -- Cargar datos reales
 INSERT INTO alumnos (nombre, whatsapp, email, fecha_nacimiento, categoria, tutor, estado)
