@@ -1,64 +1,208 @@
 {
+  "name": "get-horarios",
   "nodes": [
     {
       "parameters": {
-        "path": "get-horarios",
-        "responseMode": "responseNode",
+        "url": "https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/auth-validate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $input.first().json }}",
         "options": {}
       },
-      "id": "webhook",
-      "name": "Webhook",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1,
-      "position": [-528, 112],
-      "webhookId": "get-horarios"
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        -208
+      ],
+      "id": "edab190d-61e0-4bb0-809b-5d8c04ae9b5f",
+      "name": "Validador",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst { categoria } = input;\n\nlet query = `SELECT id, nombre, tipo, nivel, categoria, dia_1, dia_2, \n       hora_inicio, hora_fin, cupo_max, cupo_actual, precio_mensual, \n       descripcion, activo, created_at, updated_at\nFROM horarios\nWHERE activo = TRUE`;\n\n// Agregar filtro por categoría si se proporciona\nif (categoria) {\n  query += ` AND categoria = '${categoria}'`;\n}\n\nquery += ` ORDER BY nombre ASC;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        144
+      ],
+      "id": "dbe66350-d7eb-428d-835f-00a8b4bc754c",
+      "name": "arma query"
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT id, nombre, tipo, nivel, categoria, dia_1, dia_2, hora_inicio, hora_fin, cupo_max, cupo_actual, precio_mensual, descripcion, activo, created_at, updated_at FROM horarios WHERE activo = true ORDER BY categoria, tipo, hora_inicio;",
+        "query": "{{ $('arma query').first().json.query }}",
         "options": {}
       },
-      "id": "postgres_query",
-      "name": "PostgreSQL - Query",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.4,
-      "position": [-288, 112],
+      "typeVersion": 2.6,
+      "position": [
+        688,
+        144
+      ],
+      "id": "30c7fb4c-3331-4af9-91c0-8189c6225edf",
+      "name": "obtener horarios",
       "credentials": {
-        "postgres": "postgres_db"
+        "postgres": {
+          "id": "7vZZbkZhFbmui4On",
+          "name": "Postgres account"
+        }
       }
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all().map(row => row.json);\n\nreturn [{\n  json: {\n    items,\n    total: items.length\n  }\n}];"
+        "jsCode": "const horarios = $('obtener horarios').all().map(row => {\n  const h = row.json;\n  return {\n    ...h,\n    ocupacion_porcentaje: Math.round((h.cupo_actual / h.cupo_max) * 100),\n    cupos_libres: h.cupo_max - h.cupo_actual\n  };\n});\n\nreturn [{\n  json: {\n    success: true,\n    items: horarios\n  }\n}];"
       },
-      "id": "format_response",
-      "name": "Format Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-96, 112]
+      "position": [
+        896,
+        144
+      ],
+      "id": "cdd9cb63-4dd7-4082-850e-6e713644de2d",
+      "name": "respuesta"
     },
     {
       "parameters": {
+        "path": "get-horarios",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
         "options": {}
       },
-      "id": "response",
-      "name": "Respond to Webhook",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [120, 112]
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        176,
+        224
+      ],
+      "id": "344e4dfb-118f-49f0-a46e-e53724006a15",
+      "name": "Webhook",
+      "webhookId": "96ff5032-9976-4d79-a425-7da8277ed30c"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "categoria"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        32
+      ],
+      "id": "2090a453-0895-420e-aeaf-c050b8f71d28",
+      "name": "When Executed by Another Workflow"
     }
   ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "asistente-ia-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "es-419,es;q=0.9",
+            "if-none-match": "W/\"1085-3lkIJjE/R7eRDC3ub23GyALjhBo\"",
+            "origin": "https://asistente-ia-fla-frontend.x5miqk.easypanel.host",
+            "priority": "u=1, i",
+            "referer": "https://asistente-ia-fla-frontend.x5miqk.easypanel.host/",
+            "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "x-forwarded-for": "201.235.17.183",
+            "x-forwarded-host": "asistente-ia-fla-n8n.x5miqk.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "17792bd965dd",
+            "x-real-ip": "201.235.17.183"
+          },
+          "params": {},
+          "query": {},
+          "body": {},
+          "webhookUrl": "https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/get-horarios",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
   "connections": {
+    "Validador": {
+      "main": [
+        []
+      ]
+    },
+    "arma query": {
+      "main": [
+        [
+          {
+            "node": "obtener horarios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtener horarios": {
+      "main": [
+        [
+          {
+            "node": "respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Webhook": {
-      "main": [[{"node": "postgres_query", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "arma query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "postgres_query": {
-      "main": [[{"node": "format_response", "type": "main", "index": 0}]]
-    },
-    "format_response": {
-      "main": [[{"node": "response", "type": "main", "index": 0}]]
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "arma query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "09f7d344-6e5f-4a89-93e0-6353d8b6068d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f4802d3c2c5422c1c22bebcbf4214605a665c7e251fd858859b294104b3e805e"
+  },
+  "id": "YYfCvvBhKi16kUwV",
+  "tags": []
 }
