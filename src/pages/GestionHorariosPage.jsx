@@ -80,7 +80,7 @@ export default function GestionHorariosPage() {
 
       if (editingId) {
         // Actualizar
-        await axios.post(
+        await axios.put(
           '/api/webhook/update-horario',
           {
             id: editingId,
