@@ -1,0 +1,77 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "path": "crear-horario",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [-528, 112],
+      "webhookId": "crear-horario"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.all()[0].json;\n\nconst query = `INSERT INTO horarios (nombre, tipo, nivel, categoria, dia_1, dia_2, hora_inicio, hora_fin, cupo_max, precio_mensual, descripcion, activo)\nVALUES ('${body.nombre.replace(/'/g, \"''\")}', '${body.tipo}', '${body.nivel}', '${body.categoria}', '${body.dia_1}', ${body.dia_2 ? `'${body.dia_2}'` : 'NULL'}, '${body.hora_inicio}', '${body.hora_fin}', ${body.cupo_max || 'NULL'}, ${body.precio_mensual || 'NULL'}, ${body.descripcion ? `'${body.descripcion.replace(/'/g, \"''\")}` : 'NULL'}, true)\nRETURNING *;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];"
+      },
+      "id": "arma_query",
+      "name": "Build Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-288, 112]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $json.query }}",
+        "options": {}
+      },
+      "id": "postgres_query",
+      "name": "PostgreSQL - Query",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [-96, 112],
+      "credentials": {
+        "postgres": "postgres_db"
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $input.first().json;\n\nreturn [{\n  json: {\n    success: true,\n    message: 'Horario creado exitosamente',\n    horario: result\n  }\n}];"
+      },
+      "id": "format_response",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [120, 112]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "response",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [320, 112]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "arma_query", "type": "main", "index": 0}]]
+    },
+    "arma_query": {
+      "main": [[{"node": "postgres_query", "type": "main", "index": 0}]]
+    },
+    "postgres_query": {
+      "main": [[{"node": "format_response", "type": "main", "index": 0}]]
+    },
+    "format_response": {
+      "main": [[{"node": "response", "type": "main", "index": 0}]]
+    }
+  },
+  "active": true
+}
