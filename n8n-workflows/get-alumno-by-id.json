@@ -1,0 +1,116 @@
+{
+  "name": "get-alumno-by-id",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "get-alumno-by-id",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        176,
+        224
+      ],
+      "id": "344e4dfb-118f-49f0-a46e-e53724006a15",
+      "name": "Webhook",
+      "webhookId": "get-alumno-by-id"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst { id } = input.query;\n\nconst query = `SELECT id, nombre, apellido, email, whatsapp, fecha_nacimiento, \n       categoria, tutor, horario_clase, estado, activo, created_at, updated_at\nFROM alumnos\nWHERE id = ${parseInt(id)} AND activo = TRUE;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        144
+      ],
+      "id": "dbe66350-d7eb-428d-835f-00a8b4bc754c",
+      "name": "arma query"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('arma query').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        688,
+        144
+      ],
+      "id": "30c7fb4c-3331-4af9-91c0-8189c6225edf",
+      "name": "obtener alumno",
+      "credentials": {
+        "postgres": {
+          "id": "7vZZbkZhFbmui4On",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const alumnos = $('obtener alumno').all();\n\nif (alumnos.length === 0) {\n  return [{\n    json: {\n      success: false,\n      message: 'Alumno no encontrado',\n      alumno: null\n    }\n  }];\n}\n\nconst alumno = alumnos[0].json;\n\nreturn [{\n  json: {\n    success: true,\n    alumno: alumno\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        144
+      ],
+      "id": "cdd9cb63-4dd7-4082-850e-6e713644de2d",
+      "name": "respuesta"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "arma query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "arma query": {
+      "main": [
+        [
+          {
+            "node": "obtener alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtener alumno": {
+      "main": [
+        [
+          {
+            "node": "respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "09f7d344-6e5f-4a89-93e0-6353d8b6068d",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "id": "get-alumno-by-id-workflow",
+  "tags": []
+}
