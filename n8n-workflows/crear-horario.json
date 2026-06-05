@@ -15,7 +15,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const body = $input.all()[0].json;\n\nconst query = `INSERT INTO horarios (nombre, tipo, nivel, categoria, dia_1, dia_2, hora_inicio, hora_fin, cupo_max, precio_mensual, descripcion, activo)\nVALUES ('${body.nombre.replace(/'/g, \"''\")}', '${body.tipo}', '${body.nivel}', '${body.categoria}', '${body.dia_1}', ${body.dia_2 ? `'${body.dia_2}'` : 'NULL'}, '${body.hora_inicio}', '${body.hora_fin}', ${body.cupo_max || 'NULL'}, ${body.precio_mensual || 'NULL'}, ${body.descripcion ? `'${body.descripcion.replace(/'/g, \"''\")}` : 'NULL'}, true)\nRETURNING *;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];"
+        "jsCode": "const body = $input.all()[0].json;\n\nconst query = `INSERT INTO horarios (nombre, tipo, nivel, categoria, dia_1, dia_2, hora_inicio, hora_fin, cupo_max, cupo_actual, precio_mensual, descripcion, activo)\nVALUES ('${body.nombre.replace(/'/g, \"''\")}', '${body.tipo}', '${body.nivel}', '${body.categoria}', '${body.dia_1}', ${body.dia_2 ? `'${body.dia_2}'` : 'NULL'}, '${body.hora_inicio}', '${body.hora_fin}', ${body.cupo_max || 0}, 0, ${body.precio_mensual || 'NULL'}, ${body.descripcion ? `'${body.descripcion.replace(/'/g, \"''\")}` : 'NULL'}, true)\nRETURNING *;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];"
       },
       "id": "arma_query",
       "name": "Build Query",

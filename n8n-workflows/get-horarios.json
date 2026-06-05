@@ -16,7 +16,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT * FROM horarios WHERE activo = true ORDER BY categoria, tipo, hora_inicio;",
+        "query": "SELECT id, nombre, tipo, nivel, categoria, dia_1, dia_2, hora_inicio, hora_fin, cupo_max, cupo_actual, precio_mensual, descripcion, activo, created_at, updated_at FROM horarios WHERE activo = true ORDER BY categoria, tipo, hora_inicio;",
         "options": {}
       },
       "id": "postgres_query",
