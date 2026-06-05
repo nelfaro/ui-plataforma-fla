@@ -38,8 +38,8 @@ export default function AlumnoDetallePage() {
         const response = await axios.get(
           '/api/webhook/get-horarios'
         );
-        if (response.data.items) {
-          setHorariosDisponibles(response.data.items);
+        if (response.data[0] && response.data[0].items) {
+          setHorariosDisponibles(response.data[0].items);
         }
       } catch (error) {
         console.error('Error:', error);
