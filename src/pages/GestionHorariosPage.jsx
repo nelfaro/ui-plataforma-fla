@@ -51,8 +51,10 @@ export default function GestionHorariosPage() {
         '/api/webhook/get-horarios'
       );
 
-      if (response.data.items) {
-        setHorarios(response.data.items);
+      // La respuesta viene dentro de un array, extraer el primer elemento
+      const data = Array.isArray(response.data) ? response.data[0] : response.data;
+      if (data && data.items) {
+        setHorarios(data.items);
       }
     } catch (error) {
       console.error('Error:', error);
