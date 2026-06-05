@@ -153,9 +153,9 @@ export default function GestionHorariosPage() {
     }
 
     try {
-      await axios.post(
+      await axios.delete(
         '/api/webhook/delete-horario',
-        { id }
+        { data: { id } }
       );
       toast.success('Horario eliminado');
       cargarHorarios();
