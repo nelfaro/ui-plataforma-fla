@@ -30,8 +30,8 @@ export const FunnelByOrigin = ({ data = [] }) => {
   return (
     <div className="space-y-6">
       {/* Resumen General */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
-        <h4 className="font-semibold text-gray-900 mb-4">📊 Resumen General (Todos los orígenes)</h4>
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200 shadow-sm">
+        <h4 className="font-bold text-lg text-gray-900 mb-4">📊 Resumen General</h4>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <p className="text-sm text-gray-600 mb-1">Total Nuevos</p>

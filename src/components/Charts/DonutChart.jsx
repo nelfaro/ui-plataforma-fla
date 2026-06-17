@@ -4,9 +4,26 @@ import {
   Pie,
   Cell,
   ResponsiveContainer,
-  Tooltip
+  Tooltip,
+  Legend
 } from 'recharts';
 import { CHART_COLORS } from '../../config/constants';
+
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const entry = payload[0].payload;
+    return (
+      <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
+        <p className="font-semibold text-gray-900 text-sm">{entry.origen}</p>
+        <p className="text-sm text-gray-600">{entry.total.toLocaleString()} registros</p>
+        <p className="text-sm font-medium" style={{ color: entry.fill }}>
+          {entry.porcentaje || 0}% del total
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export const DonutChart = ({ data, height = 300 }) => {
   const colors = [
@@ -14,49 +31,52 @@ export const DonutChart = ({ data, height = 300 }) => {
     CHART_COLORS.orange,
     CHART_COLORS.teal,
     CHART_COLORS.yellow,
-    CHART_COLORS.purple
+    CHART_COLORS.purple,
+    CHART_COLORS.pink,
+    CHART_COLORS.cyan
   ];
 
   if (!data || !Array.isArray(data) || data.length === 0 || !data.some(d => d.total > 0)) {
     return (
-      <div className="flex items-center justify-center h-80 bg-gray-50 rounded">
-        <p className="text-gray-500">Sin datos disponibles</p>
+      <div className="flex items-center justify-center h-80 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+        <p className="text-gray-500 font-medium">Sin datos disponibles</p>
       </div>
     );
   }
 
-  const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const entry = payload[0].payload;
-      const label = entry.origen;
-      return (
-        <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
-          <p className="font-semibold text-gray-900">{label}</p>
-          <p className="text-sm text-gray-600">{entry.total} registros</p>
-          <p className="text-sm font-medium text-blue-600">{entry.porcentaje || 0}% del total</p>
-        </div>
-      );
-    }
-    return null;
-  };
+  const dataWithColors = data.map((entry, index) => ({
+    ...entry,
+    fill: colors[index % colors.length]
+  }));
 
   return (
     <ResponsiveContainer width="100%" height={height}>
       <PieChart>
         <Pie
-          data={data}
+          data={dataWithColors}
           cx="50%"
           cy="50%"
+          innerRadius={60}
           outerRadius={100}
+          paddingAngle={2}
           dataKey="total"
           nameKey="origen"
-          label={(entry) => `${entry.origen} (${entry.porcentaje || 0}%)`}
+          label={(entry) => `${entry.porcentaje || 0}%`}
         >
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+          {dataWithColors.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.fill} />
           ))}
         </Pie>
         <Tooltip content={<CustomTooltip />} />
+        <Legend
+          verticalAlign="bottom"
+          height={36}
+          formatter={(value, entry) => (
+            <span className="text-sm font-medium text-gray-700">
+              {entry.payload.origen}
+            </span>
+          )}
+        />
       </PieChart>
     </ResponsiveContainer>
   );
