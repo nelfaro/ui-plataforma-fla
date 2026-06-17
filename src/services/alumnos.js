@@ -28,6 +28,22 @@ export const getAlumnoById = async (id) => {
 };
 
 /**
+ * Crear un nuevo alumno
+ */
+export const createAlumno = async (datos) => {
+  try {
+    const response = await axiosInstance.post(
+      `${API_BASE_URL}/create-alumno`,
+      datos
+    );
+    return response.data.alumno;
+  } catch (error) {
+    console.error('Error creating alumno:', error);
+    throw error;
+  }
+};
+
+/**
  * Actualizar datos del alumno
  */
 export const updateAlumno = async (id, datos) => {
@@ -112,6 +128,7 @@ export const updateCupoHorario = async (horarioId, accion) => {
 
 export default {
   getAlumnoById,
+  createAlumno,
   updateAlumno,
   registrarPago,
   getAlumnosList,

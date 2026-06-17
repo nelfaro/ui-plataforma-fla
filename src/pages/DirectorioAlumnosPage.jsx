@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '../components/Layout/MainLayout';
 import { Card } from '../components/UI/Card';
-import { Search, Filter, Users, Phone, Mail, Calendar, Eye } from 'lucide-react';
-import { getAlumnosList } from '../services/alumnos';
+import { Search, Filter, Users, Phone, Mail, Calendar, Eye, Plus, X } from 'lucide-react';
+import { getAlumnosList, createAlumno } from '../services/alumnos';
 import toast from 'react-hot-toast';
 
 export default function DirectorioAlumnosPage() {
@@ -16,6 +16,15 @@ export default function DirectorioAlumnosPage() {
   const [limit, setLimit] = useState(50);
   const [offset, setOffset] = useState(0);
   const [total, setTotal] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [creatingAlumno, setCreatingAlumno] = useState(false);
+  const [formData, setFormData] = useState({
+    nombre: '',
+    whatsapp: '',
+    email: '',
+    categoria: 'KIDS',
+    estado: 'REGISTRADO'
+  });
 
   // Estados disponibles para alumnos (post-venta)
   // Los leads (NUEVO/FRIO/TIBIO/CALIENTE) están en tabla separada
@@ -77,6 +86,58 @@ export default function DirectorioAlumnosPage() {
     setOffset(0);
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleAgregarAlumno = async (e) => {
+    e.preventDefault();
+
+    if (!formData.nombre.trim()) {
+      toast.error('El nombre es obligatorio');
+      return;
+    }
+    if (!formData.whatsapp.trim()) {
+      toast.error('El teléfono es obligatorio');
+      return;
+    }
+
+    try {
+      setCreatingAlumno(true);
+      await createAlumno(formData);
+      toast.success('Alumno creado correctamente');
+      setShowModal(false);
+      setFormData({
+        nombre: '',
+        whatsapp: '',
+        email: '',
+        categoria: 'KIDS',
+        estado: 'REGISTRADO'
+      });
+      setOffset(0);
+      // Recargar lista
+      const params = {
+        limit,
+        offset: 0,
+        ...(searchTerm && { search: searchTerm }),
+        ...(filtroEstado && { estado: filtroEstado }),
+        ...(filtroCategoria && { categoria: filtroCategoria })
+      };
+      const resultado = await getAlumnosList(params);
+      setAlumnos(resultado.alumnos || []);
+      setTotal(resultado.total || 0);
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al crear alumno');
+    } finally {
+      setCreatingAlumno(false);
+    }
+  };
+
   const getEstadoBadge = (estado) => {
     const badges = {
       REGISTRADO: 'bg-blue-100 text-blue-800',
@@ -110,7 +171,16 @@ export default function DirectorioAlumnosPage() {
             <h1 className="text-3xl font-bold text-gray-900">Directorio de Alumnos</h1>
             <p className="text-gray-600 mt-1">Total: {total} alumnos</p>
           </div>
-          <Users size={32} className="text-blue-600" />
+          <div className="flex items-center gap-4">
+            <Users size={32} className="text-blue-600" />
+            <button
+              onClick={() => setShowModal(true)}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
+            >
+              <Plus size={20} />
+              Agregar Alumno
+            </button>
+          </div>
         </div>
 
         {/* Búsqueda y Filtros */}
@@ -310,6 +380,116 @@ export default function DirectorioAlumnosPage() {
               </select>
             </div>
           </Card>
+        )}
+
+        {/* Modal Agregar Alumno */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <Card className="w-full max-w-md">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Agregar Alumno</h2>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <form onSubmit={handleAgregarAlumno} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nombre *
+                  </label>
+                  <input
+                    type="text"
+                    name="nombre"
+                    value={formData.nombre}
+                    onChange={handleInputChange}
+                    placeholder="Ej: Juan Pérez"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Teléfono (WhatsApp) *
+                  </label>
+                  <input
+                    type="tel"
+                    name="whatsapp"
+                    value={formData.whatsapp}
+                    onChange={handleInputChange}
+                    placeholder="Ej: +5491234567890"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Ej: juan@example.com"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Categoría *
+                  </label>
+                  <select
+                    name="categoria"
+                    value={formData.categoria}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {categorias.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Estado
+                  </label>
+                  <select
+                    name="estado"
+                    value={formData.estado}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {estados.map(estado => (
+                      <option key={estado} value={estado}>{estado}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-900 rounded-lg hover:bg-gray-400 transition-colors font-medium"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={creatingAlumno}
+                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {creatingAlumno ? 'Creando...' : 'Crear Alumno'}
+                  </button>
+                </div>
+              </form>
+            </Card>
+          </div>
         )}
       </div>
     </MainLayout>
