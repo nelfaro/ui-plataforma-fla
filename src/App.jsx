@@ -15,6 +15,7 @@ import AnalisisTemporalPage from './pages/AnalisisTemporalPage';
 import GestionHorariosPage from './pages/GestionHorariosPage';
 import LeadsPage from './pages/LeadsPage';
 import ConocimientoPage from './pages/ConocimientoPage';
+import DashboardImprovedPage from './pages/DashboardImprovedPage';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuthContext();
@@ -45,6 +46,16 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Dashboard Improved */}
+          <Route
+            path="/dashboard-improved"
+            element={
+              <ProtectedRoute>
+                <DashboardImprovedPage />
               </ProtectedRoute>
             }
           />
