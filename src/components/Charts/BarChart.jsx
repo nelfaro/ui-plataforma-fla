@@ -54,18 +54,18 @@ export const BarChart = ({ data, height = 300 }) => {
         </div>
       )}
       <ResponsiveContainer width="100%" height={height}>
-        <RechartsBarChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+        <RechartsBarChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 20 }} animationDuration={800}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
           <XAxis
             dataKey="name"
-            tick={{ fill: '#6b7280', fontSize: 12, fontWeight: 500 }}
+            tick={{ fill: '#6b7280', fontSize: 12, fontWeight: 600 }}
             axisLine={{ stroke: '#e5e7eb' }}
           />
           <YAxis
-            tick={{ fill: '#6b7280', fontSize: 12 }}
+            tick={{ fill: '#6b7280', fontSize: 12, fontWeight: 500 }}
             axisLine={{ stroke: '#e5e7eb' }}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }} />
           <Legend
             wrapperStyle={{ paddingTop: '20px' }}
             iconType="square"
@@ -76,12 +76,14 @@ export const BarChart = ({ data, height = 300 }) => {
             fill={CHART_COLORS.blue}
             name="Chats"
             radius={[8, 8, 0, 0]}
+            animationDuration={800}
           />
           <Bar
             dataKey="registros"
             fill={CHART_COLORS.green}
             name="Registros"
             radius={[8, 8, 0, 0]}
+            animationDuration={800}
           />
         </RechartsBarChart>
       </ResponsiveContainer>

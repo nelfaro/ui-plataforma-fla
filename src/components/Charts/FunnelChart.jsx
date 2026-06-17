@@ -71,22 +71,23 @@ export const FunnelChart = ({ data, height = 400 }) => {
           data={chartData}
           layout="vertical"
           margin={{ top: 10, right: 30, left: 120, bottom: 10 }}
+          animationDuration={800}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
           <XAxis
             type="number"
-            tick={{ fill: '#6b7280', fontSize: 12 }}
+            tick={{ fill: '#6b7280', fontSize: 12, fontWeight: 500 }}
             axisLine={{ stroke: '#e5e7eb' }}
           />
           <YAxis
             dataKey="etapa"
             type="category"
             width={110}
-            tick={{ fill: '#6b7280', fontSize: 12, fontWeight: 500 }}
+            tick={{ fill: '#6b7280', fontSize: 12, fontWeight: 600 }}
             axisLine={{ stroke: '#e5e7eb' }}
           />
-          <Tooltip content={<CustomTooltip />} />
-          <Bar dataKey="cantidad" radius={[0, 8, 8, 0]} animationDuration={500}>
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }} />
+          <Bar dataKey="cantidad" radius={[0, 8, 8, 0]} animationDuration={800}>
             {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
             ))}

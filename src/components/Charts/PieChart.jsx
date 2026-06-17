@@ -64,6 +64,8 @@ export const PieChart = ({ data, height = 300 }) => {
             const name = entry.origen || entry.nombre || entry.name || 'Sin nombre';
             return `${entry.porcentaje || 0}%`;
           }}
+          animationDuration={800}
+          animationBegin={0}
         >
           {dataWithColors.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -73,9 +75,10 @@ export const PieChart = ({ data, height = 300 }) => {
         <Legend
           verticalAlign="bottom"
           height={36}
+          wrapperStyle={{ paddingTop: '20px' }}
           formatter={(value, entry) => (
             <span className="text-sm font-medium text-gray-700">
-              {entry.payload.origen || entry.payload.categoria || entry.payload.nombre || value}
+              {entry.payload.origen || entry.payload.categoria || entry.payload.nombre || value} ({entry.payload.porcentaje}%)
             </span>
           )}
         />
