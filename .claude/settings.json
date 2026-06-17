@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node scripts/fix-all-workflows.js)"
+      "Bash(node scripts/fix-all-workflows.js)",
+      "Bash(git reset *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "figma"
+  ]
 }

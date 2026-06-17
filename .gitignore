@@ -28,3 +28,6 @@ lerna-debug.log
 # Optional
 .cache/
 .eslintcache
+
+# Claude Code - Local settings with secrets
+.claude/settings.local.json
