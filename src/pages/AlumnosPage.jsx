@@ -17,7 +17,7 @@ export default function AlumnosPage() {
     endDate: new Date().toISOString().split('T')[0]
   });
 
-  const categorias = ['KIDS', 'ADULTO', 'ADOLESCENTE', 'AU_PAIR', 'CORPORATIVO'];
+  const categorias = ['KIDS', 'KIDS-ADOLESCENTES', 'ADOLESCENTE', 'ADULTO', 'ADULTOS', 'AU_PAIR', 'PERSONALIZADO', 'CORPORATIVO'];
 
   // Cargar alumnos reales
   useEffect(() => {

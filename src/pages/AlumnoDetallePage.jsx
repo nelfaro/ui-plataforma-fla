@@ -310,10 +310,14 @@ export default function AlumnoDetallePage() {
                     onChange={(e) => handleEditChange('categoria', e.target.value)}
                     className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
+                    <option value="">Seleccionar categoría...</option>
                     <option>KIDS</option>
-                    <option>ADULTO</option>
+                    <option>KIDS-ADOLESCENTES</option>
                     <option>ADOLESCENTE</option>
+                    <option>ADULTO</option>
+                    <option>ADULTOS</option>
                     <option>AU_PAIR</option>
+                    <option>PERSONALIZADO</option>
                     <option>CORPORATIVO</option>
                   </select>
                 ) : (
