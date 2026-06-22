@@ -20,7 +20,9 @@ export const getAlumnoById = async (id) => {
     const response = await axiosInstance.get(
       `${API_BASE_URL}/get-alumno-by-id?id=${id}`
     );
-    return response.data.alumno;
+    const data = Array.isArray(response.data) ? response.data[0] : response.data;
+    if (!data.success) throw new Error(data.message || 'Alumno no encontrado');
+    return data.alumno;
   } catch (error) {
     console.error('Error fetching alumno:', error);
     throw error;
