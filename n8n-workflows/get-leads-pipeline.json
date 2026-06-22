@@ -35,7 +35,10 @@
       "typeVersion": 2.4,
       "position": [-96, 50],
       "credentials": {
-        "postgres": "postgres_db"
+        "postgres": {
+          "id": "7vZZbkZhFbmui4On",
+          "name": "Postgres account"
+        }
       }
     },
     {
@@ -50,7 +53,10 @@
       "typeVersion": 2.4,
       "position": [-96, 150],
       "credentials": {
-        "postgres": "postgres_db"
+        "postgres": {
+          "id": "7vZZbkZhFbmui4On",
+          "name": "Postgres account"
+        }
       }
     },
     {
