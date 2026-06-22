@@ -16,7 +16,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst { categoria, segmento } = input.query || {};\n\nlet query = 'SELECT id, categoria, segmento, titulo, contenido, activo FROM conocimiento_academia WHERE activo = true';\n\nif (categoria) {\n  query += ` AND categoria = '${categoria}'`;\n}\nif (segmento) {\n  query += ` AND segmento = '${segmento}'`;\n}\n\nquery += ' ORDER BY categoria, segmento, titulo;';\n\nreturn [{\n  json: {\n    query\n  }\n}];"
+        "jsCode": "const input = $input.first().json;\nconst { categoria, segmento } = input.query || {};\n\nlet query = `SELECT id, categoria, segmento, titulo, contenido, activo FROM conocimiento_academia WHERE activo = true`;\n\nif (categoria) {\n  query += ` AND categoria = '${String(categoria).replace(/'/g, \"''\")}' `;\n}\nif (segmento) {\n  query += ` AND segmento = '${String(segmento).replace(/'/g, \"''\")}' `;\n}\n\nquery += `ORDER BY categoria, segmento, titulo;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
