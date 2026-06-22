@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "url": "https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/auth-validate",
+        "url": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/auth-validate",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ $input.first().json }}",
@@ -108,7 +108,7 @@
       {
         "json": {
           "headers": {
-            "host": "asistente-ia-fla-n8n.x5miqk.easypanel.host",
+            "host": "agente-fla-n8n.x5miqk.easypanel.host",
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
             "accept": "application/json, text/plain, */*",
             "accept-encoding": "gzip, deflate, br, zstd",
@@ -124,7 +124,7 @@
             "sec-fetch-mode": "cors",
             "sec-fetch-site": "same-site",
             "x-forwarded-for": "201.235.17.183",
-            "x-forwarded-host": "asistente-ia-fla-n8n.x5miqk.easypanel.host",
+            "x-forwarded-host": "agente-fla-n8n.x5miqk.easypanel.host",
             "x-forwarded-port": "443",
             "x-forwarded-proto": "https",
             "x-forwarded-server": "17792bd965dd",
@@ -133,7 +133,7 @@
           "params": {},
           "query": {},
           "body": {},
-          "webhookUrl": "https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/get-horarios",
+          "webhookUrl": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/get-horarios",
           "executionMode": "production"
         },
         "pairedItem": {

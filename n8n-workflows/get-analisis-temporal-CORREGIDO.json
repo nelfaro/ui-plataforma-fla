@@ -95,7 +95,7 @@
     },
     {
       "parameters":{
-        "url":"https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/auth-validate",
+        "url":"https://agente-fla-n8n.x5miqk.easypanel.host/webhook/auth-validate",
         "sendBody":true,
         "specifyBody":"json",
         "jsonBody":"={{ $input.first().json }}",
