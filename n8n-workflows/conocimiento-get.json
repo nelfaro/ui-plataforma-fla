@@ -1,0 +1,72 @@
+{
+  "name": "conocimiento-get",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "conocimiento-get",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-400, 0],
+      "id": "webhook",
+      "name": "Webhook",
+      "webhookId": "conocimiento-get"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst { categoria, segmento } = input.query || {};\n\nlet query = 'SELECT id, categoria, segmento, titulo, contenido, activo FROM conocimiento_academia WHERE activo = true';\n\nif (categoria) {\n  query += ` AND categoria = '${categoria}'`;\n}\nif (segmento) {\n  query += ` AND segmento = '${segmento}'`;\n}\n\nquery += ' ORDER BY categoria, segmento, titulo;';\n\nreturn [{\n  json: {\n    query\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-100, 0],
+      "id": "build_query",
+      "name": "Build Query"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('build_query').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [200, 0],
+      "id": "query_db",
+      "name": "Query DB",
+      "credentials": {
+        "postgres": {
+          "id": "7vZZbkZhFbmui4On",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $('query_db').all().map(row => row.json);\n\nreturn [{\n  json: {\n    items,\n    total: items.length\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [400, 0],
+      "id": "response",
+      "name": "Response"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "build_query", "type": "main", "index": 0}]]
+    },
+    "build_query": {
+      "main": [[{"node": "query_db", "type": "main", "index": 0}]]
+    },
+    "query_db": {
+      "main": [[{"node": "response", "type": "main", "index": 0}]]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  }
+}
