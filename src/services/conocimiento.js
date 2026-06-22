@@ -20,7 +20,10 @@ export const getItems = async (categoria = '', segmento = '') => {
 
 export const createItem = async (data) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/conocimiento-post`, data);
+    const response = await axios.post(`${API_BASE_URL}/conocimiento-post`, {
+      ...data,
+      _action: 'create'
+    });
     return response.data;
   } catch (error) {
     console.error('Error creating conocimiento item:', error);
