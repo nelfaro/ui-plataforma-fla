@@ -356,12 +356,30 @@ export default function AlumnoDetallePage() {
 
               <div>
                 <label className="text-sm font-medium text-gray-700">Origen</label>
-                <p className="text-gray-900 font-medium">{alumno.origen}</p>
+                {editMode ? (
+                  <input
+                    type="text"
+                    value={formData.origen || ''}
+                    onChange={(e) => handleEditChange('origen', e.target.value)}
+                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                ) : (
+                  <p className="text-gray-900 font-medium">{alumno.origen}</p>
+                )}
               </div>
 
               <div>
                 <label className="text-sm font-medium text-gray-700">Intención</label>
-                <p className="text-gray-900 font-medium">{alumno.intencion}</p>
+                {editMode ? (
+                  <input
+                    type="text"
+                    value={formData.intencion || ''}
+                    onChange={(e) => handleEditChange('intencion', e.target.value)}
+                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                ) : (
+                  <p className="text-gray-900 font-medium">{alumno.intencion}</p>
+                )}
               </div>
             </div>
           </Card>
@@ -377,18 +395,40 @@ export default function AlumnoDetallePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-blue-50 p-4 rounded-lg">
               <p className="text-sm text-gray-600">Estado</p>
-              <p className={`text-lg font-bold mt-1 ${
-                alumno.estado_pago === 'PAGADO' ? 'text-green-600' :
-                alumno.estado_pago === 'PENDIENTE' ? 'text-yellow-600' :
-                'text-red-600'
-              }`}>
-                {alumno.estado_pago}
-              </p>
+              {editMode ? (
+                <select
+                  value={formData.estado_pago || ''}
+                  onChange={(e) => handleEditChange('estado_pago', e.target.value)}
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Seleccionar...</option>
+                  <option value="PAGADO">PAGADO</option>
+                  <option value="PENDIENTE">PENDIENTE</option>
+                  <option value="VENCIDO">VENCIDO</option>
+                </select>
+              ) : (
+                <p className={`text-lg font-bold mt-1 ${
+                  alumno.estado_pago === 'PAGADO' ? 'text-green-600' :
+                  alumno.estado_pago === 'PENDIENTE' ? 'text-yellow-600' :
+                  'text-red-600'
+                }`}>
+                  {alumno.estado_pago}
+                </p>
+              )}
             </div>
 
             <div className="bg-blue-50 p-4 rounded-lg">
               <p className="text-sm text-gray-600">Último pago</p>
-              <p className="text-lg font-bold text-gray-900 mt-1">{alumno.fecha_pago_ultimo}</p>
+              {editMode ? (
+                <input
+                  type="date"
+                  value={formData.fecha_pago_ultimo || ''}
+                  onChange={(e) => handleEditChange('fecha_pago_ultimo', e.target.value)}
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              ) : (
+                <p className="text-lg font-bold text-gray-900 mt-1">{alumno.fecha_pago_ultimo}</p>
+              )}
             </div>
 
             <div className="bg-blue-50 p-4 rounded-lg">
