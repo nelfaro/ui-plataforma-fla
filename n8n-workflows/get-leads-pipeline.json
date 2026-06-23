@@ -11,30 +11,30 @@
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [-528, 112],
+      "position": [-400, 0],
       "webhookId": "get-leads-pipeline"
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst query = input.query || {};\nconst { search, estado, origen, lead_tipo, limit = 50, offset = 0 } = query;\n\nconst searchPattern = search ? `%${search}%` : '%';\n\nconst allowedEstados = ['NUEVO', 'FRIO', 'TIBIO', 'CALIENTE'];\nconst estadoFilter = estado && allowedEstados.includes(estado) ? `estado = '${String(estado).replace(/'/g, \"''\")}' ` : `estado IN ('NUEVO','FRIO','TIBIO','CALIENTE')`;\n\nconst originFilter = origen ? `AND origen = '${String(origen).replace(/'/g, \"''\")}' ` : '';\nconst tipoFilter = lead_tipo ? `AND lead_tipo = '${String(lead_tipo).replace(/'/g, \"''\")}' ` : '';\n\nconst whereClause = `(nombre ILIKE '${searchPattern}' OR whatsapp ILIKE '${searchPattern}' OR email ILIKE '${searchPattern}')\nAND ${estadoFilter}\n${originFilter}\n${tipoFilter}`;\n\nconst query1 = `SELECT id, nombre, whatsapp, email, estado, nivel, origen, lead_tipo, objetivo, resumen, tags, primera_consulta, ultimo_contacto\nFROM leads\nWHERE ${whereClause}\nORDER BY ultimo_contacto DESC NULLS LAST\nLIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)};`;\n\nconst query2 = `SELECT COUNT(*) as total FROM leads WHERE ${whereClause};`;\n\nreturn [{\n  json: {\n    query1,\n    query2,\n    limit: parseInt(limit),\n    offset: parseInt(offset)\n  }\n}];"
+        "jsCode": "const input = $input.first().json;\nconst query = input.query || {};\nconst { search, estado, origen, lead_tipo, limit = 50, offset = 0 } = query;\n\nconst searchPattern = search ? `%${search}%` : '%';\nconst allowedEstados = ['NUEVO', 'FRIO', 'TIBIO', 'CALIENTE'];\nconst estadoFilter = estado && allowedEstados.includes(estado) ? estado : null;\n\nlet whereClause = `(nombre ILIKE '${searchPattern}' OR whatsapp ILIKE '${searchPattern}' OR email ILIKE '${searchPattern}')`;\n\nif (estadoFilter) {\n  whereClause += ` AND estado = '${String(estadoFilter).replace(/'/g, \"''\")}' `;\n} else {\n  whereClause += ` AND estado IN ('NUEVO','FRIO','TIBIO','CALIENTE')`;\n}\n\nif (origen) {\n  whereClause += ` AND origen = '${String(origen).replace(/'/g, \"''\")}' `;\n}\n\nif (lead_tipo) {\n  whereClause += ` AND lead_tipo = '${String(lead_tipo).replace(/'/g, \"''\")}' `;\n}\n\nconst sqlList = `SELECT id, nombre, whatsapp, email, estado, nivel, origen, lead_tipo, objetivo, resumen, tags, primera_consulta, ultimo_contacto FROM leads WHERE ${whereClause} ORDER BY ultimo_contacto DESC NULLS LAST LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)};`;\n\nconst sqlCount = `SELECT COUNT(*) as total FROM leads WHERE ${whereClause};`;\n\nreturn [{\n  json: {\n    sqlList,\n    sqlCount\n  }\n}];"
       },
       "id": "build_query",
       "name": "Build Query",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-288, 112]
+      "position": [-100, 0]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "={{ $json.query1 }}",
+        "query": "={{ $json.sqlList }}",
         "options": {}
       },
-      "id": "postgres_list",
-      "name": "PostgreSQL - List",
+      "id": "query_list",
+      "name": "Query List",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.4,
-      "position": [-50, 50],
+      "typeVersion": 2.6,
+      "position": [200, -100],
       "credentials": {
         "postgres": {
           "id": "7vZZbkZhFbmui4On",
@@ -45,14 +45,14 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "={{ $json.query2 }}",
+        "query": "={{ $json.sqlCount }}",
         "options": {}
       },
-      "id": "postgres_count",
-      "name": "PostgreSQL - Count",
+      "id": "query_count",
+      "name": "Query Count",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.4,
-      "position": [-50, 150],
+      "typeVersion": 2.6,
+      "position": [200, 100],
       "credentials": {
         "postgres": {
           "id": "7vZZbkZhFbmui4On",
@@ -62,13 +62,13 @@
     },
     {
       "parameters": {
-        "jsCode": "const listResults = $('postgres_list').all();\nconst countResults = $('postgres_count').all();\nconst buildQuery = $('build_query').first().json;\n\nconst items = listResults.map(row => row.json);\nconst total = countResults[0]?.json?.total || 0;\n\nreturn [{\n  json: {\n    items,\n    total,\n    limit: buildQuery.limit,\n    offset: buildQuery.offset\n  }\n}];"
+        "jsCode": "const listData = $('query_list').all();\nconst countData = $('query_count').all();\nconst total = countData[0]?.json?.total || 0;\nconst items = listData.map(row => row.json);\n\nreturn [{\n  json: {\n    success: true,\n    items: items,\n    total: parseInt(total),\n    count: items.length\n  }\n}];"
       },
-      "id": "response",
-      "name": "Response",
+      "id": "format_response",
+      "name": "Format Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [150, 100]
+      "position": [450, 0]
     }
   ],
   "connections": {
@@ -78,21 +78,20 @@
     "build_query": {
       "main": [
         [
-          {"node": "postgres_list", "type": "main", "index": 0},
-          {"node": "postgres_count", "type": "main", "index": 0}
+          {"node": "query_list", "type": "main", "index": 0},
+          {"node": "query_count", "type": "main", "index": 0}
         ]
       ]
     },
-    "postgres_list": {
-      "main": [[{"node": "response", "type": "main", "index": 0}]]
+    "query_list": {
+      "main": [[{"node": "format_response", "type": "main", "index": 0}]]
     },
-    "postgres_count": {
-      "main": [[{"node": "response", "type": "main", "index": 0}]]
+    "query_count": {
+      "main": [[{"node": "format_response", "type": "main", "index": 0}]]
     }
   },
   "active": true,
   "settings": {
-    "executionOrder": "v1",
-    "binaryMode": "separate"
+    "executionOrder": "v1"
   }
 }
