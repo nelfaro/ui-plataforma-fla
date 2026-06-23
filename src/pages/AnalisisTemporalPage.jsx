@@ -263,7 +263,7 @@ export default function AnalisisTemporalPage() {
                 <ResponsiveContainer width="100%" height={350}>
                   <LineChart data={dataNuevos} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                    <XAxis dataKey="semana" stroke="#999" />
+                    <XAxis dataKey="semana" stroke="#999" angle={-45} textAnchor="end" height={80} />
                     <YAxis stroke="#999" />
                     <Tooltip 
                       contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '8px' }}
@@ -292,7 +292,7 @@ export default function AnalisisTemporalPage() {
                 <ResponsiveContainer width="100%" height={350}>
                   <LineChart data={dataConversion} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                    <XAxis dataKey="semana" stroke="#999" />
+                    <XAxis dataKey="semana" stroke="#999" angle={-45} textAnchor="end" height={80} />
                     <YAxis stroke="#999" />
                     <Tooltip 
                       contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '8px' }}
