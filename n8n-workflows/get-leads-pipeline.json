@@ -4,7 +4,7 @@
     {
       "parameters": {
         "path": "get-leads-pipeline",
-        "responseMode": "lastNode",
+        "responseMode": "responseNode",
         "options": {}
       },
       "id": "webhook",
@@ -69,6 +69,16 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [450, 0]
+    },
+    {
+      "parameters": {
+        "responseData": "={{ { success: true, items: $('query_list').all().map(row => row.json), total: $('query_count').all()[0]?.json?.total || 0 } }}"
+      },
+      "id": "response",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [650, 0]
     }
   ],
   "connections": {
@@ -84,10 +94,10 @@
       ]
     },
     "query_list": {
-      "main": [[{"node": "format_response", "type": "main", "index": 0}]]
+      "main": [[{"node": "response", "type": "main", "index": 0}]]
     },
     "query_count": {
-      "main": [[{"node": "format_response", "type": "main", "index": 0}]]
+      "main": [[{"node": "response", "type": "main", "index": 0}]]
     }
   },
   "active": true,
