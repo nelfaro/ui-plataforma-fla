@@ -36,11 +36,10 @@ export default function AnalisisTemporalPage() {
 
         console.log('Datos recibidos:', data);
 
-        if (data.items) {
-          const items = data.items;
-          setDataNuevos(items.nuevos_por_semana || []);
-          setDataConversion(items.conversion_por_semana || []);
-          setDataIngresos(items.ingresos_acumulados || []);
+        if (data && data.nuevos_por_semana) {
+          setDataNuevos(data.nuevos_por_semana || []);
+          setDataConversion(data.conversion_por_semana || []);
+          setDataIngresos(data.ingresos_acumulados || []);
         }
       } catch (error) {
         console.error('Error:', error);
