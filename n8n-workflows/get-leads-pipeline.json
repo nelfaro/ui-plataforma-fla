@@ -7,37 +7,37 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "webhook",
+      "id": "54fcb30c-8270-4df9-969b-a2b34b64f31c",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
-      "position": [-400, 0],
+      "typeVersion": 1,
+      "position": [-400, 16],
       "webhookId": "get-leads-pipeline"
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst query = input.query || {};\nconst { search, estado, origen, lead_tipo, limit = 50, offset = 0 } = query;\n\nconst searchPattern = search ? `%${search}%` : '%';\nconst allowedEstados = ['NUEVO', 'FRIO', 'TIBIO', 'CALIENTE'];\nconst estadoFilter = estado && allowedEstados.includes(estado) ? estado : null;\n\nlet whereClause = `(nombre ILIKE '${searchPattern}' OR whatsapp ILIKE '${searchPattern}' OR email ILIKE '${searchPattern}')`;\n\nif (estadoFilter) {\n  whereClause += ` AND estado = '${String(estadoFilter).replace(/'/g, \"''\")}' `;\n} else {\n  whereClause += ` AND estado IN ('NUEVO','FRIO','TIBIO','CALIENTE')`;\n}\n\nif (origen) {\n  whereClause += ` AND origen = '${String(origen).replace(/'/g, \"''\")}' `;\n}\n\nif (lead_tipo) {\n  whereClause += ` AND lead_tipo = '${String(lead_tipo).replace(/'/g, \"''\")}' `;\n}\n\nconst sqlList = `SELECT id, nombre, whatsapp, email, estado, nivel, origen, lead_tipo, objetivo, resumen, tags, primera_consulta, ultimo_contacto FROM leads WHERE ${whereClause} ORDER BY ultimo_contacto DESC NULLS LAST LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)};`;\n\nconst sqlCount = `SELECT COUNT(*) as total FROM leads WHERE ${whereClause};`;\n\nreturn [{\n  json: {\n    sqlList,\n    sqlCount\n  }\n}];"
+        "jsCode": "const input = $input.first().json;\nconst query = input.query || {};\nconst { search, estado, origen, lead_tipo, limit = 50, offset = 0 } = query;\n\nconst searchPattern = search ? `%${search}%` : '%';\n\nconst allowedEstados = ['NUEVO', 'FRIO', 'TIBIO', 'CALIENTE'];\nconst estadoFilter = estado && allowedEstados.includes(estado) ? `estado = '${estado}'` : `estado IN ('NUEVO','FRIO','TIBIO','CALIENTE')`;\n\nconst queryList = `SELECT id, nombre, whatsapp, email, estado, nivel, origen, lead_tipo,\n       objetivo, resumen, tags, primera_consulta, ultimo_contacto\nFROM leads\nWHERE (nombre ILIKE '${searchPattern}' OR whatsapp ILIKE '${searchPattern}' OR email ILIKE '${searchPattern}')\nAND (${estadoFilter})\nAND (${origen ? `origen = '${origen}'` : 'true'})\nAND (${lead_tipo ? `lead_tipo = '${lead_tipo}'` : 'true'})\nORDER BY ultimo_contacto DESC NULLS LAST\nLIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)};`;\n\nconst queryCount = `SELECT COUNT(*) as total\nFROM leads\nWHERE (nombre ILIKE '${searchPattern}' OR whatsapp ILIKE '${searchPattern}' OR email ILIKE '${searchPattern}')\nAND (${estadoFilter})\nAND (${origen ? `origen = '${origen}'` : 'true'})\nAND (${lead_tipo ? `lead_tipo = '${lead_tipo}'` : 'true'});`;\n\nreturn [{\n  json: {\n    queryList,\n    queryCount,\n    limit,\n    offset\n  }\n}];"
       },
-      "id": "build_query",
-      "name": "Build Query",
+      "id": "75ce2e65-a98c-4ce8-93c9-f2f8ed890ff7",
+      "name": "arma query",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-100, 0]
+      "position": [-160, 16]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "={{ $json.sqlList }}",
+        "query": "{{ $json.queryList }}",
         "options": {}
       },
-      "id": "query_list",
-      "name": "Query List",
+      "id": "8f4971fd-7aaa-4ad0-93a8-143f9ae26197",
+      "name": "PostgreSQL - List",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [200, -100],
+      "typeVersion": 2.4,
+      "position": [16, 16],
       "credentials": {
         "postgres": {
-          "id": "7vZZbkZhFbmui4On",
+          "id": "wPNcwJLWeQKZlTmC",
           "name": "Postgres account"
         }
       }
@@ -45,59 +45,44 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "={{ $json.sqlCount }}",
+        "query": "{{ $('arma query').item.json.queryCount }}",
         "options": {}
       },
-      "id": "query_count",
-      "name": "Query Count",
+      "id": "957071c2-4fc3-428b-a799-b87ddaf6e8e9",
+      "name": "PostgreSQL - Count",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [200, 100],
+      "typeVersion": 2.4,
+      "position": [208, 16],
       "credentials": {
         "postgres": {
-          "id": "7vZZbkZhFbmui4On",
+          "id": "wPNcwJLWeQKZlTmC",
           "name": "Postgres account"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "const listData = $('query_list').all();\nconst countData = $('query_count').all();\nconst total = countData[0]?.json?.total || 0;\nconst items = listData.map(row => row.json);\n\nreturn [{\n  json: {\n    success: true,\n    items: items,\n    total: parseInt(total),\n    count: items.length\n  }\n}];"
+        "jsCode": "const listData = $('PostgreSQL - List').all();\nconst countData = $('PostgreSQL - Count').all();\nconst total = countData[0]?.json?.total || 0;\nconst items = listData.map(row => row.json);\n\nreturn [{\n  json: {\n    success: true,\n    items: items,\n    total: parseInt(total),\n    count: items.length\n  }\n}];"
       },
-      "id": "format_response",
+      "id": "2539865e-0773-4a4d-a6ad-4f16f498bc67",
       "name": "Format Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [450, 0]
-    },
-    {
-      "parameters": {
-        "responseData": "={{ { success: true, items: $('query_list').all().map(row => row.json), total: $('query_count').all()[0]?.json?.total || 0 } }}"
-      },
-      "id": "response",
-      "name": "Respond to Webhook",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [650, 0]
+      "position": [400, 16]
     }
   ],
   "connections": {
     "Webhook": {
-      "main": [[{"node": "build_query", "type": "main", "index": 0}]]
+      "main": [[{"node": "arma query", "type": "main", "index": 0}]]
     },
-    "build_query": {
-      "main": [
-        [
-          {"node": "query_list", "type": "main", "index": 0},
-          {"node": "query_count", "type": "main", "index": 0}
-        ]
-      ]
+    "arma query": {
+      "main": [[{"node": "PostgreSQL - List", "type": "main", "index": 0}]]
     },
-    "query_list": {
-      "main": [[{"node": "response", "type": "main", "index": 0}]]
+    "PostgreSQL - List": {
+      "main": [[{"node": "PostgreSQL - Count", "type": "main", "index": 0}]]
     },
-    "query_count": {
-      "main": [[{"node": "response", "type": "main", "index": 0}]]
+    "PostgreSQL - Count": {
+      "main": [[{"node": "Format Response", "type": "main", "index": 0}]]
     }
   },
   "active": true,
