@@ -9,41 +9,25 @@ SET origen = CASE
 END
 WHERE origen IS NULL;
 
--- 2. Crear tabla conversation_log si no existe (SINGULAR)
-CREATE TABLE IF NOT EXISTS conversation_log (
-    id SERIAL PRIMARY KEY,
-    whatsapp VARCHAR(20) NOT NULL,
-    mensaje TEXT,
-    tipo VARCHAR(50),
-    remitente VARCHAR(50),
-    estado VARCHAR(50),
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (whatsapp) REFERENCES alumnos(whatsapp) ON DELETE CASCADE
-);
-
--- 3. Crear índices
-CREATE INDEX IF NOT EXISTS idx_conversation_log_whatsapp ON conversation_log(whatsapp);
-CREATE INDEX IF NOT EXISTS idx_conversation_log_created_at ON conversation_log(created_at);
-CREATE INDEX IF NOT EXISTS idx_conversation_log_timestamp ON conversation_log(timestamp);
-CREATE INDEX IF NOT EXISTS idx_conversation_log_estado ON conversation_log(estado);
-
--- 4. Insertar datos de prueba en conversation_log (últimos 7 días)
-INSERT INTO conversation_log (whatsapp, mensaje, tipo, remitente, estado, created_at, timestamp)
+-- 2. Insertar datos de prueba en conversation_log (últimos 7 días)
+-- La tabla ya existe con estructura: id, lead_id, alumno_id, mensaje, tipo, created_at
+INSERT INTO conversation_log (alumno_id, lead_id, mensaje, tipo, created_at)
 SELECT
-    a.whatsapp,
+    a.id,
+    a.id as lead_id,
     'Conversación de prueba ' || a.id,
     'mensaje',
-    'alumno',
-    'abierto',
-    CURRENT_TIMESTAMP - (RANDOM() * INTERVAL '7 days'),
     CURRENT_TIMESTAMP - (RANDOM() * INTERVAL '7 days')
 FROM alumnos a
 WHERE NOT EXISTS (
-    SELECT 1 FROM conversation_log cl WHERE cl.whatsapp = a.whatsapp
+    SELECT 1 FROM conversation_log cl WHERE cl.alumno_id = a.id
 )
 LIMIT 20;
+
+-- 3. Crear índices si no existen
+CREATE INDEX IF NOT EXISTS idx_conversation_log_alumno_id ON conversation_log(alumno_id);
+CREATE INDEX IF NOT EXISTS idx_conversation_log_lead_id ON conversation_log(lead_id);
+CREATE INDEX IF NOT EXISTS idx_conversation_log_created_at ON conversation_log(created_at);
 
 -- 5. Crear tabla pagos si no existe
 CREATE TABLE IF NOT EXISTS pagos (
@@ -97,17 +81,16 @@ WHERE estado IN ('ACTIVO', 'REGISTRADO')
 LIMIT 5;
 
 -- Verificar datos cargados
-SELECT 'Alumnos con origen:' as info;
+SELECT '✓ Alumnos con origen:' as info;
 SELECT origen, COUNT(*) FROM alumnos WHERE origen IS NOT NULL GROUP BY origen;
 
-SELECT 'Conversaciones cargadas:' as info;
+SELECT '✓ Conversaciones cargadas:' as info;
 SELECT COUNT(*) as total_conversations FROM conversation_log;
 
-SELECT 'Pagos cargados:' as info;
+SELECT '✓ Última conversación:' as info;
+SELECT MAX(created_at) as ultima_fecha FROM conversation_log;
+
+SELECT '✓ Pagos cargados:' as info;
 SELECT COUNT(*) as total_pagos FROM pagos;
 
-SELECT 'Pagos manuales cargados:' as info;
-SELECT COUNT(*) as total_pagos_manuales FROM pagos_manuales;
-
-SELECT 'Última conversación:' as info;
-SELECT MAX(created_at) as ultima_fecha FROM conversation_log;
+SELECT '✓ Datos cargados correctamente' as status;
