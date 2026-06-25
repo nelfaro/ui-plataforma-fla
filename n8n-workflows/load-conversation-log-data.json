@@ -1,0 +1,179 @@
+{
+  "name": "load-conversation-log-data",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "load-conversation-log-data",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-300, 0],
+      "id": "webhook",
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Script para cargar datos sintéticos en conversation_log\nconst query = `\nINSERT INTO conversation_log (lead_id, alumno_id, mensaje, tipo, direccion, tipo_media, mensaje_preview, lead_tipo, intencion, created_at)\nWITH leads_data AS (\n    SELECT\n        l.id as lead_id,\n        l.whatsapp,\n        l.nombre,\n        l.lead_tipo,\n        l.estado,\n        NULL::integer as alumno_id,\n        CURRENT_TIMESTAMP - (random() * interval '30 days') as msg_time,\n        row_number() OVER (ORDER BY l.id) as rn\n    FROM leads l\n    WHERE l.whatsapp IS NOT NULL\n    LIMIT 20\n)\nSELECT\n    ld.lead_id,\n    ld.alumno_id,\n    CASE\n        WHEN ld.rn % 4 = 1 THEN 'Hola, me gustaría consultar sobre clases de inglés'\n        WHEN ld.rn % 4 = 2 THEN 'Tengo interés en clases para mi hijo'\n        WHEN ld.rn % 4 = 3 THEN 'Cuál es el horario disponible?'\n        ELSE 'Me gustaría empezar la próxima semana'\n    END as mensaje,\n    'mensaje' as tipo,\n    'entrada' as direccion,\n    'texto' as tipo_media,\n    SUBSTRING(\n        CASE\n            WHEN ld.rn % 4 = 1 THEN 'Hola, me gustaría consultar sobre clases de inglés'\n            WHEN ld.rn % 4 = 2 THEN 'Tengo interés en clases para mi hijo'\n            WHEN ld.rn % 4 = 3 THEN 'Cuál es el horario disponible?'\n            ELSE 'Me gustaría empezar la próxima semana'\n        END,\n        1,\n        50\n    ) as mensaje_preview,\n    ld.lead_tipo,\n    CASE\n        WHEN ld.rn % 5 = 1 THEN 'consulta'\n        WHEN ld.rn % 5 = 2 THEN 'venta'\n        WHEN ld.rn % 5 = 3 THEN 'seguimiento'\n        WHEN ld.rn % 5 = 4 THEN 'cierre'\n        ELSE 'otro'\n    END as intencion,\n    ld.msg_time\nFROM leads_data ld\nON CONFLICT DO NOTHING;\n`;\n\nreturn [{json: {query}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-100, 0],
+      "id": "build_insert_query",
+      "name": "Build INSERT Query"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('build_insert_query').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [100, -100],
+      "id": "insert_messages",
+      "name": "PostgreSQL - Insert Messages",
+      "credentials": {
+        "postgres": {
+          "id": "7vZZbkZhFbmui4On",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Script para cargar mensajes de respuesta (salida)\nconst query = `\nINSERT INTO conversation_log (lead_id, alumno_id, mensaje, tipo, direccion, tipo_media, mensaje_preview, lead_tipo, intencion, created_at)\nSELECT\n    cl.lead_id,\n    cl.alumno_id,\n    CASE\n        WHEN cl.id % 3 = 1 THEN '¡Hola! Nos encantaría ayudarte. Contamos con clases personalizadas para todos los niveles.'\n        WHEN cl.id % 3 = 2 THEN 'Tenemos excelentes programas para niños. ¿Cuál es la edad? ¿Nivel de inglés actual?'\n        ELSE '¡Perfecto! Tenemos horarios disponibles. ¿Prefieres mañana, tarde o noche?'\n    END as mensaje,\n    'mensaje' as tipo,\n    'salida' as direccion,\n    'texto' as tipo_media,\n    SUBSTRING(\n        CASE\n            WHEN cl.id % 3 = 1 THEN '¡Hola! Nos encantaría ayudarte. Contamos con clases personalizadas para todos los niveles.'\n            WHEN cl.id % 3 = 2 THEN 'Tenemos excelentes programas para niños. ¿Cuál es la edad? ¿Nivel de inglés actual?'\n            ELSE '¡Perfecto! Tenemos horarios disponibles. ¿Prefieres mañana, tarde o noche?'\n        END,\n        1,\n        50\n    ) as mensaje_preview,\n    cl.lead_tipo,\n    'soporte' as intencion,\n    cl.created_at + interval '5 minutes'\nFROM conversation_log cl\nWHERE cl.direccion = 'entrada'\nAND cl.id NOT IN (\n    SELECT cl2.id FROM conversation_log cl2 WHERE cl2.direccion = 'salida'\n)\nLIMIT 20\nON CONFLICT DO NOTHING;\n`;\n\nreturn [{json: {query}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-100, 100],
+      "id": "build_response_query",
+      "name": "Build RESPONSE Query"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('build_response_query').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [100, 100],
+      "id": "insert_responses",
+      "name": "PostgreSQL - Insert Responses",
+      "credentials": {
+        "postgres": {
+          "id": "7vZZbkZhFbmui4On",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) as total_messages FROM conversation_log; SELECT direccion, COUNT(*) as count FROM conversation_log GROUP BY direccion; SELECT tipo_media, COUNT(*) as count FROM conversation_log GROUP BY tipo_media;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [300, 0],
+      "id": "verify_data",
+      "name": "PostgreSQL - Verify",
+      "credentials": {
+        "postgres": {
+          "id": "7vZZbkZhFbmui4On",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $('verify_data').all();\nconst summary = result.map(r => r.json);\n\nreturn [{json: {success: true, message: 'Datos sintéticos cargados correctamente', summary: summary}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 0],
+      "id": "response",
+      "name": "Response"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "build_insert_query",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "build_response_query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "build_insert_query": {
+      "main": [
+        [
+          {
+            "node": "insert_messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "build_response_query": {
+      "main": [
+        [
+          {
+            "node": "insert_responses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "insert_messages": {
+      "main": [
+        [
+          {
+            "node": "verify_data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "insert_responses": {
+      "main": [
+        [
+          {
+            "node": "verify_data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verify_data": {
+      "main": [
+        [
+          {
+            "node": "response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  }
+}
