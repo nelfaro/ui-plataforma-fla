@@ -10,7 +10,7 @@ import axios from 'axios';
 export default function AnalisisTemporalPage() {
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
-    date.setMonth(date.getMonth() - 3); // Últimos 3 meses
+    date.setDate(date.getDate() - 14); // Últimas 2 semanas
     return date.toISOString().split('T')[0];
   });
 
