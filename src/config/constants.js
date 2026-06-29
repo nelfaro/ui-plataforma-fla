@@ -1,7 +1,6 @@
 // URLs Base
-//export const N8N_BASE_URL = import.meta.env.VITE_N8N_BASE_URL || 'https://asistente-ia-fla-n8n.x5miqk.easypanel.host';
-// En desarrollo: usar proxy local
-// En producción: usar proxy en EasyPanel
+// En desarrollo: usar proxy local (/api/webhook)
+// En producción: usar proxy en EasyPanel (nginx redirige a agente-fla-n8n)
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 export const CHATWOOT_URL = import.meta.env.VITE_CHATWOOT_URL || 'https://asistente-ia-fla-chatwoot.x5miqk.easypanel.host';
 export const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL || 'https://asistente-ia-fla-puentewhatsapp.x5miqk.easypanel.host/';

@@ -7,7 +7,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api/webhook': {
-        target: 'https://asistente-ia-fla-n8n.x5miqk.easypanel.host',
+        target: 'https://agente-fla-n8n.x5miqk.easypanel.host',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '')
