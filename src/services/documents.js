@@ -18,7 +18,7 @@ export const uploadRAGFile = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await api.post('/webhook/subir-stock-manual', formData, {
+    const response = await api.post('/api/webhook/subir-stock-manual', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
