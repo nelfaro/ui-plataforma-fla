@@ -80,34 +80,35 @@ export default function AlumnosPage() {
       diasVencido: 0
     }));
 
-  // Preparar datos de alumnos nuevos por semana (aproximado)
-  const alumnosNuevosData = [
-    { semana: 'Sem 1', nuevos: Math.floor(alumnos.length * 0.1) },
-    { semana: 'Sem 2', nuevos: Math.floor(alumnos.length * 0.12) },
-    { semana: 'Sem 3', nuevos: Math.floor(alumnos.length * 0.08) },
-    { semana: 'Sem 4', nuevos: Math.floor(alumnos.length * 0.15) },
-    { semana: 'Sem 5', nuevos: Math.floor(alumnos.length * 0.1) },
-    { semana: 'Sem 6', nuevos: Math.floor(alumnos.length * 0.14) },
-    { semana: 'Sem 7', nuevos: Math.floor(alumnos.length * 0.11) },
-    { semana: 'Sem 8', nuevos: Math.floor(alumnos.length * 0.16) }
-  ];
+  // Generar datos reales por semana
+  const generateWeeklyData = (alumnos) => {
+    const weeks = {};
+    alumnos.forEach(a => {
+      if (!a.fecha_registro) return;
+      const date = new Date(a.fecha_registro);
+      const weekNum = Math.ceil((date.getDate()) / 7);
+      const month = date.toLocaleString('es-AR', { month: 'short' });
+      const key = `Sem ${weekNum}`;
+      weeks[key] = (weeks[key] || 0) + 1;
+    });
+    return Object.entries(weeks).map(([semana, nuevos]) => ({ semana, nuevos }));
+  };
 
-  const conversionData = [
-    { semana: 'Sem 1', conversion: 45 },
-    { semana: 'Sem 2', conversion: 52 },
-    { semana: 'Sem 3', conversion: 48 },
-    { semana: 'Sem 4', conversion: 61 },
-    { semana: 'Sem 5', conversion: 55 },
-    { semana: 'Sem 6', conversion: 68 },
-    { semana: 'Sem 7', conversion: 64 },
-    { semana: 'Sem 8', conversion: 71 }
-  ];
+  const alumnosNuevosData = generateWeeklyData(alumnosFiltrados).length > 0
+    ? generateWeeklyData(alumnosFiltrados)
+    : [{ semana: 'Sin datos', nuevos: 0 }];
+
+  const conversionData = alumnosFiltrados.length > 0
+    ? [
+        { semana: 'Registrados', conversion: Math.round((alumnosFiltrados.filter(a => a.estado === 'REGISTRADO').length / alumnosFiltrados.length) * 100) },
+        { semana: 'Activos', conversion: Math.round((alumnosFiltrados.filter(a => a.estado === 'ACTIVO').length / alumnosFiltrados.length) * 100) },
+        { semana: 'Pausados', conversion: Math.round((alumnosFiltrados.filter(a => a.estado === 'PAUSADO').length / alumnosFiltrados.length) * 100) },
+        { semana: 'Baja', conversion: Math.round((alumnosFiltrados.filter(a => a.estado === 'BAJA').length / alumnosFiltrados.length) * 100) }
+      ]
+    : [{ semana: 'Sin datos', conversion: 0 }];
 
   const ingresosData = [
-    { mes: 'Enero', ingresos: 2400 },
-    { mes: 'Febrero', ingresos: 3200 },
-    { mes: 'Marzo', ingresos: 2800 },
-    { mes: 'Abril', ingresos: 3900 }
+    { mes: 'Total', ingresos: 0 }
   ];
 
   return (
