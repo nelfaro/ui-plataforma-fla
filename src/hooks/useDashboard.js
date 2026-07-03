@@ -16,11 +16,13 @@ export const useDashboard = (dateRange = {}) => {
           dashboardService.getKPIs(dateRange),
           dashboardService.getWeeklyData(dateRange),
           dashboardService.getConversionFunnel(dateRange),
+          dashboardService.getLeadsDistribution(dateRange),
+          dashboardService.getLeadsOrigin(dateRange),
           dashboardService.getFunnelByOrigin(dateRange),
           dashboardService.getUltimaActividad()
         ]);
 
-        const endpoints = ['kpis', 'weekly', 'funnel', 'funnelByOrigin', 'ultimaActividad'];
+        const endpoints = ['kpis', 'weekly', 'funnel', 'distribution', 'origin', 'funnelByOrigin', 'ultimaActividad'];
         results.forEach((r, i) => {
           if (r.status === 'rejected') console.warn(`[Dashboard] Endpoint '${endpoints[i]}' falló:`, r.reason);
         });
@@ -28,15 +30,15 @@ export const useDashboard = (dateRange = {}) => {
         const getValue = (result, fallback) =>
           result.status === 'fulfilled' ? result.value : fallback;
 
-        const [kpis, weekly, funnel, funnelByOrigin, ultimaActividad] = results;
+        const [kpis, weekly, funnel, distribution, origin, funnelByOrigin, ultimaActividad] = results;
 
         const ultimaActData = getValue(ultimaActividad, {});
         setData({
           kpis: getValue(kpis, {}),
           weekly: Array.isArray(getValue(weekly, [])) ? getValue(weekly, []) : [],
-          distribution: [],
+          distribution: Array.isArray(getValue(distribution, [])) ? getValue(distribution, []) : [],
           funnel: Array.isArray(getValue(funnel, [])) ? getValue(funnel, []) : [],
-          origin: [],
+          origin: Array.isArray(getValue(origin, [])) ? getValue(origin, []) : [],
           alumnos: [],
           funnelByOrigin: Array.isArray(getValue(funnelByOrigin, [])) ? getValue(funnelByOrigin, []) : [],
           ultimaActividad: ultimaActData?.texto || 'Sin datos'
