@@ -19,8 +19,8 @@ export const FunnelChart = ({ data, height = 400 }) => {
     );
   }
 
-  // Asegurar que siempre existan las 5 etapas del funnel
-  const etapasEsperadas = ['NUEVO', 'FRIO', 'TIBIO', 'CALIENTE', 'ACTIVO'];
+  // Asegurar que siempre existan las 4 etapas del funnel de LEADS
+  const etapasEsperadas = ['NUEVO', 'FRIO', 'TIBIO', 'CALIENTE'];
   const dataMap = {};
 
   data.forEach(item => {
