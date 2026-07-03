@@ -373,31 +373,6 @@ export default function AlumnosPage() {
         {/* TAB 4: Estado de Pagos */}
         {activeTab === 'pagos' && (
           <div className="space-y-4">
-            {/* Selector de fechas */}
-            <Card>
-              <h3 className="text-lg font-bold mb-4">Filtrar por período</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Desde:</label>
-                  <input
-                    type="date"
-                    value={dateRange.startDate}
-                    onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Hasta:</label>
-                  <input
-                    type="date"
-                    value={dateRange.endDate}
-                    onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-            </Card>
-
             {/* Resumen de Pagos */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card className="bg-green-50 border-green-200">
@@ -480,31 +455,9 @@ export default function AlumnosPage() {
         {activeTab === 'temporal' && (
           <div className="space-y-4">
             <Card>
-              <h3 className="text-lg font-bold mb-4">Filtrar por período</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Desde:</label>
-                  <input
-                    type="date"
-                    value={dateRange.startDate}
-                    onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Hasta:</label>
-                  <input
-                    type="date"
-                    value={dateRange.endDate}
-                    onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 mb-4">
                 Alumnos en período: {alumnosFiltrados.length}
               </p>
-            </Card>
 
             <Card>
               <h3 className="text-lg font-bold mb-4">📈 Alumnos Nuevos por Semana</h3>
