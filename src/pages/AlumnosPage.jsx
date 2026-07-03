@@ -27,15 +27,12 @@ export default function AlumnosPage() {
   const cargarAlumnos = async () => {
     try {
       setLoading(true);
-      const response = await getAlumnosList();
-      let alumnosList = response.alumnos || [];
-
-      // Filtrar por rango de fechas
-      alumnosList = alumnosList.filter(a => {
-        if (!a.fecha_registro) return true;
-        const createdDate = new Date(a.fecha_registro).toISOString().split('T')[0];
-        return createdDate >= dateRange.startDate && createdDate <= dateRange.endDate;
+      const response = await getAlumnosList({
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+        limit: 100
       });
+      let alumnosList = response.alumnos || [];
 
       setAlumnos(alumnosList);
 
