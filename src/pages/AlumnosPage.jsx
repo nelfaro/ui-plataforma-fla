@@ -458,6 +458,7 @@ export default function AlumnosPage() {
               <p className="text-xs text-gray-500 mb-4">
                 Alumnos en período: {alumnosFiltrados.length}
               </p>
+            </Card>
 
             <Card>
               <h3 className="text-lg font-bold mb-4">📈 Alumnos Nuevos por Semana</h3>
