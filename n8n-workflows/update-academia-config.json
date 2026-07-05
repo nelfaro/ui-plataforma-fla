@@ -16,13 +16,31 @@
     },
     {
       "parameters": {
-        "jsCode": "const body = $input.first().json;\n\nconst updates = [];\nconst fields = [\n  'nombre_academia', 'nombre_profe', 'email', 'telefono',\n  'ubicacion_direccion', 'ubicacion_localidad', 'horario_atencion',\n  'banco', 'cbu', 'alias', 'linktree_url',\n  'instagram', 'facebook', 'politica_cancelacion',\n  'politica_recuperacion', 'politica_reembolso'\n];\n\nfor (const field of fields) {\n  const value = body[field];\n  if (value !== undefined && value !== null && value !== '') {\n    const escaped = String(value).replace(/'/g, \"''\");\n    updates.push(`${field} = '${escaped}'`);\n  }\n}\n\nif (updates.length === 0) {\n  return [{\n    json: {\n      success: false,\n      message: 'No hay campos para actualizar'\n    }\n  }];\n}\n\nconst query = `UPDATE academia_config SET ${updates.join(', ')}, updated_at = NOW() WHERE id = 1 RETURNING *;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];"
+        "jsCode": "const body = $input.first().json;\n\nconst updates = [];\nconst fields = [\n  'nombre_academia', 'nombre_profe', 'email', 'telefono',\n  'ubicacion_direccion', 'ubicacion_localidad', 'horario_atencion',\n  'banco', 'cbu', 'alias', 'linktree_url',\n  'instagram', 'facebook', 'politica_cancelacion',\n  'politica_recuperacion', 'politica_reembolso'\n];\n\nfor (const field of fields) {\n  const value = body[field];\n  if (value !== undefined && value !== null && value !== '') {\n    const escaped = String(value).replace(/'/g, \"''\");\n    updates.push(`${field} = '${escaped}'`);\n  }\n}\n\nconst query = updates.length > 0 \n  ? `UPDATE academia_config SET ${updates.join(', ')}, updated_at = NOW() WHERE id = 1 RETURNING *;`\n  : null;\n\nreturn [{\n  json: {\n    query,\n    hasUpdates: updates.length > 0\n  }\n}];"
       },
       "id": "arma_query",
       "name": "Build Query",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [-288, 112]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "comparator": "==",
+              "value1": "={{ $json.hasUpdates }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "check_updates",
+      "name": "Check Updates",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [-96, 0]
     },
     {
       "parameters": {
@@ -34,7 +52,7 @@
       "name": "PostgreSQL - Query",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [-96, 112],
+      "position": [120, -96],
       "credentials": {
         "postgres": {
           "id": "7vZZbkZhFbmui4On",
@@ -50,7 +68,17 @@
       "name": "Format Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [120, 112]
+      "position": [312, -96]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    success: false,\n    message: 'No hay campos para actualizar',\n    config: {}\n  }\n}];"
+      },
+      "id": "no_updates",
+      "name": "No Updates Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [120, 240]
     },
     {
       "parameters": {
@@ -60,21 +88,30 @@
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [320, 112]
+      "position": [504, 0]
     }
   ],
   "connections": {
     "Webhook": {
-      "main": [[{"node": "arma_query", "type": "main", "index": 0}]]
+      "main": [[{"node": "Build Query", "type": "main", "index": 0}]]
     },
-    "arma_query": {
-      "main": [[{"node": "postgres_query", "type": "main", "index": 0}]]
+    "Build Query": {
+      "main": [[{"node": "Check Updates", "type": "main", "index": 0}]]
     },
-    "postgres_query": {
-      "main": [[{"node": "format_response", "type": "main", "index": 0}]]
+    "Check Updates": {
+      "main": [
+        [{"node": "PostgreSQL - Query", "type": "main", "index": 0}],
+        [{"node": "No Updates Response", "type": "main", "index": 0}]
+      ]
     },
-    "format_response": {
-      "main": [[{"node": "response", "type": "main", "index": 0}]]
+    "PostgreSQL - Query": {
+      "main": [[{"node": "Format Response", "type": "main", "index": 0}]]
+    },
+    "Format Response": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    },
+    "No Updates Response": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
     }
   },
   "active": true
