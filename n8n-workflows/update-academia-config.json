@@ -2,6 +2,7 @@
   "nodes": [
     {
       "parameters": {
+        "httpMethod": "POST",
         "path": "update-academia-config",
         "responseMode": "responseNode",
         "options": {}
@@ -9,13 +10,13 @@
       "id": "webhook",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1,
+      "typeVersion": 2.1,
       "position": [-528, 112],
       "webhookId": "update-academia-config"
     },
     {
       "parameters": {
-        "jsCode": "const body = $input.all()[0].json;\n\nconst updates = [];\nconst values = [];\nlet paramNum = 1;\n\nconst fields = [\n  'nombre_academia', 'nombre_profe', 'email', 'telefono',\n  'ubicacion_direccion', 'ubicacion_localidad', 'horario_atencion',\n  'banco', 'cbu', 'alias', 'linktree_url',\n  'instagram', 'facebook', 'politica_cancelacion',\n  'politica_recuperacion', 'politica_reembolso'\n];\n\nfor (const field of fields) {\n  if (body[field] !== undefined && body[field] !== null) {\n    const value = String(body[field]).replace(/'/g, \"''\");\n    updates.push(`${field} = '${value}'`);\n  }\n}\n\nconst query = `UPDATE academia_config SET ${updates.join(', ')}, updated_at = NOW() WHERE id = 1 RETURNING *;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];"
+        "jsCode": "const body = $input.first().json;\n\nconst updates = [];\nconst fields = [\n  'nombre_academia', 'nombre_profe', 'email', 'telefono',\n  'ubicacion_direccion', 'ubicacion_localidad', 'horario_atencion',\n  'banco', 'cbu', 'alias', 'linktree_url',\n  'instagram', 'facebook', 'politica_cancelacion',\n  'politica_recuperacion', 'politica_reembolso'\n];\n\nfor (const field of fields) {\n  const value = body[field];\n  if (value !== undefined && value !== null && value !== '') {\n    const escaped = String(value).replace(/'/g, \"''\");\n    updates.push(`${field} = '${escaped}'`);\n  }\n}\n\nif (updates.length === 0) {\n  return [{\n    json: {\n      success: false,\n      message: 'No hay campos para actualizar'\n    }\n  }];\n}\n\nconst query = `UPDATE academia_config SET ${updates.join(', ')}, updated_at = NOW() WHERE id = 1 RETURNING *;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];"
       },
       "id": "arma_query",
       "name": "Build Query",
@@ -26,16 +27,19 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "={{ $json.query }}",
+        "query": "{{ $json.query }}",
         "options": {}
       },
       "id": "postgres_query",
       "name": "PostgreSQL - Query",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.4,
+      "typeVersion": 2.6,
       "position": [-96, 112],
       "credentials": {
-        "postgres": "postgres_db"
+        "postgres": {
+          "id": "7vZZbkZhFbmui4On",
+          "name": "Postgres account"
+        }
       }
     },
     {
