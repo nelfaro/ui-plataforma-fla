@@ -27,11 +27,10 @@
     {
       "parameters": {
         "conditions": {
-          "number": [
+          "boolean": [
             {
-              "comparator": "==",
-              "value1": "={{ $json.hasUpdates }}",
-              "value2": true
+              "comparator": "true",
+              "value1": "={{ $json.hasUpdates }}"
             }
           ]
         }
