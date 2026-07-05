@@ -16,7 +16,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT * FROM academia_config LIMIT 1;",
+        "query": "SELECT clave, valor FROM academia_config WHERE clave IN ('nombre_academia', 'nombre_profe', 'email', 'telefono', 'ubicacion_direccion', 'ubicacion_localidad', 'horario_atencion', 'banco', 'cbu', 'alias', 'linktree_url', 'instagram', 'facebook', 'politica_cancelacion', 'politica_recuperacion', 'politica_reembolso');",
         "options": {}
       },
       "id": "postgres_query",
@@ -33,7 +33,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const result = $input.first().json;\n\nconst config = {\n  nombre_academia: result.nombre_academia || '',\n  nombre_profe: result.nombre_profe || '',\n  email: result.email || '',\n  telefono: result.telefono || '',\n  ubicacion_direccion: result.ubicacion_direccion || '',\n  ubicacion_localidad: result.ubicacion_localidad || '',\n  horario_atencion: result.horario_atencion || '',\n  banco: result.banco || '',\n  cbu: result.cbu || '',\n  alias: result.alias || '',\n  linktree_url: result.linktree_url || '',\n  instagram: result.instagram || '',\n  facebook: result.facebook || '',\n  politica_cancelacion: result.politica_cancelacion || '',\n  politica_recuperacion: result.politica_recuperacion || '',\n  politica_reembolso: result.politica_reembolso || ''\n};\n\nreturn [{\n  json: {\n    config\n  }\n}];"
+        "jsCode": "const rows = $input.all();\nconst config = {};\n\nfor (const row of rows) {\n  const data = row.json;\n  if (data.clave && data.valor !== undefined) {\n    config[data.clave] = data.valor || '';\n  }\n}\n\nconst fields = [\n  'nombre_academia', 'nombre_profe', 'email', 'telefono',\n  'ubicacion_direccion', 'ubicacion_localidad', 'horario_atencion',\n  'banco', 'cbu', 'alias', 'linktree_url',\n  'instagram', 'facebook', 'politica_cancelacion',\n  'politica_recuperacion', 'politica_reembolso'\n];\n\nconst resultado = {};\nfor (const field of fields) {\n  resultado[field] = config[field] || '';\n}\n\nreturn [{\n  json: {\n    config: resultado\n  }\n}];"
       },
       "id": "format_response",
       "name": "Format Response",

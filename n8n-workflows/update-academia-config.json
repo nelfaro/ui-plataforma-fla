@@ -16,7 +16,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst body = input.body || input;\n\nconst updates = [];\nconst fields = [\n  'nombre_academia', 'nombre_profe', 'email', 'telefono',\n  'ubicacion_direccion', 'ubicacion_localidad', 'horario_atencion',\n  'banco', 'cbu', 'alias', 'linktree_url',\n  'instagram', 'facebook', 'politica_cancelacion',\n  'politica_recuperacion', 'politica_reembolso'\n];\n\nfor (const field of fields) {\n  const value = body[field];\n  if (value !== undefined && value !== null && value !== '') {\n    const escaped = String(value).replace(/'/g, \"''\");\n    updates.push(`${field} = '${escaped}'`);\n  }\n}\n\nconst query = updates.length > 0\n  ? `UPDATE academia_config SET ${updates.join(', ')}, updated_at = NOW() WHERE id = 1 RETURNING *;`\n  : null;\n\nreturn [{\n  json: {\n    query,\n    hasUpdates: updates.length > 0\n  }\n}];"
+        "jsCode": "const input = $input.first().json;\nconst body = input.body || input;\n\nconst fields = [\n  'nombre_academia', 'nombre_profe', 'email', 'telefono',\n  'ubicacion_direccion', 'ubicacion_localidad', 'horario_atencion',\n  'banco', 'cbu', 'alias', 'linktree_url',\n  'instagram', 'facebook', 'politica_cancelacion',\n  'politica_recuperacion', 'politica_reembolso'\n];\n\nconst values = [];\nlet hasUpdates = false;\n\nfor (const field of fields) {\n  const value = body[field];\n  if (value !== undefined && value !== null && value !== '') {\n    const escaped = String(value).replace(/'/g, \"''\");\n    values.push(`('${field}', '${escaped}')`);\n    hasUpdates = true;\n  }\n}\n\nlet query = null;\nif (hasUpdates) {\n  query = `INSERT INTO academia_config (clave, valor, updated_at) \nVALUES ${values.join(', ')} \nON CONFLICT (clave) DO UPDATE SET valor = EXCLUDED.valor, updated_at = NOW()\nRETURNING clave, valor;`;\n}\n\nreturn [{\n  json: {\n    query,\n    hasUpdates,\n    values\n  }\n}];"
       },
       "id": "arma_query",
       "name": "Build Query",
@@ -61,7 +61,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const result = $input.first().json;\n\nconst config = {\n  nombre_academia: result.nombre_academia || '',\n  nombre_profe: result.nombre_profe || '',\n  email: result.email || '',\n  telefono: result.telefono || '',\n  ubicacion_direccion: result.ubicacion_direccion || '',\n  ubicacion_localidad: result.ubicacion_localidad || '',\n  horario_atencion: result.horario_atencion || '',\n  banco: result.banco || '',\n  cbu: result.cbu || '',\n  alias: result.alias || '',\n  linktree_url: result.linktree_url || '',\n  instagram: result.instagram || '',\n  facebook: result.facebook || '',\n  politica_cancelacion: result.politica_cancelacion || '',\n  politica_recuperacion: result.politica_recuperacion || '',\n  politica_reembolso: result.politica_reembolso || ''\n};\n\nreturn [{\n  json: {\n    success: true,\n    message: 'Configuración actualizada exitosamente',\n    config\n  }\n}];"
+        "jsCode": "const results = $input.all();\nconst config = {};\n\nfor (const row of results) {\n  const data = row.json;\n  if (data.clave && data.valor !== undefined) {\n    config[data.clave] = data.valor;\n  }\n}\n\nreturn [{\n  json: {\n    success: true,\n    message: 'Configuración actualizada exitosamente',\n    config\n  }\n}];"
       },
       "id": "format_response",
       "name": "Format Response",
