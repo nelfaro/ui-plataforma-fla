@@ -1,0 +1,222 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "pregunta"
+            },
+            {
+              "name": "lead_tipo"
+            },
+            {
+              "name": "whatsapp"
+            }
+          ]
+        }
+      },
+      "id": "73310a3a-ee75-448f-9046-02c823090c86",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { pregunta, lead_tipo } = $input.first().json;\n\nconst segmentosMap = {\n  KIDS: ['KIDS', 'GENERAL'],\n  ADOLESCENTE: ['KIDS', 'ADULTOS', 'GENERAL'],\n  ADULTO: ['ADULTOS', 'GENERAL'],\n  AU_PAIR: ['AU_PAIR', 'GENERAL'],\n  GENERAL: ['GENERAL']\n};\n\nconst segmentos = segmentosMap[lead_tipo] || segmentosMap['GENERAL'];\n\nreturn [{\n  json: {\n    pregunta: pregunta || 'información general',\n    lead_tipo: lead_tipo || 'GENERAL',\n    segmentos\n  }\n}];"
+      },
+      "id": "8c3fdfe2-3ad5-4f6e-a7b1-8f6248ad3908",
+      "name": "Mapear Segmentos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { segmentos } = $input.first().json;\nconst segmentosStr = segmentos.map(s => `'${s}'`).join(',');\n\nconst query = `SELECT id, categoria, segmento, titulo, contenido, activo FROM conocimiento_academia WHERE segmento IN (${segmentosStr}) AND activo = true ORDER BY categoria, segmento, titulo LIMIT 20`;\n\nreturn [{ json: { query } }];"
+      },
+      "id": "d5f34c59-8310-40ae-be79-d5b68a94ff7b",
+      "name": "Build Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.query }}",
+        "options": {}
+      },
+      "id": "f5fd304b-70f6-4991-9b96-ba3f2f1a1ce2",
+      "name": "Query PostgreSQL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        608,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(i => i.json);\nconst normData = $('Mapear Segmentos').first().json;\n\nif (!rows || rows.length === 0) {\n  return [{\n    json: {\n      contexto_encontrado: false,\n      contexto: 'Sin información disponible en la base de datos.',\n      pregunta: normData.pregunta,\n      lead_tipo: normData.lead_tipo,\n      items_encontrados: 0\n    }\n  }];\n}\n\nconst contexto = rows\n  .map(r => `**${r.categoria}**\\n${r.titulo}\\n${r.contenido}`)\n  .join('\\n\\n');\n\nreturn [{\n  json: {\n    contexto_encontrado: true,\n    contexto,\n    pregunta: normData.pregunta,\n    lead_tipo: normData.lead_tipo,\n    items_encontrados: rows.length\n  }\n}];"
+      },
+      "id": "d720b9a4-c8fb-41a8-b865-b93c3630abbc",
+      "name": "Procesar Resultados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $credentials.openAiApi.apiKey }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"max_tokens\": 300,\n  \"temperature\": 0.1,\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Sos un asistente de soporte para Clases de Inglés con Fla.\\n\\nTarea: responder la pregunta del usuario usando SOLO la información del CONTEXTO.\\n\\nREGLAS CRÍTICAS (NO NEGOCIABLES):\\n1. NUNCA inventes, supongas o agregues información que NO esté en el CONTEXTO.\\n2. Si la información NO está exactamente en el contexto, responde textualmente: 'No tengo esa información. Te paso al equipo de Fla para que te den los detalles.'\\n3. Si hay información sobre precios en el contexto, transcribela exactamente como aparece. NO CAMBIES monedas, NO AGREGUES planes adicionales.\\n4. Sé conciso (máximo 2-3 líneas).\\n5. Tono: amable, cálido, cercano. Como si fuera Fla respondiendo.\\n6. Nunca menciones 'contexto', 'base de datos' o detalles técnicos.\\n\\nEJEMPLO DE RESPUESTA CORRECTA:\\nContexto: 'Las clases grupales para adultos tienen un valor de $97.000.'\\nPregunta: '¿Cuánto cuesta?'\\nRespuesta: 'Las clases grupales tienen un valor de $97.000. ¿Querés más info?'\\n\\nEJEMPLO DE RESPUESTA INCORRECTA (PROHIBIDA):\\nRespuesta: 'Ofrecemos diferentes planes: Conversación a $200, Negocio a $250...' ← NUNCA HAGAS ESTO SI NO ESTÁ EN EL CONTEXTO.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify('CONTEXTO:\\n' + ($json.contexto_encontrado ? $json.contexto : 'Sin información disponible en la base de datos.') + '\\n\\nPREGUNTA DEL USUARIO: ' + $json.pregunta) }}\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "5ce22650-c2d5-4edd-90f8-a252bad3b96d",
+      "name": "Sintetizar con OpenAI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1008,
+        0
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "bznJ7tqJGM25Nv9r",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const synth = $input.first().json;\nconst procData = $('Procesar Resultados').first().json;\n\nlet respuesta = 'No tengo esa información. Te paso al equipo de Fla para que te den los detalles.';\nif (synth?.choices?.[0]?.message?.content) {\n  respuesta = synth.choices[0].message.content.trim();\n}\n\nreturn [{\n  json: {\n    resultado: respuesta,\n    confianza: procData.contexto_encontrado ? 'ALTA' : 'BAJA',\n    items_consultados: procData.items_encontrados\n  }\n}];"
+      },
+      "id": "118a6dc3-5ac1-463b-a3c8-e02133fbc79a",
+      "name": "Retornar al Agente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Mapear Segmentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapear Segmentos": {
+      "main": [
+        [
+          {
+            "node": "Build Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query": {
+      "main": [
+        [
+          {
+            "node": "Query PostgreSQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query PostgreSQL": {
+      "main": [
+        [
+          {
+            "node": "Procesar Resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Procesar Resultados": {
+      "main": [
+        [
+          {
+            "node": "Sintetizar con OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sintetizar con OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Retornar al Agente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "pregunta": "",
+        "lead_tipo": "",
+        "whatsapp": ""
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec"
+  }
+}
