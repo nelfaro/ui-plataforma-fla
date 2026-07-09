@@ -53,7 +53,7 @@
     },
     {
       "parameters": {
-        "jsCode": "return [{ json: { query: 'SELECT key, value FROM academia_config WHERE active = true ORDER BY key', type: 'config' } }];"
+        "jsCode": "return [{ json: { query: 'SELECT clave, valor, description FROM academia_config ORDER BY clave', type: 'config' } }];"
       },
       "id": "config-query-builder",
       "name": "Build Query - Config",
@@ -122,7 +122,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nconst normData = $('Mapear Segmentos').first().json;\n\nlet conocimientoContexto = '';\nlet configContexto = '';\n\nitems.forEach(item => {\n  const data = item.json;\n  \n  if (data.type === 'conocimiento') {\n    if (data.id) {\n      conocimientoContexto += `**${data.categoria}**\\n${data.titulo}\\n${data.contenido}\\n\\n`;\n    }\n  } else if (data.type === 'config') {\n    configContexto += `${data.key}: ${data.value}\\n`;\n  }\n});\n\nlet contextoTotal = '';\n\nif (conocimientoContexto.trim()) {\n  contextoTotal += 'INFORMACIÓN SOBRE CLASES:\\n' + conocimientoContexto;\n}\n\nif (configContexto.trim()) {\n  contextoTotal += '\\nINFORMACIÓN DE CONTACTO Y CONFIGURACIÓN:\\n' + configContexto;\n}\n\nconst tieneContenido = contextoTotal.trim().length > 0;\n\nreturn [{\n  json: {\n    contexto_encontrado: tieneContenido,\n    contexto: tieneContenido ? contextoTotal.trim() : 'Sin información disponible.',\n    pregunta: normData.pregunta,\n    lead_tipo: normData.lead_tipo\n  }\n}];"
+        "jsCode": "const items = $input.all();\nconst normData = $('Mapear Segmentos').first().json;\n\nlet conocimientoContexto = '';\nlet configContexto = '';\n\nitems.forEach(item => {\n  const data = item.json;\n  \n  if (data.type === 'conocimiento') {\n    if (data.id) {\n      conocimientoContexto += `**${data.categoria}**\\n${data.titulo}\\n${data.contenido}\\n\\n`;\n    }\n  } else if (data.type === 'config') {\n    configContexto += `${data.clave}: ${data.valor}\\n`;\n  }\n});\n\nlet contextoTotal = '';\n\nif (conocimientoContexto.trim()) {\n  contextoTotal += 'INFORMACIÓN SOBRE CLASES:\\n' + conocimientoContexto;\n}\n\nif (configContexto.trim()) {\n  contextoTotal += '\\nINFORMACIÓN DE CONTACTO Y CONFIGURACIÓN:\\n' + configContexto;\n}\n\nconst tieneContenido = contextoTotal.trim().length > 0;\n\nreturn [{\n  json: {\n    contexto_encontrado: tieneContenido,\n    contexto: tieneContenido ? contextoTotal.trim() : 'Sin información disponible.',\n    pregunta: normData.pregunta,\n    lead_tipo: normData.lead_tipo\n  }\n}];"
       },
       "id": "d720b9a4-c8fb-41a8-b865-b93c3630abbc",
       "name": "Procesar Contextos",
