@@ -16,11 +16,11 @@ El agente estaba **inventando información** que no existe en ninguna fuente:
 
 ## Solución Implementada
 
-### Versión 2: Dual Source (v2-dual-source.json)
+### Versión 2: Dual Source con Merge Node (v2-correct.json)
 
 **Cambios principales:**
 
-#### 1️⃣ Arquitectura: Ahora consulta AMBAS fuentes en paralelo
+#### 1️⃣ Arquitectura: Ahora consulta AMBAS fuentes en paralelo + Merge
 
 **ANTES:**
 ```
@@ -30,7 +30,7 @@ Mapear Segmentos → Build Query (conocimiento) → PostgreSQL → Procesar → 
 **DESPUÉS:**
 ```
                 ├─→ Build Query (conocimiento) → PostgreSQL ─┐
-Mapear Segmentos ┤                                            ├→ Combinar Contextos → OpenAI
+Mapear Segmentos ┤                                            ├→ Merge Node → Procesar Contextos → OpenAI
                 └─→ Build Query (config)     → PostgreSQL ─┘
 ```
 
@@ -38,12 +38,19 @@ Mapear Segmentos ┤                                            ├→ Combinar 
 - `conocimiento_academia`: precios, FAQs, metodología, información sobre clases
 - `academia_config`: contacto, horarios, redes sociales, políticas, ubicación, datos bancarios
 
-#### 2️⃣ Nodo "Combinar Contextos" (NUEVO)
+#### 2️⃣ Nodo "Merge Results" (BUILT-IN de n8n)
 
-Une la información de AMBAS tablas:
-- Extrae campos específicos de `academia_config` (nombre_profe, email, teléfono, redes, etc.)
-- Combina con la información de `conocimiento_academia`
-- Devuelve contexto completo y estructurado
+- Espera a que AMBOS nodos Postgres se ejecuten
+- Combina los resultados en un solo stream
+- Permite que el nodo Code siguiente procese todo correctamente
+
+#### 3️⃣ Nodo "Procesar Contextos" (Code)
+
+Procesa los datos ya combinados por el Merge:
+- Itera sobre todos los items del merge
+- Separa por tipo ('conocimiento' vs 'config')
+- Construye el contexto final
+- Devuelve JSON estructurado con contexto + pregunta
 
 #### 3️⃣ Prompt de OpenAI: MÁS PROHIBITIVO
 
@@ -103,11 +110,12 @@ Si falta alguno, simplemente no lo mostrará (sin errores).
 
 ## Diferencias Clave vs Versión Anterior
 
-| Aspecto | v1 | v2 |
+| Aspecto | v1 | v2-correct |
 |--------|----|----|
 | **Fuentes consultadas** | Solo `conocimiento_academia` | `conocimiento_academia` + `academia_config` |
-| **Parallelismo** | Secuencial | Consultas en paralelo |
-| **Temperature OpenAI** | 0.1 | 0.0 (más determinístico) |
+| **Parallelismo** | Secuencial | 2 Postgres en paralelo + Merge |
+| **Integración de datos** | Un solo Code node (ERROR) | Merge built-in + Code node (CORRECTO) |
+| **Temperature OpenAI** | 0.1 | 0.0 (determinístico) |
 | **Fallback garantizado** | Soft | Duro (SIEMPRE se ejecuta si falta info) |
 | **Prompt anti-alucinación** | Básico | Exhaustivo (prohibiciones explícitas) |
 | **Máximo tokens** | 300 | 250 (más conciso) |

@@ -1,0 +1,308 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "pregunta"
+            },
+            {
+              "name": "lead_tipo"
+            },
+            {
+              "name": "whatsapp"
+            }
+          ]
+        }
+      },
+      "id": "73310a3a-ee75-448f-9046-02c823090c86",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { pregunta, lead_tipo } = $input.first().json;\n\nconst segmentosMap = {\n  KIDS: ['KIDS', 'GENERAL'],\n  ADOLESCENTE: ['KIDS', 'ADULTOS', 'GENERAL'],\n  ADULTO: ['ADULTOS', 'GENERAL'],\n  AU_PAIR: ['AU_PAIR', 'GENERAL'],\n  GENERAL: ['GENERAL']\n};\n\nconst segmentos = segmentosMap[lead_tipo] || segmentosMap['GENERAL'];\n\nreturn [{\n  json: {\n    pregunta: pregunta || 'información general',\n    lead_tipo: lead_tipo || 'GENERAL',\n    segmentos\n  }\n}];"
+      },
+      "id": "8c3fdfe2-3ad5-4f6e-a7b1-8f6248ad3908",
+      "name": "Mapear Segmentos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { segmentos } = $input.first().json;\nconst segmentosStr = segmentos.map(s => `'${s}'`).join(',');\n\nconst query = `SELECT id, categoria, segmento, titulo, contenido, activo FROM conocimiento_academia WHERE segmento IN (${segmentosStr}) AND activo = true ORDER BY categoria, segmento, titulo LIMIT 20`;\n\nreturn [{ json: { query, type: 'conocimiento' } }];"
+      },
+      "id": "d5f34c59-8310-40ae-be79-d5b68a94ff7b",
+      "name": "Build Query - Conocimiento",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -150
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { query: 'SELECT key, value FROM academia_config WHERE active = true ORDER BY key', type: 'config' } }];"
+      },
+      "id": "config-query-builder",
+      "name": "Build Query - Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        150
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.query }}",
+        "options": {}
+      },
+      "id": "f5fd304b-70f6-4991-9b96-ba3f2f1a1ce2",
+      "name": "Query PostgreSQL - Conocimiento",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        600,
+        -150
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.query }}",
+        "options": {}
+      },
+      "id": "config-query-executor",
+      "name": "Query PostgreSQL - Config",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        600,
+        150
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "waitForAll",
+        "output": "all"
+      },
+      "id": "merge-node",
+      "name": "Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst normData = $('Mapear Segmentos').first().json;\n\nlet conocimientoContexto = '';\nlet configContexto = '';\n\nitems.forEach(item => {\n  const data = item.json;\n  \n  if (data.type === 'conocimiento') {\n    if (data.id) {\n      conocimientoContexto += `**${data.categoria}**\\n${data.titulo}\\n${data.contenido}\\n\\n`;\n    }\n  } else if (data.type === 'config') {\n    configContexto += `${data.key}: ${data.value}\\n`;\n  }\n});\n\nlet contextoTotal = '';\n\nif (conocimientoContexto.trim()) {\n  contextoTotal += 'INFORMACIÓN SOBRE CLASES:\\n' + conocimientoContexto;\n}\n\nif (configContexto.trim()) {\n  contextoTotal += '\\nINFORMACIÓN DE CONTACTO Y CONFIGURACIÓN:\\n' + configContexto;\n}\n\nconst tieneContenido = contextoTotal.trim().length > 0;\n\nreturn [{\n  json: {\n    contexto_encontrado: tieneContenido,\n    contexto: tieneContenido ? contextoTotal.trim() : 'Sin información disponible.',\n    pregunta: normData.pregunta,\n    lead_tipo: normData.lead_tipo\n  }\n}];"
+      },
+      "id": "d720b9a4-c8fb-41a8-b865-b93c3630abbc",
+      "name": "Procesar Contextos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $credentials.openAiApi.apiKey }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"max_tokens\": 250,\n  \"temperature\": 0.0,\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"ERES ASISTENTE DE FLA. INSTRUCCIONES CRÍTICAS Y NO NEGOCIABLES:\\n\\n🚫 PROHIBICIONES ABSOLUTAS:\\n- NUNCA inventes información.\\n- NUNCA supongas o agregues detalles que no estén en el CONTEXTO.\\n- NUNCA cambies monedas, precios, horarios, o números.\\n- NUNCA menciones 'contexto', 'base de datos', detalles técnicos.\\n- NUNCA hagas listas de opciones que no están en el contexto.\\n\\n✅ SI LA INFORMACIÓN ESTÁ EN EL CONTEXTO:\\n- Transcribela fielmente, tal como aparece.\\n- Sé conciso (máximo 2 líneas).\\n- Tono: amable, cálido, natural. Como si Fla respondiera.\\n\\n❌ SI LA INFORMACIÓN NO ESTÁ EN EL CONTEXTO:\\n- Responde EXACTAMENTE esto: 'Esa información todavía no la tengo. Voy a consultarlo con la profe Fla y te paso la info.'\\n- No hagas excepciones. No inventes. No 'asumas'.\\n\\n📋 CONTEXTO DISPONIBLE - Lee con atención:\\n\\nEJEMPLOS DE RESPUESTAS CORRECTAS:\\nP: '¿Cuánto cuesta?'\\nC: 'Las clases grupales tienen un valor de $97.000.'\\nP: '¿Tienen plan de negocio?'\\nC: 'Esa información todavía no la tengo. Voy a consultarlo con la profe Fla y te paso la info.'\\n\\nEJEMPLOS DE RESPUESTAS PROHIBIDAS:\\n- 'Ofrecemos planes de Conversación a $200 y Negocio a $250' ← NO EXISTE EN CONTEXTO\\n- 'Tenemos varios programas disponibles: ...' ← ALUCINACIÓN\\n- 'Generalmente las clases cuestan entre...' ← NO ESTÁ EN CONTEXTO\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify('CONTEXTO DISPONIBLE:\\n' + $json.contexto + '\\n\\n---\\n\\nPREGUNTA: ' + $json.pregunta) }}\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "5ce22650-c2d5-4edd-90f8-a252bad3b96d",
+      "name": "Sintetizar con OpenAI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        0
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "bznJ7tqJGM25Nv9r",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const synth = $input.first().json;\nconst procData = $('Procesar Contextos').first().json;\n\nlet respuesta = 'Esa información todavía no la tengo. Voy a consultarlo con la profe Fla y te paso la info.';\nif (synth?.choices?.[0]?.message?.content) {\n  respuesta = synth.choices[0].message.content.trim();\n}\n\nreturn [{\n  json: {\n    resultado: respuesta,\n    confianza: procData.contexto_encontrado ? 'ALTA' : 'BAJA'\n  }\n}];"
+      },
+      "id": "118a6dc3-5ac1-463b-a3c8-e02133fbc79a",
+      "name": "Retornar al Agente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Mapear Segmentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapear Segmentos": {
+      "main": [
+        [
+          {
+            "node": "Build Query - Conocimiento",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build Query - Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query - Conocimiento": {
+      "main": [
+        [
+          {
+            "node": "Query PostgreSQL - Conocimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query - Config": {
+      "main": [
+        [
+          {
+            "node": "Query PostgreSQL - Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query PostgreSQL - Conocimiento": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query PostgreSQL - Config": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Results": {
+      "main": [
+        [
+          {
+            "node": "Procesar Contextos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Procesar Contextos": {
+      "main": [
+        [
+          {
+            "node": "Sintetizar con OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sintetizar con OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Retornar al Agente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "pregunta": "",
+        "lead_tipo": "",
+        "whatsapp": ""
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec"
+  }
+}
