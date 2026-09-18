@@ -10,7 +10,8 @@ import {
   TrendingUp,
   Clock,
   Target,
-  BookOpen
+  BookOpen,
+  Receipt
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -50,6 +51,11 @@ export const Sidebar = ({ isOpen, onClose }) => {
       to: '/leads',
       label: 'Leads / Pipeline',
       icon: Target
+    },
+    {
+      to: '/pagos-pendientes',
+      label: 'Pagos Pendientes',
+      icon: Receipt
     },
     {
       label: 'Chatwoot',

@@ -15,6 +15,7 @@ import AnalisisTemporalPage from './pages/AnalisisTemporalPage';
 import GestionHorariosPage from './pages/GestionHorariosPage';
 import LeadsPage from './pages/LeadsPage';
 import ConocimientoPage from './pages/ConocimientoPage';
+import PagosPendientesPage from './pages/PagosPendientesPage';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuthContext();
@@ -89,6 +90,14 @@ const AppRoutes = () => {
             path="/leads"
             element={
               <LeadsPage />
+            }
+          />
+
+          {/*PagosPendientesPage*/}
+          <Route
+            path="/pagos-pendientes"
+            element={
+              <PagosPendientesPage />
             }
           />
 
