@@ -1,0 +1,122 @@
+{
+  "n8n_id": "m165FT4fBHG3BbBq",
+  "n8n_name": "etiquetar-alumno",
+  "active": true,
+  "updatedAt": "2026-06-17T23:53:22.185Z",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "whatsapp"
+            },
+            {
+              "name": "tags"
+            }
+          ]
+        }
+      },
+      "id": "b90a1cda-34cf-4887-a434-5e5a6bddfd62",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst { whatsapp, tags } = input;\n\nif (!whatsapp) {\n  throw new Error('whatsapp es requerido');\n}\n\nif (!tags || tags.length === 0) {\n  throw new Error('tags es requerido y debe ser un array');\n}\n\nconst tagsStr = Array.isArray(tags) ? tags.join(',') : tags;\nconst validTags = ['KIDS', 'KIDS-ADOLESCENTES', 'ADULTOS-REGULAR GRUPAL', 'PERSONALIZADO', 'AU_PAIR'];\nconst tagsArray = tagsStr.split(',').map(t => t.trim());\n\nconst invalidTags = tagsArray.filter(tag => !validTags.includes(tag));\nif (invalidTags.length > 0) {\n  throw new Error(`Tags inválidos: ${invalidTags.join(', ')}. Tags válidos: ${validTags.join(', ')}`);\n}\n\nconst query = `UPDATE alumnos SET tags = '${tagsStr}', updated_at = NOW() WHERE whatsapp = '${whatsapp}' RETURNING id, whatsapp, nombre, tags`;\n\nreturn [{ json: { query, whatsapp, tags: tagsStr } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "6d85c525-48ef-4601-a5b2-c42b26edc2de",
+      "name": "Validar entrada"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Validar entrada').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        448,
+        0
+      ],
+      "id": "d7c8d846-130c-4ab8-a7f0-eacfccbe347c",
+      "name": "Actualizar tags",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $('Actualizar tags').first()?.json;\n\nlet response = {\n  success: false,\n  alumno: null\n};\n\nif (result) {\n  response.success = true;\n  response.alumno = {\n    whatsapp: result.whatsapp,\n    nombre: result.nombre,\n    tags: result.tags\n  };\n} else {\n  response.error = 'Alumno no encontrado';\n}\n\nreturn [{ json: response }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        0
+      ],
+      "id": "88e0ba97-a955-458d-9a34-820a26bb4cf8",
+      "name": "Respuesta"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Validar entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar entrada": {
+      "main": [
+        [
+          {
+            "node": "Actualizar tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar tags": {
+      "main": [
+        [
+          {
+            "node": "Respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {}
+}

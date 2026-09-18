@@ -1,0 +1,143 @@
+{
+  "n8n_id": "48EtLxbiQQGE4Snd",
+  "n8n_name": "get-pagos-pendientes",
+  "active": true,
+  "updatedAt": "2026-09-17T22:06:58.378Z",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "get-pagos-pendientes",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a3a10000-0000-0000-0000-000000000001",
+      "name": "Webhook",
+      "webhookId": "ff9c54fb-21bc-403b-a6fb-4a6bf265e6ae"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst query = input.query || {};\nconst { estado, limit = 50, offset = 0 } = query;\n\nconst allowedEstados = ['PENDIENTE_VERIFICACION', 'VERIFICADO', 'RECHAZADO', 'DEVUELTO', 'PENDIENTE_PAGO'];\nconst estadoFilter = estado && allowedEstados.includes(estado) ? `p.estado = '${estado}'` : `p.estado = 'PENDIENTE_VERIFICACION'`;\n\nconst queryList = `SELECT\n  p.id, p.alumno_id, p.horario_id, p.tipo, p.canal, p.monto, p.moneda, p.periodo,\n  p.estado, p.comprobante_url, p.comprobante_fecha, p.comprobante_monto,\n  p.verificado_por, p.verificado_at, p.notas_verificacion, p.created_at,\n  a.nombre AS alumno_nombre, a.whatsapp AS alumno_whatsapp, a.email AS alumno_email,\n  h.nombre AS horario_nombre, h.dia_semana, h.hora_inicio, h.hora_fin\nFROM pagos p\nLEFT JOIN alumnos a ON a.id = p.alumno_id\nLEFT JOIN horarios h ON h.id = p.horario_id\nWHERE ${estadoFilter}\nORDER BY p.created_at DESC\nLIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)};`;\n\nconst queryCount = `SELECT COUNT(*) as total FROM pagos p WHERE ${estadoFilter};`;\n\nreturn [{ json: { queryList, queryCount, limit, offset } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ],
+      "id": "a3a10000-0000-0000-0000-000000000002",
+      "name": "arma query"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('arma query').first().json.queryList }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        400,
+        0
+      ],
+      "id": "a3a10000-0000-0000-0000-000000000003",
+      "name": "Select Pagos",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('arma query').first().json.queryCount }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        600,
+        0
+      ],
+      "id": "a3a10000-0000-0000-0000-000000000004",
+      "name": "Count Total",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $('Select Pagos').all().map(row => row.json).filter(row => row && Object.keys(row).length > 0);\nconst totalData = $('Count Total').first().json;\nconst total = totalData.total;\nconst limit = $input.first().json.limit;\nconst offset = $input.first().json.offset;\n\nreturn [{\n  json: { items, total, limit, offset }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        0
+      ],
+      "id": "a3a10000-0000-0000-0000-000000000005",
+      "name": "respuesta"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "arma query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "arma query": {
+      "main": [
+        [
+          {
+            "node": "Select Pagos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Pagos": {
+      "main": [
+        [
+          {
+            "node": "Count Total",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Count Total": {
+      "main": [
+        [
+          {
+            "node": "respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

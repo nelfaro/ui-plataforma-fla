@@ -1,5 +1,8 @@
 {
-  "name": "conocimiento-post",
+  "n8n_id": "GhS0S7loHc2PPCzi",
+  "n8n_name": "conocimiento-post",
+  "active": true,
+  "updatedAt": "2026-06-22T23:47:12.863Z",
   "nodes": [
     {
       "parameters": {
@@ -10,10 +13,26 @@
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [-600, 0],
-      "id": "webhook",
+      "position": [
+        992,
+        48
+      ],
+      "id": "78bd5671-cd2a-4159-abef-940ff390fe1e",
       "name": "Webhook",
       "webhookId": "conocimiento-post"
+    },
+    {
+      "parameters": {
+        "jsCode": "const resultado = $('Query DB').all();\nconst action = $('Build Query').first().json._action;\n\nif (action === 'delete') {\n  return [{\n    json: {\n      success: true,\n      message: 'Item eliminado correctamente',\n      item: null\n    }\n  }];\n}\n\nconst item = resultado[0]?.json || null;\n\nreturn [{\n  json: {\n    success: true,\n    message: `Item ${action === 'create' ? 'creado' : 'actualizado'} correctamente`,\n    item\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        48
+      ],
+      "id": "6ec2faab-2136-492e-9aef-7e68bc298617",
+      "name": "Response"
     },
     {
       "parameters": {
@@ -21,53 +40,121 @@
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-300, 0],
-      "id": "build_query",
+      "position": [
+        1264,
+        48
+      ],
+      "id": "d3f23058-f5e5-43c6-92c8-98289cf283fd",
       "name": "Build Query"
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "{{ $('build_query').first().json.query }}",
+        "query": "{{ $('Build Query').first().json.query }}",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [0, 0],
-      "id": "query_db",
+      "position": [
+        1504,
+        48
+      ],
+      "id": "0ba643f7-a2de-420d-b213-d864d20098b3",
       "name": "Query DB",
       "credentials": {
         "postgres": {
-          "id": "7vZZbkZhFbmui4On",
+          "id": "wPNcwJLWeQKZlTmC",
           "name": "Postgres account"
         }
       }
-    },
-    {
-      "parameters": {
-        "jsCode": "const resultado = $('query_db').all();\nconst action = $('build_query').first().json._action;\n\nif (action === 'delete') {\n  return [{\n    json: {\n      success: true,\n      message: 'Item eliminado correctamente',\n      item: null\n    }\n  }];\n}\n\nconst item = resultado[0]?.json || null;\n\nreturn [{\n  json: {\n    success: true,\n    message: `Item ${action === 'create' ? 'creado' : 'actualizado'} correctamente`,\n    item\n  }\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [300, 0],
-      "id": "response",
-      "name": "Response"
     }
   ],
   "connections": {
     "Webhook": {
-      "main": [[{"node": "build_query", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Build Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "build_query": {
-      "main": [[{"node": "query_db", "type": "main", "index": 0}]]
+    "Build Query": {
+      "main": [
+        [
+          {
+            "node": "Query DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "query_db": {
-      "main": [[{"node": "response", "type": "main", "index": 0}]]
+    "Query DB": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "agente-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+            "content-length": "28",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "es-419,es;q=0.9",
+            "content-type": "application/json",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2Bxl8q0nh7YNTT92gLklYhX5W1eFpe3VB8%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2BhSkT6aeIYKLKO24E1Je2oJ8VIo9ey2Oo%3D; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX1%2FQFS4T0snFkl1%2BsW7zQY%2BEdz9bWqtw%2Frx7PapleWbUkhuax3D0DVIQh1St95R9d965r66vs499kQ%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX188U%2FhbzUNXB3cFZO9daAf1LJxA8qqvf16O%2FvLnk52Z4dhhtdFZTB3Ze2T3ltY%2Fg4WIvcZ2aB0tK0%2FPth1glE83ztoIxHcvx7i6pp99NQuWQO202f32xDx6R8JhsWkgvrkspujoRlKsp6KpUj%2BTNO2gliG3Zf49ATc%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX1%2BxmDistTO6xcI2FupS1wu0CAJ0wJwevZKxs9K0eIAzwy4M09CFcpurwr5pusACXrJ2u%2FvLcAdIB0Q83i8hiNNsL4%2FR3RfBTav1GqVKnHRr0S1TnYotGyKnO%2FLWQYbM1BQc9%2Bi4pJ1h8sYHVU40xtvtvPRlQ6iHPp01H2o7XzwwDE%2FEoEpoBPa4Otge%2BzxDSxxf9dcMZgniLQ%3D%3D; rl_session=RudderEncrypt%3AU2FsdGVkX1%2FQGOsjwKrihPMrnKVxi5oFXEucb5ssN%2Be5v1zeD1XnkGjQZX9VRzDfjWbsa1Dtjeak88zWmuLTLyL7JB%2FeXLyxeSUkspzmxuD3H1SDeFmhKBtNT%2B%2FfD5I29nkBbSioUT%2F1ydDGj6iTtQ%3D%3D; ph_phc_kMstNfAgBcBkWSh6KdsgN09heqqNe5VNmalHP1Ni9Q4_posthog=%7B%22%24device_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22distinct_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22%24sesid%22%3A%5B1782167413876%2C%22019ef16f-2f89-77d1-ae29-383cdd545587%22%2C1782167056261%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fasistente-ia-fla-n8n.x5miqk.easypanel.host%2Fworkflow%2FovC7bSUVy2yM6k1L%22%7D%2C%22%24user_state%22%3A%22anonymous%22%7D",
+            "origin": "https://agente-fla-ui-plataforma.x5miqk.easypanel.host",
+            "priority": "u=1, i",
+            "referer": "https://agente-fla-ui-plataforma.x5miqk.easypanel.host/conocimiento",
+            "sec-ch-ua": "\"Google Chrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "x-forwarded-for": "201.235.17.183, 10.11.0.23, 172.18.0.1",
+            "x-forwarded-host": "agente-fla-ui-plataforma.x5miqk.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "17792bd965dd",
+            "x-real-ip": "10.11.0.23"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "id": 26,
+            "_action": "delete"
+          },
+          "webhookUrl": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/conocimiento-post",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
   }
 }

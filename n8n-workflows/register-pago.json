@@ -1,0 +1,216 @@
+{
+  "n8n_id": "OptI5tQlHynoPvZi",
+  "n8n_name": "register-pago",
+  "active": true,
+  "updatedAt": "2026-07-29T23:10:01.772Z",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "register-pago",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -240,
+        224
+      ],
+      "id": "e471f304-95ce-4630-b375-049b120ee48f",
+      "name": "Webhook",
+      "webhookId": "c0c94ff7-41d1-41cb-9e2e-8ab226e693ff"
+    },
+    {
+      "parameters": {
+        "jsCode": "const pagoCrud = $('Insert Pago').first().json;\n\nreturn [{\n  json: {\n    success: true,\n    mensaje: 'Pago registrado correctamente',\n    pago_id: pagoCrud.id,\n    alumno_id: pagoCrud.alumno_id\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        784,
+        224
+      ],
+      "id": "5bbe821a-53e7-44ba-b8d1-01b2285c2839",
+      "name": "respuesta"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst bodyData = input.body || {};\nconst { alumno_id, monto, fecha_pago, tipo_pago, metodo, nota, registrado_por } = bodyData;\n\nconsole.log('Body Data:', JSON.stringify(bodyData));\n\nif (!alumno_id || !monto || !fecha_pago || !tipo_pago) {\n  throw new Error(`Faltan campos. Recibido: ${JSON.stringify(bodyData)}`);\n}\n\nif (monto <= 0) {\n  throw new Error('El monto debe ser mayor a 0');\n}\n\nlet queryPago = '';\n\n// Si es pago MANUAL\nif (tipo_pago === 'MANUAL') {\n  queryPago = `INSERT INTO pagos_manuales (alumno_id, monto, fecha_pago, metodo, nota, registrado_por)\nVALUES (${parseInt(alumno_id)}, ${parseFloat(monto)}, '${fecha_pago}', '${metodo || 'EFECTIVO'}', ${nota ? `'${nota.replace(/'/g, \"''\")}'` : 'null'}, ${registrado_por ? `'${registrado_por}'` : 'null'})\nRETURNING id, alumno_id, monto, fecha_pago;`;\n}\n// Si es pago MERCADO PAGO\nelse if (tipo_pago === 'MERCADO_PAGO') {\n  queryPago = `INSERT INTO pagos (alumno_id, tipo, canal, monto, moneda, periodo, estado, comprobante_fecha)\nVALUES (${parseInt(alumno_id)}, 'CUOTA_MENSUAL', 'MERCADOPAGO', ${parseFloat(monto)}, 'ARS', 'JULIO', 'VERIFICADO', '${fecha_pago}')\nRETURNING id, alumno_id, monto, comprobante_fecha;`;\n}\n\nif (!queryPago) {\n  throw new Error(`tipo_pago inválido: \"${tipo_pago}\"`);\n}\n\n// Query 2: UPDATE en tabla alumnos\nconst queryAlumno = `UPDATE alumnos\nSET estado_pago = 'PAGADO',\n    fecha_pago_ultimo = '${fecha_pago}',\n    updated_at = NOW()\nWHERE id = ${parseInt(alumno_id)}\nRETURNING id, estado_pago, fecha_pago_ultimo;`;\n\nreturn [{\n  json: { queryPago, queryAlumno, alumno_id, tipo_pago }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        224
+      ],
+      "id": "168e6ed6-525b-4186-bdd0-445866f10070",
+      "name": "valida y arma querys"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('valida y arma querys').first().json.queryAlumno }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        576,
+        224
+      ],
+      "id": "798c0fd2-009f-46cb-ac70-76200f83be67",
+      "name": "Insert Pago",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.queryPago }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        368,
+        224
+      ],
+      "id": "4a3725c4-a643-4475-a7bb-c95ee6dc4c5d",
+      "name": "registra pago",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/auth-validate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $input.first().json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "767ca89f-6350-40e3-ace7-907ce7d60655",
+      "name": "Validador",
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "valida y arma querys",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "valida y arma querys": {
+      "main": [
+        [
+          {
+            "node": "registra pago",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Pago": {
+      "main": [
+        [
+          {
+            "node": "respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "registra pago": {
+      "main": [
+        [
+          {
+            "node": "Insert Pago",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "agente-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+            "content-length": "151",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "es-US,es-419;q=0.9,es;q=0.8",
+            "content-type": "application/json",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2Boka1BbzEjnHEJJ7x96fSmMVoJ%2FqUNvNE%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2FBXaykxoTZrC9AJuSXunN0Fp74zumPNCI%3D; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX1%2B8y2MnkQdLaq2nC9O9CnuOCu15elbNyXWLPy8wEpC9aBEFHJXlAXJ4FBEbo0ra7d9FIlpX74AJeg%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX18xBs8jLWPYE0WKZQCnIX4aFcdCaUo1L6vNimHlG%2FxFndUyT85oexjy0JXr%2Bc%2B%2FCmo8QLRxGx7OJ%2FLlQ0FzhoQ2aOZkqXmN2D0zrqcnOSpWSOy8m%2Bpl02gFzxEFhmTGrG0hyfeRXYQKcm%2FWKmBZkLvjpX1E9rs%2B8KQ%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX19bzPRMmoeBcXMVY61GufziHL%2FyCKvXQVQAhDW0ZEFLW4HFjiHvn1cmchpGXBX%2Bj4u6md5nMJNnG7Y%2FgDPIayIycMRM8%2F%2FYCTcnZ8E1H6355wPuzjpG8ouIrL9Kt1GC2cFpAfVVJSeW8kSi5YsDKqYQM3pCz3BQVcmdqL8etdjU972bvsvP%2BdvH1bp12XptcrpLt9VXCVjnbA%3D%3D; rl_session=RudderEncrypt%3AU2FsdGVkX19rL0kJqNs5Q7EIIzSLDbu8oRJgGV0EbJ%2BO%2BaEdmGoyeOCsKAWDIADQUu7hH7abnR4qoU1LZdq3AwHQmhzZVDuD0HZC4HpP%2B%2BIoFDs1cbRw9GdD36GbxS2VEjubO5GcmMdpJ7917pH52w%3D%3D; ph_phc_kMstNfAgBcBkWSh6KdsgN09heqqNe5VNmalHP1Ni9Q4_posthog=%7B%22%24device_id%22%3A%22814a943ea599cccfa2e87d6900d68005d28cac5224ad5cfffb46be2401582121%230048eb28-ffca-49ae-b723-ab36a0f6a6ed%22%2C%22distinct_id%22%3A%22814a943ea599cccfa2e87d6900d68005d28cac5224ad5cfffb46be2401582121%230048eb28-ffca-49ae-b723-ab36a0f6a6ed%22%2C%22%24sesid%22%3A%5Bnull%2Cnull%2Cnull%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fn8n.escalia.com.ar%2Fsignin%3Fredirect%3D%25252Fworkflow%25252FmwVrZiqJYQDno4Kk%22%7D%2C%22%24user_state%22%3A%22anonymous%22%7D",
+            "origin": "https://gestionfla.escalia.com.ar",
+            "priority": "u=1, i",
+            "referer": "https://gestionfla.escalia.com.ar/alumno/3",
+            "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\", \"Google Chrome\";v=\"150\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "x-api-key": "",
+            "x-forwarded-for": "201.235.17.183, 10.11.0.16, 172.18.0.1",
+            "x-forwarded-host": "gestionfla.escalia.com.ar",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "ca60eb9448e6",
+            "x-real-ip": "10.11.0.16"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "alumno_id": 3,
+            "monto": 97000,
+            "fecha_pago": "2026-07-29",
+            "tipo_pago": "MERCADO_PAGO",
+            "metodo": "TRANSFERENCIA",
+            "nota": "",
+            "registrado_por": "usuario_actual"
+          },
+          "webhookUrl": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/register-pago",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
+}

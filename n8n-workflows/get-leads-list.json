@@ -1,1 +1,179 @@
-{"name":"get-leads-list","active":true,"nodes":[{"parameters":{"path":"get-leads-list","responseMode":"lastNode","options":{}},"type":"n8n-nodes-base.webhook","typeVersion":2.1,"position":[-300,0],"id":"webhook","name":"Webhook","webhookId":"get-leads-list"},{"parameters":{"jsCode":"const input = $input.first().json;\nconst query = input.query || {};\nconst { search, estado, lead_tipo, origen, limit = 50, offset = 0 } = query;\n\nconst searchPattern = search ? `%${search}%` : '%';\nconst allowedEstados = ['NUEVO', 'FRIO', 'TIBIO', 'CALIENTE'];\nconst estadoFilter = estado && allowedEstados.includes(estado) ? `estado = '${estado}'` : `estado IN ('NUEVO','FRIO','TIBIO','CALIENTE')`;\n\nconst queryList = `SELECT id, nombre, apellido, whatsapp, email, lead_tipo, origen, nivel, estado, resumen, ultimo_contacto, created_at FROM leads\nWHERE (nombre ILIKE '${searchPattern}' OR whatsapp ILIKE '${searchPattern}' OR email ILIKE '${searchPattern}')\nAND (${estadoFilter})\nAND (${lead_tipo ? `lead_tipo = '${lead_tipo}'` : 'true'})\nAND (${origen ? `origen = '${origen}'` : 'true'})\nORDER BY ultimo_contacto DESC NULLS LAST\nLIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)};`;\n\nconst queryCount = `SELECT COUNT(*) as total FROM leads\nWHERE (nombre ILIKE '${searchPattern}' OR whatsapp ILIKE '${searchPattern}' OR email ILIKE '${searchPattern}')\nAND (${estadoFilter})\nAND (${lead_tipo ? `lead_tipo = '${lead_tipo}'` : 'true'})\nAND (${origen ? `origen = '${origen}'` : 'true'});`;\n\nreturn [{json: {queryList, queryCount, limit, offset}}];"},"type":"n8n-nodes-base.code","typeVersion":2,"position":[-100,0],"id":"build_query","name":"Build Query"},{"parameters":{"operation":"executeQuery","query":"{{ $('build_query').first().json.queryList }}","options":{}},"type":"n8n-nodes-base.postgres","typeVersion":2.6,"position":[100,0],"id":"get_leads","name":"PostgreSQL - List","credentials":{"postgres":{"id":"7vZZbkZhFbmui4On","name":"Postgres account"}}},{"parameters":{"operation":"executeQuery","query":"{{ $('build_query').first().json.queryCount }}","options":{}},"type":"n8n-nodes-base.postgres","typeVersion":2.6,"position":[100,120],"id":"count_leads","name":"PostgreSQL - Count","credentials":{"postgres":{"id":"7vZZbkZhFbmui4On","name":"Postgres account"}}},{"parameters":{"jsCode":"const listData = $('get_leads').all();\nconst countData = $('count_leads').all();\nconst total = countData[0]?.json?.total || 0;\nconst items = listData.map(row => row.json);\n\nreturn [{json: {success: true, items: items, total: parseInt(total), count: items.length}}];"},"type":"n8n-nodes-base.code","typeVersion":2,"position":[300,60],"id":"response","name":"Response"}],"connections":{"Webhook":{"main":[[{"node":"build_query","type":"main","index":0}]]},"build_query":{"main":[[{"node":"get_leads","type":"main","index":0}]]},"get_leads":{"main":[[{"node":"count_leads","type":"main","index":0}]]},"count_leads":{"main":[[{"node":"response","type":"main","index":0}]]}},"settings":{"executionOrder":"v1","binaryMode":"separate"}}
+{
+  "n8n_id": "8TOuiMIoHqZO0GLZ",
+  "n8n_name": "get-leads-list",
+  "active": true,
+  "updatedAt": "2026-06-29T21:07:50.356Z",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "get-leads-list",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -32,
+        -16
+      ],
+      "id": "e6be6b35-9858-435b-987e-54a27fbd105b",
+      "name": "Webhook",
+      "webhookId": "get-leads-list"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst query = input.query || {};\nconst { search, estado, lead_tipo, origen, limit = 50, offset = 0 } = query;\n\nconst searchPattern = search ? `%${search}%` : '%';\nconst allowedEstados = ['NUEVO', 'FRIO', 'TIBIO', 'CALIENTE'];\nconst estadoFilter = estado && allowedEstados.includes(estado) ? `estado = '${estado}'` : `estado IN ('NUEVO','FRIO','TIBIO','CALIENTE')`;\n\nconst queryList = `SELECT id, nombre, apellido, whatsapp, email, lead_tipo, origen, nivel, estado, resumen, ultimo_contacto, created_at FROM leads\nWHERE (nombre ILIKE '${searchPattern}' OR whatsapp ILIKE '${searchPattern}' OR email ILIKE '${searchPattern}')\nAND (${estadoFilter})\nAND (${lead_tipo ? `lead_tipo = '${lead_tipo}'` : 'true'})\nAND (${origen ? `origen = '${origen}'` : 'true'})\nORDER BY ultimo_contacto DESC NULLS LAST\nLIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)};`;\n\nconst queryCount = `SELECT COUNT(*) as total FROM leads\nWHERE (nombre ILIKE '${searchPattern}' OR whatsapp ILIKE '${searchPattern}' OR email ILIKE '${searchPattern}')\nAND (${estadoFilter})\nAND (${lead_tipo ? `lead_tipo = '${lead_tipo}'` : 'true'})\nAND (${origen ? `origen = '${origen}'` : 'true'});`;\n\nreturn [{json: {queryList, queryCount, limit, offset}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -16
+      ],
+      "id": "c6065e65-6931-497d-9207-143ec6707dbd",
+      "name": "Build Query"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query').first().json.queryList }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        368,
+        -16
+      ],
+      "id": "798e6e41-da81-4a95-8bd8-fd8a4238993a",
+      "name": "PostgreSQL - List",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query').first().json.queryCount }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        592,
+        -16
+      ],
+      "id": "19956592-ac20-4125-9832-7956bdd19bba",
+      "name": "PostgreSQL - Count",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const listData = $('PostgreSQL - List').all();\nconst countData = $('PostgreSQL - Count').all();\nconst total = countData[0]?.json?.total || 0;\nconst items = listData.map(row => row.json);\n\nreturn [{json: {success: true, items: items, total: parseInt(total), count: items.length}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        -16
+      ],
+      "id": "bc0b0563-9186-4fa5-ab4b-7c0e6a3de176",
+      "name": "Response"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - List": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Count": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "agente-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "curl/8.4.0",
+            "accept": "*/*",
+            "content-type": "application/json",
+            "x-forwarded-for": "201.235.17.183",
+            "x-forwarded-host": "agente-fla-n8n.x5miqk.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "17792bd965dd",
+            "x-real-ip": "201.235.17.183",
+            "accept-encoding": "gzip"
+          },
+          "params": {},
+          "query": {
+            "limit": "5",
+            "offset": "0"
+          },
+          "body": {},
+          "webhookUrl": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/get-leads-list",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
+}

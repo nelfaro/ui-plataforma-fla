@@ -1,0 +1,151 @@
+{
+  "n8n_id": "PI2Hz5ZH8zKVVGBp",
+  "n8n_name": "Analytics Weekly",
+  "active": true,
+  "updatedAt": "2026-06-23T19:58:22.142Z",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "get-analytics-weekly",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -80,
+        224
+      ],
+      "id": "5dfa6e90-c250-4c08-afd0-2091dd7925da",
+      "name": "Webhook",
+      "webhookId": "cf2db7c7-f46d-45cc-a095-2e48d74dae8b"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH dias AS (\n    SELECT generate_series(\n        '{{ $json.query.startDate }}'::date,\n        '{{ $json.query.endDate }}'::date,\n        '1 day'::interval\n    )::date AS fecha_calendario\n)\nSELECT\n    TO_CHAR(d.fecha_calendario, 'Day') as name,\n    COALESCE(COUNT(DISTINCT l.id), 0)::integer as chats,\n    COALESCE(COUNT(DISTINCT a.id), 0)::integer as registros\nFROM dias d\nLEFT JOIN conversation_log l ON DATE(l.created_at) = d.fecha_calendario\nLEFT JOIN alumnos a ON DATE(a.ultimo_contacto) = d.fecha_calendario\nGROUP BY d.fecha_calendario\nORDER BY d.fecha_calendario ASC;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        208,
+        224
+      ],
+      "id": "064b4486-ce62-49e2-b5aa-c65228218c2c",
+      "name": "obtener datos",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $('obtener datos').all();\nreturn data.map(row => ({\n  json: {\n    name: row.json.name || 'Sin datos',\n    chats: parseInt(row.json.chats) || 0,\n    registros: parseInt(row.json.registros) || 0\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        224
+      ],
+      "id": "58a9ca50-f1cf-4e90-9c08-c832dddbc3a7",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/auth-validate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $input.first().json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7355c7a6-75f6-4aa2-a07b-460b48fa06eb",
+      "name": "Validador",
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "obtener datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtener datos": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "agente-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "es-419,es;q=0.9",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2Bxl8q0nh7YNTT92gLklYhX5W1eFpe3VB8%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2BhSkT6aeIYKLKO24E1Je2oJ8VIo9ey2Oo%3D; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX1%2FUhncCnyfv23JnzWtsYVKjJrxMBVDCQtjmivMCFCR33iV9kSEV6ewve3q3wMDpByMjDg%2BfR%2BbjNg%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX1%2BqS4gFu89jWMtO7LZhTvdrjgtr8SaBvGTDb8kEACUfy1H0Wgm9jQygyyeHE%2F0sd%2BMzbHzMAezkB0rbqZAP8B6621i3RxoIOdZhdMHCsbetVyHMi23n1kjSBItZHfAQ91vKCZaA8eQZRFTz62QGYUtcsorsEtNYjas%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX1%2B2fRO3PqmswGUeqmO12pVXADECerV%2FsaZ8Bx7TG0Lde3OXLKjPYvQj%2BrdpPYDBxwSbRGqF8EwxcO5H7JGKZ%2BoxagTCxIKG%2FBR9s%2B6muLESPcpIh76zAwa71wEBXc2VV%2FK5Jm9v8lTuYsdRSCXObTyQh8J3oYAyUNl9xXC02bX8VPxTCjd6Syc6XljTR2CTsqpYML5zk3dogQ%3D%3D; ph_phc_kMstNfAgBcBkWSh6KdsgN09heqqNe5VNmalHP1Ni9Q4_posthog=%7B%22%24device_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22distinct_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22%24sesid%22%3A%5B1782243831084%2C%22019ef600-0a2d-7f65-b626-32a28d6348d0%22%2C1782243658285%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fasistente-ia-fla-n8n.x5miqk.easypanel.host%2Fworkflow%2FovC7bSUVy2yM6k1L%22%7D%2C%22%24user_state%22%3A%22anonymous%22%7D; rl_session=RudderEncrypt%3AU2FsdGVkX1%2BPhfqFskLBDYyzCFzt7qj8joLYGkE4uNZiIttS2rE3dj6qTC4UwS4rJ6QgNGtLkRAX4fBnl5uG6cUIK0KRQWZkUCZRV%2BTkmEex%2FzOfl3W4efdYHnILT9jHGEA4Iq9VIK43PbaRDYS5Rw%3D%3D",
+            "if-none-match": "W/\"2c-2OrcYPovOD1iMcAETyfOEJVDxB0\"",
+            "priority": "u=1, i",
+            "referer": "https://agente-fla-ui-plataforma.x5miqk.easypanel.host/dashboard",
+            "sec-ch-ua": "\"Google Chrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "x-forwarded-for": "201.235.17.183, 10.11.0.23, 172.18.0.1",
+            "x-forwarded-host": "agente-fla-ui-plataforma.x5miqk.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "17792bd965dd",
+            "x-real-ip": "10.11.0.23"
+          },
+          "params": {},
+          "query": {
+            "startDate": "2026-03-01",
+            "endDate": "2026-06-23"
+          },
+          "body": {},
+          "webhookUrl": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/get-analytics-weekly",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
+}

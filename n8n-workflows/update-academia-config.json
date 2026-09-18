@@ -1,4 +1,8 @@
 {
+  "n8n_id": "DrwgkVFQvCQQ1iff",
+  "n8n_name": "update-academia-config",
+  "active": true,
+  "updatedAt": "2026-07-06T21:02:03.420Z",
   "nodes": [
     {
       "parameters": {
@@ -7,39 +11,35 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "webhook",
+      "id": "6c328a08-0367-4b4b-99a1-044d2329c7e9",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
-      "position": [-528, 112],
+      "typeVersion": 1,
+      "position": [
+        2016,
+        976
+      ],
       "webhookId": "update-academia-config"
-    },
-    {
-      "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst body = input.body || input;\n\nconst fields = [\n  'nombre_academia', 'nombre_profe', 'email', 'telefono',\n  'ubicacion_direccion', 'ubicacion_localidad', 'horario_atencion',\n  'banco', 'cbu', 'alias', 'linktree_url',\n  'instagram', 'facebook', 'politica_cancelacion',\n  'politica_recuperacion', 'politica_reembolso'\n];\n\nconst values = [];\nlet hasUpdates = false;\n\nfor (const field of fields) {\n  const value = body[field];\n  if (value !== undefined && value !== null && value !== '') {\n    const escaped = String(value).replace(/'/g, \"''\");\n    values.push(`('${field}', '${escaped}', NOW())`);\n    hasUpdates = true;\n  }\n}\n\nlet query = null;\nif (hasUpdates) {\n  query = `INSERT INTO academia_config (clave, valor, updated_at) \nVALUES ${values.join(', ')} \nON CONFLICT (clave) DO UPDATE SET valor = EXCLUDED.valor, updated_at = NOW()\nRETURNING clave, valor;`;\n}\n\nreturn [{\n  json: {\n    query,\n    hasUpdates,\n    values\n  }\n}];"
-      },
-      "id": "arma_query",
-      "name": "Build Query",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [-288, 112]
     },
     {
       "parameters": {
         "conditions": {
           "boolean": [
             {
-              "comparator": "true",
-              "value1": "={{ $json.hasUpdates }}"
+              "value1": "={{ $json.hasUpdates }}",
+              "value2": "={{ true }}"
             }
           ]
         }
       },
-      "id": "check_updates",
+      "id": "095a1588-3405-4af7-982c-98256ba8dc11",
       "name": "Check Updates",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [-96, 0]
+      "position": [
+        2416,
+        864
+      ]
     },
     {
       "parameters": {
@@ -47,14 +47,17 @@
         "query": "{{ $json.query }}",
         "options": {}
       },
-      "id": "postgres_query",
+      "id": "81ce253f-0337-4525-a34c-8c33d5b91fd2",
       "name": "PostgreSQL - Query",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [120, -96],
+      "position": [
+        2624,
+        768
+      ],
       "credentials": {
         "postgres": {
-          "id": "7vZZbkZhFbmui4On",
+          "id": "wPNcwJLWeQKZlTmC",
           "name": "Postgres account"
         }
       }
@@ -63,55 +66,195 @@
       "parameters": {
         "jsCode": "const results = $input.all();\nconst config = {};\n\nfor (const row of results) {\n  const data = row.json;\n  if (data.clave && data.valor !== undefined) {\n    config[data.clave] = data.valor;\n  }\n}\n\nreturn [{\n  json: {\n    success: true,\n    message: 'Configuración actualizada exitosamente',\n    config\n  }\n}];"
       },
-      "id": "format_response",
+      "id": "906eefd6-bef7-4318-ab0a-41051ea1108c",
       "name": "Format Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [312, -96]
+      "position": [
+        2816,
+        768
+      ]
     },
     {
       "parameters": {
         "jsCode": "return [{\n  json: {\n    success: false,\n    message: 'No hay campos para actualizar',\n    config: {}\n  }\n}];"
       },
-      "id": "no_updates",
+      "id": "f73635de-271c-4212-b1b3-2b4b3dc50095",
       "name": "No Updates Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [120, 240]
+      "position": [
+        2624,
+        1104
+      ]
     },
     {
       "parameters": {
         "options": {}
       },
-      "id": "response",
+      "id": "edee5f2f-81dd-4ac6-8ca6-b535004b0999",
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [504, 0]
+      "position": [
+        3008,
+        864
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst body = input.body || input;\n\nconst fields = [\n  'nombre_academia', 'nombre_profe', 'email', 'telefono',\n  'ubicacion_direccion', 'ubicacion_localidad', 'horario_atencion',\n  'banco', 'cbu', 'alias', 'linktree_url',\n  'instagram', 'facebook', 'politica_cancelacion',\n  'politica_recuperacion', 'politica_reembolso'\n];\n\nconst values = [];\nlet hasUpdates = false;\n\nfor (const field of fields) {\n  const value = body[field];\n  if (value !== undefined && value !== null && value !== '') {\n    const escaped = String(value).replace(/'/g, \"''\");\n    values.push(`('${field}', '${escaped}', NOW())`);\n    hasUpdates = true;\n  }\n}\n\nlet query = null;\nif (hasUpdates) {\n  query = `INSERT INTO academia_config (clave, valor, updated_at) \nVALUES ${values.join(', ')} \nON CONFLICT (clave) DO UPDATE SET valor = EXCLUDED.valor, updated_at = NOW()\nRETURNING clave, valor;`;\n}\n\nreturn [{\n  json: {\n    query,\n    hasUpdates,\n    values\n  }\n}];"
+      },
+      "id": "222a1edf-fe82-4f46-baa9-a8201c420587",
+      "name": "Build Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        912
+      ]
     }
   ],
   "connections": {
     "Webhook": {
-      "main": [[{"node": "Build Query", "type": "main", "index": 0}]]
-    },
-    "Build Query": {
-      "main": [[{"node": "Check Updates", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Build Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Check Updates": {
       "main": [
-        [{"node": "PostgreSQL - Query", "type": "main", "index": 0}],
-        [{"node": "No Updates Response", "type": "main", "index": 0}]
+        [
+          {
+            "node": "PostgreSQL - Query",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Updates Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "PostgreSQL - Query": {
-      "main": [[{"node": "Format Response", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Format Response": {
-      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "No Updates Response": {
-      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query": {
+      "main": [
+        [
+          {
+            "node": "Check Updates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "agente-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+            "content-length": "316",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "es-419,es;q=0.9",
+            "content-type": "application/json",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2Bxl8q0nh7YNTT92gLklYhX5W1eFpe3VB8%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2BhSkT6aeIYKLKO24E1Je2oJ8VIo9ey2Oo%3D; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX19PNyiQq6hWQToCuL0qYrtS7C2IeoKs4ALqx6zOTlXTV065aihAtBrJL1Kr1PyEqnGh7EphYukdoA%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX1%2FNwJFTcQ%2Bf8wYPBunfCOnf4ymIgQvDIzdsG%2FnkCBWlQ7NAWiC5RwhodyC6n7kT5QTiUOU0h4bdcaLEaVYbg096SQLtvoCGLYzxvBpCschSJ7XDVLgpyGcpyKNRsCscOiLbBynhXUIyvPfmkVyiQsuYpRDA5%2ByptXY%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX1%2BhowepcGJx%2FvWMHanb3rniI158VwyQL0PqrwsW6BQQc7HvGnsGJEerrsH3sE6sWMuXzSbjvpAOm9XkBEru5LwkTa935w4kHUhs7RI0%2FFwCGigf8ToTtRZROmojlwxx5FD6Ly78OXVIWg%2ByxziKKOJ0dSChjRHW6WIoMmsPVO%2FaZtp1iy9smRZjcliwglfnyF25bBXuykLXFQ%3D%3D; rl_session=RudderEncrypt%3AU2FsdGVkX1%2BkcyB2YwLxYjwGV3I0mRDUHQ3Se3HmWp3WWUiJhhqjtj9od6dDBft8vrS6JdHqsuFk1F9uaxNecxU21XRcS7hT2sVKkxfPlTi87rSZ9kII04NuklbCRhslVFRGad1eXqygrSKRfidx6A%3D%3D; ph_phc_kMstNfAgBcBkWSh6KdsgN09heqqNe5VNmalHP1Ni9Q4_posthog=%7B%22%24device_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22distinct_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22%24sesid%22%3A%5B1783370412566%2C%22019f3926-9f10-783c-8925-373fcfc70c58%22%2C1783370260232%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fasistente-ia-fla-n8n.x5miqk.easypanel.host%2Fworkflow%2FovC7bSUVy2yM6k1L%22%7D%2C%22%24user_state%22%3A%22anonymous%22%7D",
+            "origin": "https://agente-fla-ui-plataforma.x5miqk.easypanel.host",
+            "priority": "u=1, i",
+            "referer": "https://agente-fla-ui-plataforma.x5miqk.easypanel.host/settings",
+            "sec-ch-ua": "\"Google Chrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "x-forwarded-for": "201.235.17.183, 10.11.0.23, 172.18.0.1",
+            "x-forwarded-host": "agente-fla-ui-plataforma.x5miqk.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "17792bd965dd",
+            "x-real-ip": "10.11.0.23"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "nombre_academia": "Clases de ingles con fla",
+            "nombre_profe": "",
+            "email": "",
+            "telefono": "",
+            "ubicacion_direccion": "",
+            "ubicacion_localidad": "",
+            "horario_atencion": "",
+            "banco": "",
+            "cbu": "",
+            "alias": "",
+            "linktree_url": "",
+            "instagram": "",
+            "facebook": "",
+            "politica_cancelacion": "",
+            "politica_recuperacion": "",
+            "politica_reembolso": ""
+          },
+          "webhookUrl": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/update-academia-config",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
 }

@@ -1,0 +1,135 @@
+{
+  "n8n_id": "o9FzNUWDYQzjjJEj",
+  "n8n_name": "KPIs Dashboard",
+  "active": true,
+  "updatedAt": "2026-07-03T01:14:10.315Z",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "get-kpis",
+        "responseMode": "lastNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -128,
+        160
+      ],
+      "id": "33c320a6-7260-40ac-9a10-8e54a647a8d2",
+      "name": "Webhook",
+      "webhookId": "2af37b89-70ff-46b1-a31d-5c0c778a8df4"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    COALESCE(SUM(CASE WHEN estado IN ('REGISTRADO', 'ACTIVO') THEN 1 ELSE 0 END), 0)::integer as registrados,\n    COALESCE(SUM(CASE WHEN estado = 'CALIFICADO' THEN 1 ELSE 0 END), 0)::integer as leads_calificados,\n    COALESCE(SUM(CASE WHEN DATE(ultimo_contacto) >= '{{ $json.query.startDate }}'::date AND DATE(ultimo_contacto) <= '{{ $json.query.endDate }}'::date THEN 1 ELSE 0 END), 0)::integer as leads_nuevos_mes,\n    0.0::numeric as tasa_conversion_pct,\n    0::integer as ingresos_mes\nFROM alumnos\nWHERE DATE(ultimo_contacto) >= '{{ $json.query.startDate }}'::date\nAND DATE(ultimo_contacto) <= '{{ $json.query.endDate }}'::date",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        160,
+        160
+      ],
+      "id": "6aa4d123-31ea-4b56-a187-926e0267193e",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $('Execute a SQL query').first().json;\nreturn [\n  {\n    json: {\n      registrados: parseInt(data.registrados) || 0,\n      leads_calificados: parseInt(data.leads_calificados) || 0,\n      leads_nuevos_mes: parseInt(data.leads_nuevos_mes) || 0,\n      tasa_conversion_pct: parseFloat(data.tasa_conversion_pct) || 0,\n      ingresos_mes: parseInt(data.ingresos_mes) || 0\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        160
+      ],
+      "id": "c3b52ca0-46c9-473e-99bc-bca5ba81d7e8",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "agente-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "es-419,es;q=0.9",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2Bxl8q0nh7YNTT92gLklYhX5W1eFpe3VB8%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2BhSkT6aeIYKLKO24E1Je2oJ8VIo9ey2Oo%3D; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX18%2BEjqwsTDs3OXezi9u8R4OBWoUtx9%2BfjZ13Yowl%2BbCc19%2FoECrQNkRpVOz60vk0Z9mQhPfxsw0ZA%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX19R7NJTMHjAGCV1Jf%2BLPdMWJYvc6xMShydlWoyUmEGedwGx2%2F7cbHJ9P%2F0zt82JbqtDqM%2BWsW%2BAXm728PuMTlKQ5i6c2AcUQxqEur7wMPCMCFb2CPtIjHqmx9BJvq4dwq5ceIp3UKUMGloqxgU2bscQSFgFirzoReY%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX18%2F049ZTUL2yHK3wZFgryjmBN%2Bb0n4816G352xKnPOf8aurm26pHQCsUVokw8zqY0%2B4B2FBEFFq3RKikG8%2B%2F9U2r9IETJxYipWtAL5wffuF9j43sfJlL5f%2BNX0UQoEJYEGmyry%2FMi301kzorsbojxeE2noAQFw0fxMow0Rrze69RqL3ZkDi8wNfJRcbAemlj2VTjyBXPb3w9w%3D%3D; rl_session=RudderEncrypt%3AU2FsdGVkX1%2FItaOGrUrEmsyNv5fvkqV%2Fpl3Iw1DZ2kgKMJe5X3gG1KQTnqYgdkdrHM6KevfhATASPeubDHcLMdO6Ze2RxyUik3Vho5QltJENERmbD82b2II6CfXH09VSyUI3KjV6QRAPRamKintMCw%3D%3D; ph_phc_kMstNfAgBcBkWSh6KdsgN09heqqNe5VNmalHP1Ni9Q4_posthog=%7B%22%24device_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22distinct_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22%24sesid%22%3A%5B1782244767492%2C%22019ef600-0a2d-7f65-b626-32a28d6348d0%22%2C1782243658285%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fasistente-ia-fla-n8n.x5miqk.easypanel.host%2Fworkflow%2FovC7bSUVy2yM6k1L%22%7D%2C%22%24user_state%22%3A%22anonymous%22%7D",
+            "if-none-match": "W/\"65-ONIFAI2D7qe+Wl/quLOuRi5P+P0\"",
+            "priority": "u=1, i",
+            "referer": "https://agente-fla-ui-plataforma.x5miqk.easypanel.host/dashboard",
+            "sec-ch-ua": "\"Google Chrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "x-forwarded-for": "201.235.17.183, 10.11.0.23, 172.18.0.1",
+            "x-forwarded-host": "agente-fla-ui-plataforma.x5miqk.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "17792bd965dd",
+            "x-real-ip": "10.11.0.23"
+          },
+          "params": {},
+          "query": {
+            "startDate": "2026-06-01",
+            "endDate": "2026-06-23"
+          },
+          "body": {},
+          "webhookUrl": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/get-kpis",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
+}

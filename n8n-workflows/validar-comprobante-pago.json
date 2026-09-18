@@ -1,0 +1,431 @@
+{
+  "n8n_id": "ezOhxxvYhWCTBVeO",
+  "n8n_name": "validar-comprobante-pago",
+  "active": false,
+  "updatedAt": "2026-06-18T00:09:24.023Z",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "whatsapp"
+            },
+            {
+              "name": "comprobante_url"
+            },
+            {
+              "name": "comprobante_tipo"
+            }
+          ]
+        }
+      },
+      "id": "9c2dc853-6799-49eb-8b19-002dd8d2767e",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst { whatsapp, comprobante_url, comprobante_tipo } = input;\n\nif (!whatsapp || !comprobante_url || !comprobante_tipo) {\n  throw new Error('whatsapp, comprobante_url y comprobante_tipo son requeridos');\n}\n\nif (!['image', 'pdf'].includes(comprobante_tipo)) {\n  throw new Error('comprobante_tipo debe ser image o pdf');\n}\n\nconst timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);\nconst filename = `comprobante_${timestamp}`;\nconst folder_path = `Comprobantes Pago/${whatsapp}`;\n\nreturn [{ json: { whatsapp, comprobante_url, comprobante_tipo, filename, folder_path, timestamp } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "154b5650-a9d3-460b-9bc0-b1910806e72a",
+      "name": "Validar entrada"
+    },
+    {
+      "parameters": {
+        "url": "{{ $json.comprobante_url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "afd1d019-9b21-471d-8c1e-4725d5fbc692",
+      "name": "Descargar comprobante"
+    },
+    {
+      "parameters": {
+        "jsCode": "const tipo = $('Validar entrada').first().json.comprobante_tipo;\nconst buffer = $input.first().json.data;\n\nif (tipo === 'image') {\n  return [{ json: { data: buffer, tipo: 'image' } }];\n} else {\n  return [{ json: { data: buffer, tipo: 'pdf' } }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        0
+      ],
+      "id": "4691ac7f-4604-496a-8519-f1f1bd94b19f",
+      "name": "Routear por tipo"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "=Analiza la imagen y devuelve SOLO los datos solicitados del comprobante de pago, sin explicaciones.\n\nExtrae y devuelve ÚNICAMENTE en formato JSON:\n\n{\n  \"encabezado\": {\n    \"plataforma\": \"\",\n    \"fecha_hora\": \"\"\n  },\n  \"monto\": \"\",\n  \"remitente\": {\n    \"nombre\": \"\",\n    \"cuit_cuil\": \"\",\n    \"cvu_alias\": \"\"\n  },\n  \"destinatario\": {\n    \"nombre\": \"\",\n    \"cuit_cuil\": \"\",\n    \"cvu_alias\": \"\"\n  },\n  \"numero_operacion\": \"\"\n}\n\nReglas:\n- Sin explicaciones, solo JSON limpio\n- Sin Markdown ni comentarios\n- Plataforma: \"Mercado Pago\", \"Transferencia Bancaria\", \"Efectivo\", u otra detectada",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        848,
+        0
+      ],
+      "id": "65e00d34-cab0-413e-9717-752cfda18637",
+      "name": "Analizar imagen con GPT-4o"
+    },
+    {
+      "parameters": {
+        "operation": "extractText"
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        848,
+        208
+      ],
+      "id": "a6c180b9-8498-48c4-910b-d293c29ec3fa",
+      "name": "Extraer texto PDF"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "=El siguiente texto fue extraído de un PDF. Analízalo y extrae los datos del comprobante de pago.\n\nDevuelve SOLO JSON:\n\n{\n  \"encabezado\": {\n    \"plataforma\": \"\",\n    \"fecha_hora\": \"\"\n  },\n  \"monto\": \"\",\n  \"remitente\": {\n    \"nombre\": \"\",\n    \"cuit_cuil\": \"\",\n    \"cvu_alias\": \"\"\n  },\n  \"destinatario\": {\n    \"nombre\": \"\",\n    \"cuit_cuil\": \"\",\n    \"cvu_alias\": \"\"\n  },\n  \"numero_operacion\": \"\"\n}\n\nTexto: {{ $json.text }}",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1040,
+        208
+      ],
+      "id": "cf1a84ba-ef82-4eb5-aa25-4ff5b30ffd85",
+      "name": "Analizar PDF con GPT-4o"
+    },
+    {
+      "parameters": {
+        "jsCode": "let datosExtraidos = null;\nconst imagenResult = $('Analizar imagen con GPT-4o').first()?.json;\nconst pdfResult = $('Analizar PDF con GPT-4o').first()?.json;\n\nif (imagenResult) {\n  datosExtraidos = typeof imagenResult.content === 'string' ? JSON.parse(imagenResult.content) : imagenResult;\n} else if (pdfResult) {\n  datosExtraidos = typeof pdfResult.content === 'string' ? JSON.parse(pdfResult.content) : pdfResult;\n}\n\nif (!datosExtraidos) {\n  throw new Error('No se pudieron extraer datos del comprobante');\n}\n\nreturn [{ json: datosExtraidos }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        112
+      ],
+      "id": "8418660d-577c-4216-b4f9-fd4ffae8f191",
+      "name": "Combinar resultados"
+    },
+    {
+      "parameters": {
+        "jsCode": "const datos = $input.first().json;\nconst plataforma = datos.encabezado?.plataforma || '';\n\nif (plataforma.toLowerCase().includes('mercado pago') || plataforma.toLowerCase().includes('mp')) {\n  return [{ json: { ...datos, tipo_verificacion: 'mercado_pago' } }];\n} else {\n  return [{ json: { ...datos, tipo_verificacion: 'manual' } }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        112
+      ],
+      "id": "de62efc6-0ed4-42f2-af48-d6102191c59d",
+      "name": "Detectar plataforma"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.mercadopago.com/v1/payments/{{ $json.numero_operacion }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1648,
+        0
+      ],
+      "id": "21e94b9d-c359-46a5-9644-1e4b7f9134d9",
+      "name": "Verificar en API MP",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a1b2c3d4",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "approved",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1840,
+        0
+      ],
+      "id": "dee96586-b585-4ac1-9e57-f35d22e1b79c",
+      "name": "¿MP Verificado?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nreturn [{ json: { ...data, estado_pago: 'VERIFICADO', es_mp: true } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2048,
+        0
+      ],
+      "id": "a4f8723c-784d-43b7-b05c-f0ebcb0e3389",
+      "name": "MP Verificado"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $('Detectar plataforma').first().json;\nreturn [{ json: { ...data, estado_pago: 'PENDIENTE_VERIFICACION', es_mp: false } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2048,
+        208
+      ],
+      "id": "9bcde9cc-19b5-480d-b49c-eb65523f1ce7",
+      "name": "No es MP"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $('MP Verificado').first()?.json || $('No es MP').first()?.json;\nreturn [{ json: data }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        112
+      ],
+      "id": "6ab0d9f4-1257-4a0c-946a-d3af0d4a9709",
+      "name": "Merge rutas"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3.1,
+      "position": [
+        2448,
+        112
+      ],
+      "id": "7854c98d-6d44-49b7-9adf-ef2bb56073b2",
+      "name": "Subir a Google Drive",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "jsCode": "const driveResult = $('Subir a Google Drive').first()?.json;\nconst datos = $('Merge rutas').first().json;\n\nconst response = {\n  success: true,\n  validado: datos.estado_pago === 'VERIFICADO',\n  plataforma: datos.encabezado?.plataforma,\n  monto: datos.monto,\n  fecha_hora: datos.encabezado?.fecha_hora,\n  numero_operacion: datos.numero_operacion,\n  remitente: datos.remitente,\n  destinatario: datos.destinatario,\n  url_comprobante: `https://drive.google.com/file/d/${driveResult.id}/view`,\n  nombre_archivo: driveResult.name,\n  estado: datos.estado_pago,\n  mensaje: datos.estado_pago === 'VERIFICADO' ? 'Pago verificado en Mercado Pago ✓' : 'Comprobante registrado, pendiente revisión de Fla'\n};\n\nreturn [{ json: response }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2640,
+        112
+      ],
+      "id": "a20032b4-4b56-4be7-aa02-26c9d3f94529",
+      "name": "Respuesta final"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Validar entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar entrada": {
+      "main": [
+        [
+          {
+            "node": "Descargar comprobante",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar comprobante": {
+      "main": [
+        [
+          {
+            "node": "Routear por tipo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Routear por tipo": {
+      "main": [
+        [
+          {
+            "node": "Analizar imagen con GPT-4o",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analizar imagen con GPT-4o": {
+      "main": [
+        [
+          {
+            "node": "Combinar resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer texto PDF": {
+      "main": [
+        [
+          {
+            "node": "Analizar PDF con GPT-4o",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analizar PDF con GPT-4o": {
+      "main": [
+        [
+          {
+            "node": "Combinar resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combinar resultados": {
+      "main": [
+        [
+          {
+            "node": "Detectar plataforma",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detectar plataforma": {
+      "main": [
+        [
+          {
+            "node": "Verificar en API MP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar en API MP": {
+      "main": [
+        [
+          {
+            "node": "¿MP Verificado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿MP Verificado?": {
+      "main": [
+        [
+          {
+            "node": "MP Verificado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No es MP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MP Verificado": {
+      "main": [
+        [
+          {
+            "node": "Merge rutas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No es MP": {
+      "main": [
+        [
+          {
+            "node": "Merge rutas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "pinData": {}
+}

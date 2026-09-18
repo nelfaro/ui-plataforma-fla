@@ -1,0 +1,151 @@
+{
+  "n8n_id": "p0solkr2eWizz9fw",
+  "n8n_name": "obtener-tutor-por-nombre",
+  "active": true,
+  "updatedAt": "2026-09-11T23:29:44.292Z",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "nombre"
+            }
+          ]
+        }
+      },
+      "id": "c055762a-8fe7-4141-a639-df2372f30060",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        256,
+        544
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "b5942df6-0160-4ef7-965d-57583acdc8aa",
+      "name": "Replace me with your logic",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        528,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "path": "obtener-tutor-por-nombre",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        272,
+        256
+      ],
+      "id": "ad2b3101-c242-4e1f-a829-2501ab501457",
+      "name": "Webhook",
+      "webhookId": "obtener-tutor-por-nombre"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst nombre = (input.nombre || '').trim();\n\nif (!nombre || nombre.length < 2) {\n  return [{\n    json: {\n      success: false,\n      message: 'Nombre debe tener al menos 2 caracteres',\n      resultados: []\n    }\n  }];\n}\n\nconst query = `SELECT t.id, t.nombre, t.whatsapp, t.email, t.relacion, \n       a.id as alumno_id, a.nombre as alumno_nombre, a.categoria\nFROM tutores t\nLEFT JOIN alumnos a ON t.alumno_id = a.id\nWHERE t.nombre ILIKE '%${nombre.replace(/'/g, \"''\")}%' \nAND t.activo = TRUE\nORDER BY t.nombre ASC\nLIMIT 10;`;\n\nreturn [{\n  json: { query }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        544
+      ],
+      "id": "9ac8d42b-0695-4059-b78d-4493a78cd33a",
+      "name": "arma query"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('arma query').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        736,
+        544
+      ],
+      "id": "732ad044-1854-4422-ad94-b8662009f295",
+      "name": "buscar tutores",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const resultados = $('buscar tutores').all();\nconst tutores = resultados.map(r => r.json);\n\nreturn [{\n  json: {\n    success: true,\n    cantidad: tutores.length,\n    resultados: tutores\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        544
+      ],
+      "id": "96856ea9-ead6-47e2-bc81-aee401fa514d",
+      "name": "respuesta"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "arma query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "arma query": {
+      "main": [
+        [
+          {
+            "node": "buscar tutores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar tutores": {
+      "main": [
+        [
+          {
+            "node": "respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {}
+}

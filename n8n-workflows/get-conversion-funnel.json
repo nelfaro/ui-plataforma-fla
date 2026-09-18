@@ -1,1 +1,132 @@
-{"updatedAt":"2026-04-25T19:15:30.799Z","createdAt":"2026-04-21T17:16:31.738Z","id":"jzqml8SxYpcCT7DT","name":"get-conversion-funnel","active":true,"isArchived":false,"nodes":[{"parameters":{"path":"get-conversion-funnel","responseMode":"lastNode","options":{}},"type":"n8n-nodes-base.webhook","typeVersion":2.1,"position":[-224,0],"id":"9c2c06aa-baa5-428d-b4c2-38e4389ceb72","name":"Webhook","webhookId":"72e2748d-0b84-4022-9972-7aca31ef98ac"},{"parameters":{"jsCode":"const allRows = $('obtener datos').all();\n\nreturn [{\n  json: {\n    items: allRows.map(row => ({\n      etapa: row.json.etapa,\n      cantidad: parseInt(row.json.cantidad) || 0\n    }))\n  }\n}];"},"type":"n8n-nodes-base.code","typeVersion":2,"position":[416,0],"id":"5c4845f9-f8c9-452c-8271-5406e1047ad5","name":"Code in JavaScript"},{"parameters":{"operation":"executeQuery","query":"WITH funnel AS (\n    SELECT 'NUEVO' as etapa, COUNT(DISTINCT id)::integer as cantidad, 1 as orden FROM leads WHERE estado = 'NUEVO'\n    UNION ALL\n    SELECT 'FRIO', COUNT(DISTINCT id)::integer, 2 FROM leads WHERE estado = 'FRIO'\n    UNION ALL\n    SELECT 'TIBIO', COUNT(DISTINCT id)::integer, 3 FROM leads WHERE estado = 'TIBIO'\n    UNION ALL\n    SELECT 'CALIENTE', COUNT(DISTINCT id)::integer, 4 FROM leads WHERE estado = 'CALIENTE'\n)\nSELECT etapa, cantidad FROM funnel ORDER BY orden;","options":{}},"type":"n8n-nodes-base.postgres","typeVersion":2.6,"position":[208,0],"id":"cb79a6a3-2d51-4a1a-91bf-510515de5d8b","name":"obtener datos","credentials":{"postgres":{"id":"7vZZbkZhFbmui4On","name":"Postgres account"}}},{"parameters":{"url":"https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/auth-validate","sendBody":true,"specifyBody":"json","jsonBody":"={{ $input.first().json }}","options":{}},"type":"n8n-nodes-base.httpRequest","typeVersion":4.4,"position":[0,-192],"id":"a5b36992-fda3-4e88-b78b-ee6c00963dd6","name":"Validador","disabled":true}],"connections":{"Webhook":{"main":[[{"node":"obtener datos","type":"main","index":0}]]},"obtener datos":{"main":[[{"node":"Code in JavaScript","type":"main","index":0}]]},"Validador":{"main":[[]]}},"settings":{"executionOrder":"v1","binaryMode":"separate","timeSavedMode":"fixed","timezone":"America/Argentina/Buenos_Aires","callerPolicy":"workflowsFromSameOwner","availableInMCP":false},"staticData":null,"meta":{"templateCredsSetupCompleted":true}}
+{
+  "n8n_id": "P8esShS1d7Ncm6WX",
+  "n8n_name": "get-conversion-funnel",
+  "active": true,
+  "updatedAt": "2026-07-03T02:30:47.101Z",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "get-conversion-funnel",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        1440,
+        944
+      ],
+      "id": "994a6a7c-f17a-411b-a0e0-82b7659d0717",
+      "name": "Webhook",
+      "webhookId": "72e2748d-0b84-4022-9972-7aca31ef98ac"
+    },
+    {
+      "parameters": {
+        "jsCode": "const allRows = $('obtener datos').all();\n\nreturn [{\n  json: {\n    items: allRows.map(row => ({\n      etapa: row.json.etapa,\n      cantidad: parseInt(row.json.cantidad) || 0\n    }))\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1872,
+        944
+      ],
+      "id": "3d372e32-c5b7-44b6-916f-3931c6147fd5",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH funnel AS (\n    SELECT 'NUEVO' as etapa, COUNT(DISTINCT id)::integer as cantidad, 1 as orden FROM leads WHERE estado = 'NUEVO'\n    UNION ALL\n    SELECT 'FRIO', COUNT(DISTINCT id)::integer, 2 FROM leads WHERE estado = 'FRIO'\n    UNION ALL\n    SELECT 'TIBIO', COUNT(DISTINCT id)::integer, 3 FROM leads WHERE estado = 'TIBIO'\n    UNION ALL\n    SELECT 'CALIENTE', COUNT(DISTINCT id)::integer, 4 FROM leads WHERE estado = 'CALIENTE'\n)\nSELECT etapa, cantidad FROM funnel ORDER BY orden;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1664,
+        944
+      ],
+      "id": "93588e88-98f8-4cc1-9636-0c27c43733dc",
+      "name": "obtener datos",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "obtener datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtener datos": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "agente-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "es-419,es;q=0.9",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2Bxl8q0nh7YNTT92gLklYhX5W1eFpe3VB8%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2BhSkT6aeIYKLKO24E1Je2oJ8VIo9ey2Oo%3D; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX1%2BoaNHImLrzvROCFTlfLEOZH35tLaq%2Ffv7CMxE%2FrYDQlWKnANXX8eyvvVhHMiBh6IH1Y%2B5Ym5vS3A%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX19shzZIU0tdsspl7V4dLcOiAFHeQRodwEYg2vRVsaeOamJ19Wv5cs6iAkepCyukNV5rqKA8PUwTRryIlmc2Du7MQcAKhPiXANlR88PTl5eWWBYDcvM2y5hYrFJchxRbxeGbtdTMXpChBGoZ%2BUWWZQOoeWlvTf9jEKM%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX1%2BUpR%2B5ZZovGo7mnednAto06JaVHXIGT3Mj48EsFm18aeLgDH%2BL5ASwX8uxRRYSWVCK324oNMS%2Bz9v34wGLLg5g4whV2aF8TyqHoKG%2B%2Bmpf1Is1BAn4jSSQGUD7YE%2BvJUwHXjKwCk6WlbKs1NNQEa4bv9sb2GkGoH9wXJEl7cNvRluEmGurHGu2Uhyw6YbpRQm99rj%2FObqB0Q%3D%3D; ph_phc_kMstNfAgBcBkWSh6KdsgN09heqqNe5VNmalHP1Ni9Q4_posthog=%7B%22%24device_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22distinct_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22%24sesid%22%3A%5B1783043841547%2C%22019f25ae-c03e-7143-9979-19ea3b19eb78%22%2C1783043637307%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fasistente-ia-fla-n8n.x5miqk.easypanel.host%2Fworkflow%2FovC7bSUVy2yM6k1L%22%7D%2C%22%24user_state%22%3A%22anonymous%22%7D; rl_session=RudderEncrypt%3AU2FsdGVkX1%2FPkuYubvWMROnTC%2BWvITh2NExFS04bD2ugxbbB8vCM0iqnozP%2BrCxqMUAKI%2BIXRjeipBDJgyzjs8Vh7Ct54LIvm1CNdYq20KlBH2q4Ho%2FuywIHhng6mvc8z4rSn9o%2F5M3FkC1GIQCUvA%3D%3D",
+            "priority": "u=1, i",
+            "referer": "https://agente-fla-ui-plataforma.x5miqk.easypanel.host/dashboard",
+            "sec-ch-ua": "\"Google Chrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "x-forwarded-for": "201.235.17.183, 10.11.0.23, 172.18.0.1",
+            "x-forwarded-host": "agente-fla-ui-plataforma.x5miqk.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "17792bd965dd",
+            "x-real-ip": "10.11.0.23"
+          },
+          "params": {},
+          "query": {
+            "startDate": "2026-05-01",
+            "endDate": "2026-07-03"
+          },
+          "body": {},
+          "webhookUrl": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/get-conversion-funnel",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
+}

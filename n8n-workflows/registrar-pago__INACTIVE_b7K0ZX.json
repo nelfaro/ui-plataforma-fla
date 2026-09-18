@@ -1,0 +1,162 @@
+{
+  "n8n_id": "b7K0ZXAsKj6v8B0L",
+  "n8n_name": "registrar-pago",
+  "active": false,
+  "updatedAt": "2026-06-18T00:06:57.943Z",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "whatsapp"
+            },
+            {
+              "name": "horario_id"
+            },
+            {
+              "name": "tipo_pago"
+            },
+            {
+              "name": "monto"
+            },
+            {
+              "name": "comprobante_url"
+            },
+            {
+              "name": "estado_pago"
+            }
+          ]
+        }
+      },
+      "id": "98d20cfa-1f9d-4128-a415-2439a94d9dc0",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst { whatsapp, horario_id, tipo_pago, monto, comprobante_url, estado_pago } = input;\n\nif (!whatsapp || !tipo_pago || !monto) {\n  throw new Error('whatsapp, tipo_pago y monto son requeridos');\n}\n\nif (!['VERIFICADO', 'PENDIENTE_VERIFICACION'].includes(estado_pago)) {\n  throw new Error('estado_pago debe ser VERIFICADO o PENDIENTE_VERIFICACION');\n}\n\nconst queries = {\n  alumnoId: `SELECT id FROM alumnos WHERE whatsapp = '${whatsapp}'`,\n  pago: `INSERT INTO pagos (alumno_id, horario_id, tipo, canal, monto, estado, comprobante_url, created_at) VALUES ((SELECT id FROM alumnos WHERE whatsapp = '${whatsapp}'), ${horario_id || 'NULL'}, '${tipo_pago}', 'AGENTE', ${monto}, '${estado_pago}', '${comprobante_url || ''}', NOW())`,\n  update: `UPDATE alumnos SET estado_pago = '${estado_pago}', fecha_pago_ultimo = NOW(), ultimo_contacto = NOW(), updated_at = NOW() WHERE whatsapp = '${whatsapp}'`\n};\n\nreturn [{ json: { input, queries } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "f8109212-a7ae-487a-a141-3bf97eab5545",
+      "name": "Validar entrada"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Validar entrada').first().json.queries.pago }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        448,
+        0
+      ],
+      "id": "66c60a20-db9d-4983-8ba6-590d36ceae52",
+      "name": "Registrar pago",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Validar entrada').first().json.queries.update }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        640,
+        0
+      ],
+      "id": "90a06bcf-9aa7-4e3f-bfd0-ff4c1bd6bc30",
+      "name": "Actualizar alumno",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $('Validar entrada').first().json.input;\nconst estado = input.estado_pago;\n\nconst response = {\n  success: true,\n  pago_registrado: {\n    monto: input.monto,\n    tipo: input.tipo_pago,\n    estado: estado,\n    comprobante_url: input.comprobante_url\n  },\n  alumno_estado: estado === 'VERIFICADO' ? 'ACTIVO' : 'PAUSADO',\n  mensaje: estado === 'VERIFICADO' ? '✓ Pago verificado y registrado' : '⏳ Pago registrado, pendiente revisión de Fla'\n};\n\nreturn [{ json: response }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        0
+      ],
+      "id": "62e48e0b-2f65-4501-a49f-5272d2d9ba1a",
+      "name": "Respuesta"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Validar entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar entrada": {
+      "main": [
+        [
+          {
+            "node": "Registrar pago",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar pago": {
+      "main": [
+        [
+          {
+            "node": "Actualizar alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar alumno": {
+      "main": [
+        [
+          {
+            "node": "Respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "pinData": {}
+}

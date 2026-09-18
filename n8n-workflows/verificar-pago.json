@@ -1,0 +1,169 @@
+{
+  "n8n_id": "vG5um4WhzKMrYMCX",
+  "n8n_name": "verificar-pago",
+  "active": true,
+  "updatedAt": "2026-09-17T22:15:10.577Z",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "verificar-pago",
+        "httpMethod": "POST",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a3a20000-0000-0000-0000-000000000001",
+      "name": "Webhook",
+      "webhookId": "f0ce3c29-7f90-49f6-8cd6-684129578d9d"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst body = input.body || {};\nconst { pago_id, accion, verificado_por, notas_verificacion } = body;\n\nif (!pago_id || isNaN(Number(pago_id))) {\n  throw new Error('pago_id requerido y debe ser numérico');\n}\nif (!['VERIFICADO', 'RECHAZADO'].includes(accion)) {\n  throw new Error('accion debe ser VERIFICADO o RECHAZADO');\n}\n\nconst pagoId = parseInt(pago_id);\nconst por = verificado_por ? String(verificado_por).replace(/'/g, \"''\") : 'Fla';\nconst notas = notas_verificacion ? String(notas_verificacion).replace(/'/g, \"''\") : null;\n\nconst query = `UPDATE pagos\nSET estado = '${accion}',\n    verificado_por = '${por}',\n    verificado_at = CURRENT_TIMESTAMP,\n    notas_verificacion = ${notas ? `'${notas}'` : 'NULL'},\n    updated_at = CURRENT_TIMESTAMP\nWHERE id = ${pagoId} AND estado = 'PENDIENTE_VERIFICACION'\nRETURNING id, alumno_id, monto, estado, comprobante_url;`;\n\nreturn [{ json: { query, pago_id: pagoId, accion } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ],
+      "id": "a3a20000-0000-0000-0000-000000000002",
+      "name": "Build Query Verificar"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query Verificar').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        400,
+        0
+      ],
+      "id": "a3a20000-0000-0000-0000-000000000003",
+      "name": "Update Pago",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(i => i.json).filter(r => r && r.id);\nconst prev = $('Build Query Verificar').first().json;\n\nif (rows.length === 0) {\n  return [{ json: { skip: true, message: 'Pago no encontrado o ya no está pendiente de verificación' } }];\n}\n\nconst pago = rows[0];\n\nif (prev.accion !== 'VERIFICADO') {\n  return [{ json: { skip: true, pago } }];\n}\n\nconst query = `UPDATE alumnos\nSET estado = 'ACTIVO',\n    estado_pago = 'PAGADO',\n    fecha_pago_ultimo = CURRENT_DATE,\n    updated_at = CURRENT_TIMESTAMP\nWHERE id = ${pago.alumno_id} AND estado = 'REGISTRADO'\nRETURNING id, nombre, whatsapp, estado;`;\n\nreturn [{ json: { query, pago } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        0
+      ],
+      "id": "a3a20000-0000-0000-0000-000000000004",
+      "name": "Build Query Alumno"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query Alumno').first().json.query || 'SELECT 1 WHERE FALSE' }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        800,
+        0
+      ],
+      "id": "a3a20000-0000-0000-0000-000000000005",
+      "name": "Update Alumno",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const bqa = $('Build Query Alumno').first().json;\n\nif (bqa.message) {\n  return [{ json: { success: false, message: bqa.message } }];\n}\n\nconst pago = bqa.pago;\nconst verifyStep = $('Build Query Verificar').first().json;\n\nlet alumno = null;\nif (verifyStep.accion === 'VERIFICADO') {\n  const alumnoRows = $input.all().map(i => i.json).filter(j => j && j.id && j.nombre);\n  alumno = alumnoRows[0] || null;\n}\n\nreturn [{\n  json: {\n    success: true,\n    message: verifyStep.accion === 'VERIFICADO' ? 'Pago verificado correctamente' : 'Pago rechazado',\n    pago: {\n      id: pago.id,\n      alumno_id: pago.alumno_id,\n      monto: pago.monto,\n      estado: pago.estado\n    },\n    alumno\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        0
+      ],
+      "id": "a3a20000-0000-0000-0000-000000000006",
+      "name": "respuesta"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build Query Verificar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query Verificar": {
+      "main": [
+        [
+          {
+            "node": "Update Pago",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Pago": {
+      "main": [
+        [
+          {
+            "node": "Build Query Alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query Alumno": {
+      "main": [
+        [
+          {
+            "node": "Update Alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Alumno": {
+      "main": [
+        [
+          {
+            "node": "respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

@@ -1,0 +1,140 @@
+{
+  "n8n_id": "d0MYzdvGVyoarBSF",
+  "n8n_name": "My workflow",
+  "active": true,
+  "updatedAt": "2026-06-19T01:10:50.068Z",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "create-alumno",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c210da2c-2fb9-4caf-b1fd-da9789261707",
+      "name": "Webhook",
+      "webhookId": "30316022-51d1-432f-81ae-cdfb88dfd76f"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO alumnos (nombre, whatsapp, email, categoria, estado, fecha_registro)\nVALUES (\n  '{{ $json.body.nombre }}',\n  '{{ $json.body.whatsapp }}',\n  '{{ $json.body.email }}',\n  '{{ $json.body.categoria }}',\n  '{{ $json.body.estado }}',\n  NOW()\n)\nON CONFLICT (whatsapp) DO UPDATE SET\n  nombre = EXCLUDED.nombre,\n  email = EXCLUDED.email,\n  categoria = EXCLUDED.categoria,\n  estado = EXCLUDED.estado,\n  updated_at = NOW()\nRETURNING id;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        208,
+        0
+      ],
+      "id": "6e827461-81b6-4c72-8349-93f20ea3dbe9",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a6883c9b-7600-4fb4-acd4-e64780006fda",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "agente-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+            "content-length": "140",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "es-419,es;q=0.9",
+            "content-type": "application/json",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2Bxl8q0nh7YNTT92gLklYhX5W1eFpe3VB8%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2BhSkT6aeIYKLKO24E1Je2oJ8VIo9ey2Oo%3D; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX1%2FM3oUqnKuRXeaFQ76Jaw6b132oM%2BPoaAPayv9wK%2BQlpg7e2vMmcx1PMzvFdJy9yf%2BknGfYYQ1b9w%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX18udvxfQcv5Do7%2B8P3AqCrhkgDJm3IWQzeqYS5EG2vXwufQh4raaDXt4ckQ0NluQ4a4eLAMvwbedD3mgXMlwwrlONNzvHLzuwww1a9d8%2BujWMKpcJN6PAN%2FguCGzb3yPYScXdd%2FogUGhw7ikq9nyKPkfekqUKISNus%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX18%2BVbVFMXL19Tp4RA%2BY2ZffFJOsR7mibFOXukkOTGnd8KL2N6nTtn%2BTOcwUTu7BAN0zpANBFSK9p9N%2F0u4KQ8%2F83QeH4waq4UUgOBQGdSQhqL5I2wh7BegOUecXJi8P35zamV1FUjYjnH%2BI0bDykEVMHp7832ngjZz5psjiN2OgarrqiIhejnjnMO6aN7ruqB9%2FMnc%2B2RdG5Q%3D%3D; rl_session=RudderEncrypt%3AU2FsdGVkX18wbHvPW1Kztgs7SC22JMdOQByI%2FseLurEUDPamQJ65w88LK1x2mXCVlZJ87FC7najNQKFkzG6FQmiezZzk6fDRQMRyeknY7yWNGekqStvPl68tcPBh2C7Y5BLClQag6LNXTfPbpNASCw%3D%3D; ph_phc_kMstNfAgBcBkWSh6KdsgN09heqqNe5VNmalHP1Ni9Q4_posthog=%7B%22%24device_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22distinct_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22%24sesid%22%3A%5B1781830640138%2C%22019edd3d-87ba-7460-889b-ca15e8303611%22%2C1781828257722%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fasistente-ia-fla-n8n.x5miqk.easypanel.host%2Fworkflow%2FovC7bSUVy2yM6k1L%22%7D%2C%22%24user_state%22%3A%22anonymous%22%7D",
+            "origin": "https://agente-fla-ui-plataforma.x5miqk.easypanel.host",
+            "priority": "u=1, i",
+            "referer": "https://agente-fla-ui-plataforma.x5miqk.easypanel.host/directorio",
+            "sec-ch-ua": "\"Google Chrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "x-api-key": "",
+            "x-forwarded-for": "201.235.17.183, 10.11.0.23, 172.18.0.1",
+            "x-forwarded-host": "agente-fla-ui-plataforma.x5miqk.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "17792bd965dd",
+            "x-real-ip": "10.11.0.23"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "nombre": "Micaela Stephanie Gigena",
+            "whatsapp": "54 9 2494 01-1941",
+            "email": "micag561@gmail.com",
+            "categoria": "ADULTO",
+            "estado": "REGISTRADO"
+          },
+          "webhookUrl": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/create-alumno",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
+}

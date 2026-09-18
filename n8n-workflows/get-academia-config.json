@@ -1,4 +1,8 @@
 {
+  "n8n_id": "OCqXPJq2O6k2cgx7",
+  "n8n_name": "get-academia-config",
+  "active": true,
+  "updatedAt": "2026-07-05T00:58:54.992Z",
   "nodes": [
     {
       "parameters": {
@@ -6,11 +10,14 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "webhook",
+      "id": "44d8fab7-389c-4581-9b5c-ee6535eb2941",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
-      "position": [-528, 112],
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
       "webhookId": "get-academia-config"
     },
     {
@@ -19,14 +26,18 @@
         "query": "SELECT clave, valor FROM academia_config WHERE clave IN ('nombre_academia', 'nombre_profe', 'email', 'telefono', 'ubicacion_direccion', 'ubicacion_localidad', 'horario_atencion', 'banco', 'cbu', 'alias', 'linktree_url', 'instagram', 'facebook', 'politica_cancelacion', 'politica_recuperacion', 'politica_reembolso');",
         "options": {}
       },
-      "id": "postgres_query",
+      "id": "1aa713fd-9eea-4169-ab22-6bd0023f1ec4",
       "name": "PostgreSQL - Query",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [-288, 112],
+      "position": [
+        288,
+        0
+      ],
+      "alwaysOutputData": true,
       "credentials": {
         "postgres": {
-          "id": "7vZZbkZhFbmui4On",
+          "id": "wPNcwJLWeQKZlTmC",
           "name": "Postgres account"
         }
       }
@@ -35,33 +46,108 @@
       "parameters": {
         "jsCode": "const rows = $input.all();\nconst config = {};\n\nfor (const row of rows) {\n  const data = row.json;\n  if (data.clave && data.valor !== undefined) {\n    config[data.clave] = data.valor || '';\n  }\n}\n\nconst fields = [\n  'nombre_academia', 'nombre_profe', 'email', 'telefono',\n  'ubicacion_direccion', 'ubicacion_localidad', 'horario_atencion',\n  'banco', 'cbu', 'alias', 'linktree_url',\n  'instagram', 'facebook', 'politica_cancelacion',\n  'politica_recuperacion', 'politica_reembolso'\n];\n\nconst resultado = {};\nfor (const field of fields) {\n  resultado[field] = config[field] || '';\n}\n\nreturn [{\n  json: {\n    config: resultado\n  }\n}];"
       },
-      "id": "format_response",
+      "id": "e346de9a-739a-43c6-a798-5a2894fbcfb0",
       "name": "Format Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-96, 112]
+      "position": [
+        480,
+        0
+      ]
     },
     {
       "parameters": {
         "options": {}
       },
-      "id": "response",
+      "id": "570bc91d-1615-4eee-8c3a-e7749ba797b1",
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [120, 112]
+      "position": [
+        704,
+        0
+      ]
     }
   ],
   "connections": {
     "Webhook": {
-      "main": [[{"node": "PostgreSQL - Query", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "PostgreSQL - Query": {
-      "main": [[{"node": "Format Response", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Format Response": {
-      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "agente-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "es-419,es;q=0.9",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2Bxl8q0nh7YNTT92gLklYhX5W1eFpe3VB8%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2BhSkT6aeIYKLKO24E1Je2oJ8VIo9ey2Oo%3D; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX1%2B157EZph6goTo4KT%2BR5xwrc7EHCjqFZMly60VGS4chmfrnfYZad%2FytPMTYdDIzXfWEr%2BWphOnXHg%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX1%2FGvclAM4mU1Bevb7dT7r4payOEGR2aZyH7Jm8cQe%2B8tcgSXeiQVa0wPVKAShPg07J9e2YmITy5UB18Qtp%2BOEnGqeOCKzSGBBlShgg%2FeojfZ06sobgSIN9J1gHmgT9CgZSwQeoAE3ivVtAkijV5YR5TwTDrJkVHShE%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX19r7HNqpNzTGZVUvlN2CoUxREbr9La6LQW5iIivTnkxE7LWBc1CqdPslsthlQzqyqke7ZTk%2B2TNsk7YL0AKgwQaSyMUp5K4NTIFu47DagWAtVV3h9hg4%2BsMwtBltqld%2Fd9Qh75R4BbzCFoe4Qh5DTQjdiYvJR4inGqDe414R3FRtbXvS%2BnZK2Bd7IvG2%2FEzYyaF5mt1Z5RfPQ%3D%3D; ph_phc_kMstNfAgBcBkWSh6KdsgN09heqqNe5VNmalHP1Ni9Q4_posthog=%7B%22%24device_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22distinct_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22%24sesid%22%3A%5B1783210805845%2C%22019f2fa1-addc-7486-ad91-ccded499992c%22%2C1783210552796%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fasistente-ia-fla-n8n.x5miqk.easypanel.host%2Fworkflow%2FovC7bSUVy2yM6k1L%22%7D%2C%22%24user_state%22%3A%22anonymous%22%7D; rl_session=RudderEncrypt%3AU2FsdGVkX1%2BnbgRmS8cEJuM0v%2Bo6a9%2BEzQPkbbq96nt2nekmJodyaJ%2BIk%2FGyC%2FkWh4Cd8F9FROFSBKSujDasxf99s7XNSYoODTZXUykVT%2FUcfrKkiVbt%2FBOizPqgQWYIoOoTnbBpyZMIS%2BD5hWl0dg%3D%3D",
+            "priority": "u=1, i",
+            "referer": "https://agente-fla-ui-plataforma.x5miqk.easypanel.host/settings",
+            "sec-ch-ua": "\"Google Chrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "x-forwarded-for": "201.235.17.183, 10.11.0.23, 172.18.0.1",
+            "x-forwarded-host": "agente-fla-ui-plataforma.x5miqk.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "17792bd965dd",
+            "x-real-ip": "10.11.0.23"
+          },
+          "params": {},
+          "query": {},
+          "webhookUrl": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/get-academia-config",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
 }

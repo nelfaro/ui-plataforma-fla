@@ -1,0 +1,128 @@
+{
+  "n8n_id": "L3BcUFuCIrikSrSI",
+  "n8n_name": "obtener-alumno-por-whatsapp",
+  "active": true,
+  "updatedAt": "2026-07-17T20:10:03.770Z",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "whatsapp"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        -96
+      ],
+      "id": "ac313a29-81a3-427e-b3a3-16c9c2dbc462",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst body = input.body || input;\nconst { whatsapp } = body;\n\nif (!whatsapp) {\n  throw new Error('Falta el campo requerido: whatsapp');\n}\n\nconst wa = String(whatsapp).replace(/'/g, \"''\");\n\nconst query = `SELECT\n  (SELECT to_jsonb(a) FROM alumnos a WHERE a.whatsapp = '${wa}' LIMIT 1) AS alumno,\n  (SELECT to_jsonb(l) FROM leads l WHERE l.whatsapp = '${wa}' ORDER BY l.created_at DESC LIMIT 1) AS lead,\n  (\n    SELECT jsonb_agg(to_jsonb(h) || jsonb_build_object('alumno_horario_id', ah.id, 'fecha_inscripcion', ah.fecha_inscripcion))\n    FROM alumnos_horarios ah\n    JOIN horarios h ON h.id = ah.horario_id\n    JOIN alumnos a2 ON a2.id = ah.alumno_id\n    WHERE a2.whatsapp = '${wa}' AND ah.activo = true\n  ) AS horarios_activos,\n  (\n    SELECT jsonb_agg(p ORDER BY (p->>'created_at') DESC)\n    FROM (\n      SELECT to_jsonb(p2) AS p\n      FROM pagos p2\n      JOIN alumnos a3 ON a3.id = p2.alumno_id\n      WHERE a3.whatsapp = '${wa}'\n      ORDER BY p2.created_at DESC\n      LIMIT 3\n    ) sub\n  ) AS pagos_recientes;`;\n\nreturn [{ json: { query } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        272,
+        -96
+      ],
+      "id": "2ee01449-345a-4542-ae16-5aed151400dd",
+      "name": "Build Query"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        464,
+        -96
+      ],
+      "id": "ccbaa2b9-1e54-4a13-8942-d26dfae16895",
+      "name": "PostgreSQL - Buscar",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $input.first().json || {};\n\nconst alumno = result.alumno || null;\nconst lead = result.lead || null;\nconst horarios_activos = result.horarios_activos || [];\nconst pagos_recientes = result.pagos_recientes || [];\n\nlet tipo = 'ninguno';\nif (alumno) tipo = 'alumno';\nelse if (lead) tipo = 'lead';\n\nreturn [{\n  json: {\n    encontrado: tipo !== 'ninguno',\n    tipo,\n    alumno,\n    lead,\n    horarios_activos,\n    pagos_recientes\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        -96
+      ],
+      "id": "22036883-775a-454f-bd21-8f64e31a6755",
+      "name": "Response"
+    }
+  ],
+  "connections": {
+    "Build Query": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Buscar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Buscar": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Build Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "whatsapp": "158115077083215@lid"
+        }
+      }
+    ]
+  }
+}

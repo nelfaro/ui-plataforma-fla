@@ -1,0 +1,426 @@
+[
+  {
+    "file": "Academia_Ingles_Cerebro_IA__INACTIVE_qygPcd.json",
+    "id": "qygPcdsi9Xn8ulN5",
+    "name": "Academia_Ingles_Cerebro_IA",
+    "active": false,
+    "nodeCount": 55,
+    "updatedAt": "2026-06-17T23:43:14.000Z"
+  },
+  {
+    "file": "Academia_Ingles_Cerebro_IA.json",
+    "id": "pBYf6cv9kCeTwEWU",
+    "name": "Academia_Ingles_Cerebro_IA",
+    "active": false,
+    "nodeCount": 80,
+    "updatedAt": "2026-09-07T21:18:46.400Z"
+  },
+  {
+    "file": "Alumnos List.json",
+    "id": "WOb1v0e0JvbsQFso",
+    "name": "Alumnos List",
+    "active": true,
+    "nodeCount": 4,
+    "updatedAt": "2026-06-17T23:46:22.202Z"
+  },
+  {
+    "file": "Analytics Weekly.json",
+    "id": "PI2Hz5ZH8zKVVGBp",
+    "name": "Analytics Weekly",
+    "active": true,
+    "nodeCount": 4,
+    "updatedAt": "2026-06-23T19:58:22.142Z"
+  },
+  {
+    "file": "auth-webhook-validation.json",
+    "id": "pVwfPHZSJcSAn2fb",
+    "name": "auth-webhook-validation",
+    "active": false,
+    "nodeCount": 13,
+    "updatedAt": "2026-06-17T23:51:07.000Z"
+  },
+  {
+    "file": "Cerebro v2.json",
+    "id": "LbIjKIvn5Uqfyxa0",
+    "name": "Cerebro v2",
+    "active": true,
+    "nodeCount": 55,
+    "updatedAt": "2026-09-18T01:42:42.624Z"
+  },
+  {
+    "file": "conocimiento-get.json",
+    "id": "hVxGILtQBrEJX3E5",
+    "name": "conocimiento-get",
+    "active": true,
+    "nodeCount": 4,
+    "updatedAt": "2026-06-22T22:30:12.335Z"
+  },
+  {
+    "file": "conocimiento-post.json",
+    "id": "GhS0S7loHc2PPCzi",
+    "name": "conocimiento-post",
+    "active": true,
+    "nodeCount": 4,
+    "updatedAt": "2026-06-22T23:47:12.863Z"
+  },
+  {
+    "file": "convertir-lead-a-alumno.json",
+    "id": "vlU8BuUi4QMWoomm",
+    "name": "convertir-lead-a-alumno",
+    "active": true,
+    "nodeCount": 8,
+    "updatedAt": "2026-09-17T20:06:34.378Z"
+  },
+  {
+    "file": "create-horario.json",
+    "id": "TG2CxVQn74pEsEQx",
+    "name": "create-horario",
+    "active": true,
+    "nodeCount": 5,
+    "updatedAt": "2026-07-18T01:52:28.748Z"
+  },
+  {
+    "file": "create-lead.json",
+    "id": "PX0V4YmHX0prZUZ7",
+    "name": "create-lead",
+    "active": true,
+    "nodeCount": 5,
+    "updatedAt": "2026-07-18T14:13:12.055Z"
+  },
+  {
+    "file": "delete-horario.json",
+    "id": "oM75f2nLUL7PHHpF",
+    "name": "delete-horario",
+    "active": true,
+    "nodeCount": 5,
+    "updatedAt": "2026-06-17T23:52:39.166Z"
+  },
+  {
+    "file": "ERROR workflow.json",
+    "id": "ktDkXcf811N3FTt3",
+    "name": "ERROR workflow",
+    "active": true,
+    "nodeCount": 5,
+    "updatedAt": "2026-07-17T22:44:49.775Z"
+  },
+  {
+    "file": "etiquetar-alumno.json",
+    "id": "m165FT4fBHG3BbBq",
+    "name": "etiquetar-alumno",
+    "active": true,
+    "nodeCount": 4,
+    "updatedAt": "2026-06-17T23:53:22.185Z"
+  },
+  {
+    "file": "get-academia-config.json",
+    "id": "OCqXPJq2O6k2cgx7",
+    "name": "get-academia-config",
+    "active": true,
+    "nodeCount": 4,
+    "updatedAt": "2026-07-05T00:58:54.992Z"
+  },
+  {
+    "file": "get-alumno-by-id.json",
+    "id": "TarOZNsZZ4q1KlbF",
+    "name": "get-alumno-by-id",
+    "active": true,
+    "nodeCount": 5,
+    "updatedAt": "2026-07-30T01:01:09.046Z"
+  },
+  {
+    "file": "get-alumnos-list.json",
+    "id": "LZGosyIqAJmFZFRv",
+    "name": "get-alumnos-list",
+    "active": true,
+    "nodeCount": 5,
+    "updatedAt": "2026-07-03T17:55:09.018Z"
+  },
+  {
+    "file": "get-analisis-temporal__INACTIVE_jLq3oY.json",
+    "id": "jLq3oYFpaEpoWhdd",
+    "name": "get-analisis-temporal",
+    "active": false,
+    "nodeCount": 7,
+    "updatedAt": "2026-06-18T00:00:06.000Z"
+  },
+  {
+    "file": "get-analisis-temporal.json",
+    "id": "UDHSMHCnF8QAyVGD",
+    "name": "get-analisis-temporal",
+    "active": true,
+    "nodeCount": 7,
+    "updatedAt": "2026-06-23T01:59:02.934Z"
+  },
+  {
+    "file": "get-conocimiento-agente.json",
+    "id": "pqhCzVlVrwCO6kH6",
+    "name": "get-conocimiento-agente",
+    "active": true,
+    "nodeCount": 16,
+    "updatedAt": "2026-07-16T22:51:05.701Z"
+  },
+  {
+    "file": "get-conversation-logs__DUP_J83rBo.json",
+    "id": "J83rBo0zHt1CRfJi",
+    "name": "get-conversation-logs",
+    "active": true,
+    "nodeCount": 4,
+    "updatedAt": "2026-06-26T02:23:57.599Z"
+  },
+  {
+    "file": "get-conversation-logs.json",
+    "id": "GO191FK0JjuHoO5v",
+    "name": "get-conversation-logs",
+    "active": true,
+    "nodeCount": 4,
+    "updatedAt": "2026-06-26T02:24:40.766Z"
+  },
+  {
+    "file": "get-conversion-funnel.json",
+    "id": "P8esShS1d7Ncm6WX",
+    "name": "get-conversion-funnel",
+    "active": true,
+    "nodeCount": 3,
+    "updatedAt": "2026-07-03T02:30:47.101Z"
+  },
+  {
+    "file": "get-funnel-by-origin.json",
+    "id": "ustL3TBY5UAmBjG6",
+    "name": "get-funnel-by-origin",
+    "active": true,
+    "nodeCount": 3,
+    "updatedAt": "2026-07-03T01:15:19.275Z"
+  },
+  {
+    "file": "get-horarios.json",
+    "id": "4crS0mDaqGsMweMi",
+    "name": "get-horarios",
+    "active": true,
+    "nodeCount": 6,
+    "updatedAt": "2026-06-29T22:29:13.337Z"
+  },
+  {
+    "file": "get-lead-by-id.json",
+    "id": "VObBoj6R4sAhme1I",
+    "name": "get-lead-by-id",
+    "active": true,
+    "nodeCount": 4,
+    "updatedAt": "2026-06-24T01:13:24.773Z"
+  },
+  {
+    "file": "get-leads-distribution.json",
+    "id": "jdP8fZiC5BYaAJQg",
+    "name": "get-leads-distribution",
+    "active": true,
+    "nodeCount": 3,
+    "updatedAt": "2026-07-03T02:28:24.004Z"
+  },
+  {
+    "file": "get-leads-list.json",
+    "id": "8TOuiMIoHqZO0GLZ",
+    "name": "get-leads-list",
+    "active": true,
+    "nodeCount": 5,
+    "updatedAt": "2026-06-29T21:07:50.356Z"
+  },
+  {
+    "file": "get-leads-origin.json",
+    "id": "CB83S0q09is5UPES",
+    "name": "get-leads-origin",
+    "active": true,
+    "nodeCount": 3,
+    "updatedAt": "2026-07-03T02:29:36.551Z"
+  },
+  {
+    "file": "get-leads-pipeline.json",
+    "id": "lqDwGXi8bLvzoEsc",
+    "name": "get-leads-pipeline",
+    "active": true,
+    "nodeCount": 6,
+    "updatedAt": "2026-06-23T01:31:56.635Z"
+  },
+  {
+    "file": "get-pagos-pendientes.json",
+    "id": "48EtLxbiQQGE4Snd",
+    "name": "get-pagos-pendientes",
+    "active": true,
+    "nodeCount": 5,
+    "updatedAt": "2026-09-17T22:06:58.378Z"
+  },
+  {
+    "file": "KPIs Dashboard.json",
+    "id": "o9FzNUWDYQzjjJEj",
+    "name": "KPIs Dashboard",
+    "active": true,
+    "nodeCount": 3,
+    "updatedAt": "2026-07-03T01:14:10.315Z"
+  },
+  {
+    "file": "My workflow 2.json",
+    "id": "YvuQ9nnPpCtuGVGO",
+    "name": "My workflow 2",
+    "active": false,
+    "nodeCount": 5,
+    "updatedAt": "2026-07-29T22:18:43.000Z"
+  },
+  {
+    "file": "My workflow.json",
+    "id": "d0MYzdvGVyoarBSF",
+    "name": "My workflow",
+    "active": true,
+    "nodeCount": 3,
+    "updatedAt": "2026-06-19T01:10:50.068Z"
+  },
+  {
+    "file": "obtener-alumno-por-nombre.json",
+    "id": "4U9hTDYvuHMAp7cd",
+    "name": "obtener-alumno-por-nombre",
+    "active": true,
+    "nodeCount": 6,
+    "updatedAt": "2026-09-11T23:28:32.975Z"
+  },
+  {
+    "file": "obtener-alumno-por-whatsapp__INACTIVE_yPaWPy.json",
+    "id": "yPaWPyYbu8o777M9",
+    "name": "obtener-alumno-por-whatsapp",
+    "active": false,
+    "nodeCount": 6,
+    "updatedAt": "2026-06-18T00:04:44.830Z"
+  },
+  {
+    "file": "obtener-alumno-por-whatsapp.json",
+    "id": "L3BcUFuCIrikSrSI",
+    "name": "obtener-alumno-por-whatsapp",
+    "active": true,
+    "nodeCount": 4,
+    "updatedAt": "2026-07-17T20:10:03.770Z"
+  },
+  {
+    "file": "obtener-tutor-por-nombre.json",
+    "id": "p0solkr2eWizz9fw",
+    "name": "obtener-tutor-por-nombre",
+    "active": true,
+    "nodeCount": 6,
+    "updatedAt": "2026-09-11T23:29:44.292Z"
+  },
+  {
+    "file": "procesar-comprobante-pago.json",
+    "id": "CGfkwm2t4B6I0JA2",
+    "name": "procesar-comprobante-pago",
+    "active": true,
+    "nodeCount": 10,
+    "updatedAt": "2026-09-18T01:46:02.113Z"
+  },
+  {
+    "file": "register-pago.json",
+    "id": "OptI5tQlHynoPvZi",
+    "name": "register-pago",
+    "active": true,
+    "nodeCount": 6,
+    "updatedAt": "2026-07-29T23:10:01.772Z"
+  },
+  {
+    "file": "registrar_alumno.json",
+    "id": "7sqOI8QKnDuVkNVN",
+    "name": "registrar_alumno",
+    "active": true,
+    "nodeCount": 4,
+    "updatedAt": "2026-06-30T00:50:40.268Z"
+  },
+  {
+    "file": "registrar-alumno-existente.json",
+    "id": "qzh22lo5i7d4sLBJ",
+    "name": "registrar-alumno-existente",
+    "active": false,
+    "nodeCount": 6,
+    "updatedAt": "2026-09-12T00:42:32.304Z"
+  },
+  {
+    "file": "registrar-derivacion-a-fla.json",
+    "id": "l9n7fGRBeb8VNAIo",
+    "name": "registrar-derivacion-a-fla",
+    "active": true,
+    "nodeCount": 6,
+    "updatedAt": "2026-09-17T21:10:29.240Z"
+  },
+  {
+    "file": "registrar-pago__INACTIVE_b7K0ZX.json",
+    "id": "b7K0ZXAsKj6v8B0L",
+    "name": "registrar-pago",
+    "active": false,
+    "nodeCount": 5,
+    "updatedAt": "2026-06-18T00:06:57.943Z"
+  },
+  {
+    "file": "registrar-pago.json",
+    "id": "WDpCWOxaQyrKZKJZ",
+    "name": "registrar-pago",
+    "active": true,
+    "nodeCount": 6,
+    "updatedAt": "2026-07-29T22:46:58.292Z"
+  },
+  {
+    "file": "Tool buscar en Odoo.json",
+    "id": "jYPAK7RTiyjMtDCP",
+    "name": "Tool buscar en Odoo",
+    "active": false,
+    "nodeCount": 5,
+    "updatedAt": "2026-06-18T20:57:46.406Z"
+  },
+  {
+    "file": "ultima-actividad-agente.json",
+    "id": "s2cVCHjS8E4eYr3G",
+    "name": "ultima-actividad-agente",
+    "active": true,
+    "nodeCount": 5,
+    "updatedAt": "2026-07-18T00:04:34.219Z"
+  },
+  {
+    "file": "update-academia-config.json",
+    "id": "DrwgkVFQvCQQ1iff",
+    "name": "update-academia-config",
+    "active": true,
+    "nodeCount": 7,
+    "updatedAt": "2026-07-06T21:02:03.420Z"
+  },
+  {
+    "file": "update-cupo-horario.json",
+    "id": "36OiNFuFU17LcpFq",
+    "name": "update-cupo-horario",
+    "active": true,
+    "nodeCount": 5,
+    "updatedAt": "2026-06-18T00:08:24.609Z"
+  },
+  {
+    "file": "update-horario.json",
+    "id": "kGETJEKDayx0LZJ0",
+    "name": "update-horario",
+    "active": true,
+    "nodeCount": 5,
+    "updatedAt": "2026-06-18T00:08:59.703Z"
+  },
+  {
+    "file": "update-lead.json",
+    "id": "FjVuLaSNlsdGxhOo",
+    "name": "update-lead",
+    "active": true,
+    "nodeCount": 4,
+    "updatedAt": "2026-07-18T23:05:55.608Z"
+  },
+  {
+    "file": "validar-comprobante-pago.json",
+    "id": "ezOhxxvYhWCTBVeO",
+    "name": "validar-comprobante-pago",
+    "active": false,
+    "nodeCount": 16,
+    "updatedAt": "2026-06-18T00:09:24.023Z"
+  },
+  {
+    "file": "verificar-pago.json",
+    "id": "vG5um4WhzKMrYMCX",
+    "name": "verificar-pago",
+    "active": true,
+    "nodeCount": 6,
+    "updatedAt": "2026-09-17T22:15:10.577Z"
+  }
+]

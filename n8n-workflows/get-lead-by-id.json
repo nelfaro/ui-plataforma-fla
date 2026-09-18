@@ -1,1 +1,116 @@
-{"name":"get-lead-by-id","active":true,"nodes":[{"parameters":{"path":"get-lead-by-id","responseMode":"lastNode","options":{}},"type":"n8n-nodes-base.webhook","typeVersion":2.1,"position":[-300,0],"id":"webhook","name":"Webhook","webhookId":"get-lead-by-id"},{"parameters":{"jsCode":"const input = $input.first().json;\nconst query = input.query || input.body || {};\nconst { id } = query;\n\nif (!id) {\n  throw new Error('Falta el parámetro requerido: id');\n}\n\nconst sqlQuery = `SELECT id, nombre, apellido, whatsapp, email, telefono, lead_tipo, origen, categoria, nivel, objetivo, resumen, disponibilidad, tags, estado, estado_motivo, estado_fecha, primer_contacto, ultimo_contacto, proxima_cita, alumno_id, fecha_conversion, notas, created_at, updated_at FROM leads WHERE id = ${parseInt(id)};`;\n\nreturn [{json: {sqlQuery}}];"},"type":"n8n-nodes-base.code","typeVersion":2,"position":[-100,0],"id":"build_query","name":"Build Query"},{"parameters":{"operation":"executeQuery","query":"{{ $('build_query').first().json.sqlQuery }}","options":{}},"type":"n8n-nodes-base.postgres","typeVersion":2.6,"position":[100,0],"id":"get_lead","name":"PostgreSQL - Query","credentials":{"postgres":{"id":"7vZZbkZhFbmui4On","name":"Postgres account"}}},{"parameters":{"jsCode":"const result = $('get_lead').first().json;\n\nif (!result) {\n  return [{json: {success: false, message: 'Lead no encontrado'}}];\n}\n\nreturn [{json: {success: true, lead: result}}];"},"type":"n8n-nodes-base.code","typeVersion":2,"position":[300,0],"id":"response","name":"Response"}],"connections":{"Webhook":{"main":[[{"node":"build_query","type":"main","index":0}]]},"build_query":{"main":[[{"node":"get_lead","type":"main","index":0}]]},"get_lead":{"main":[[{"node":"response","type":"main","index":0}]]}},"settings":{"executionOrder":"v1","binaryMode":"separate"}}
+{
+  "n8n_id": "VObBoj6R4sAhme1I",
+  "n8n_name": "get-lead-by-id",
+  "active": true,
+  "updatedAt": "2026-06-24T01:13:24.773Z",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "get-lead-by-id",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2a8d17c6-9227-4afd-a43b-6ad671fe9d9b",
+      "name": "Webhook",
+      "webhookId": "get-lead-by-id"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst query = input.query || input.body || {};\nconst { id } = query;\n\nif (!id) {\n  throw new Error('Falta el parámetro requerido: id');\n}\n\nconst sqlQuery = `SELECT id, nombre, apellido, whatsapp, email, telefono, lead_tipo, origen, categoria, nivel, objetivo, resumen, disponibilidad, tags, estado, estado_motivo, estado_fecha, primer_contacto, ultimo_contacto, proxima_cita, alumno_id, fecha_conversion, notas, created_at, updated_at FROM leads WHERE id = ${parseInt(id)};`;\n\nreturn [{json: {sqlQuery}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "bed6f8ea-cb5c-4d2b-a6ef-c42f6d562108",
+      "name": "Build Query"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query').first().json.sqlQuery }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        400,
+        0
+      ],
+      "id": "7c135fad-ae83-4daa-861e-dca611a2fd7b",
+      "name": "PostgreSQL - Query",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $('get_lead').first().json;\n\nif (!result) {\n  return [{json: {success: false, message: 'Lead no encontrado'}}];\n}\n\nreturn [{json: {success: true, lead: result}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        0
+      ],
+      "id": "8dfd495b-eb15-479f-995c-e4d777f5d89f",
+      "name": "Response"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Query": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {}
+}

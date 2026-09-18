@@ -1,0 +1,154 @@
+{
+  "n8n_id": "WOb1v0e0JvbsQFso",
+  "n8n_name": "Alumnos List",
+  "active": true,
+  "updatedAt": "2026-06-17T23:46:22.202Z",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "get-alumnos",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -336,
+        272
+      ],
+      "id": "56c584e2-7445-4639-b751-5ed5bdc646ec",
+      "name": "Alumnos List",
+      "webhookId": "b8a1bccf-2501-4311-8b33-c7e4cfa42f6e"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    nombre,\n    lead_tipo,\n    origen,\n    estado,\n    intencion\nFROM alumnos\nORDER BY ultimo_contacto DESC\nLIMIT 10",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        192,
+        272
+      ],
+      "id": "af1157dc-abfa-4d3b-b36b-b0ae84f9998d",
+      "name": "obtener datos",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const allRows = $('obtener datos').all();\n\nreturn [{\n  json: {\n    items: allRows.map(row => row.json)\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        272
+      ],
+      "id": "152886a7-4e65-4bf8-b847-26708367e5e7",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/auth-validate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $input.first().json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2cde5fca-522f-49e3-9e5e-eb6d341459aa",
+      "name": "Validador",
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "obtener datos": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alumnos List": {
+      "main": [
+        [
+          {
+            "node": "obtener datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "Alumnos List": [
+      {
+        "json": {
+          "headers": {
+            "host": "asistente-ia-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "es-US,es-419;q=0.9,es;q=0.8,en;q=0.7,zh-CN;q=0.6,zh;q=0.5",
+            "authorization": {
+              "__redacted": true,
+              "reason": "node_defined_field",
+              "canReveal": false
+            },
+            "if-none-match": "W/\"22-6OS7cK0FzqnV2NeDHdOSGS1bVUs\"",
+            "referer": "http://localhost:5173/dashboard",
+            "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "x-forwarded-for": "201.235.17.183",
+            "x-forwarded-host": "asistente-ia-fla-n8n.x5miqk.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "dbf76c5580fc",
+            "x-real-ip": "201.235.17.183"
+          },
+          "params": {},
+          "query": {
+            "startDate": "2026-04-22",
+            "endDate": "2026-04-22"
+          },
+          "body": {},
+          "webhookUrl": "https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/get-alumnos",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
+}

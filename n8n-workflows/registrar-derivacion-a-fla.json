@@ -1,0 +1,151 @@
+{
+  "n8n_id": "l9n7fGRBeb8VNAIo",
+  "n8n_name": "registrar-derivacion-a-fla",
+  "active": true,
+  "updatedAt": "2026-09-17T21:10:29.240Z",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "alumno_id"
+            }
+          ]
+        }
+      },
+      "id": "c055762a-8fe7-4141-a639-df2372f30060",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        192,
+        576
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "b5942df6-0160-4ef7-965d-57583acdc8aa",
+      "name": "Replace me with your logic",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        528,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "path": "registrar-derivacion-a-fla",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        304,
+        224
+      ],
+      "id": "b9f3ed93-3b58-439e-b017-7d81aca00e03",
+      "name": "Webhook",
+      "webhookId": "registrar-derivacion-a-fla"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst alumno_id = input.alumno_id || input.id;\nconst tipo = (input.tipo || 'alumno').toLowerCase();\n\nif (!alumno_id || (typeof alumno_id !== 'number' && isNaN(Number(alumno_id)))) {\n  return [{\n    json: {\n      success: false,\n      message: 'alumno_id requerido y debe ser número',\n      alumno_id: null\n    }\n  }];\n}\n\nif (!['alumno', 'tutor'].includes(tipo)) {\n  return [{\n    json: {\n      success: false,\n      message: 'tipo debe ser alumno o tutor',\n      tipo: tipo\n    }\n  }];\n}\n\nconst idNum = Number(alumno_id);\nconst query = `UPDATE alumnos \nSET estado = 'DERIVADO_A_FLA', \n    updated_at = NOW()\nWHERE id = ${idNum} AND activo = TRUE\nRETURNING id, nombre, estado, updated_at;`;\n\nreturn [{\n  json: { query, alumno_id: idNum, tipo }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        576
+      ],
+      "id": "2e3c9f96-e721-4d7b-8d76-4d1ae731a8ba",
+      "name": "arma query"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('arma query').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        672,
+        576
+      ],
+      "id": "4b419049-d23e-492c-9e19-85eaef11fb2d",
+      "name": "actualizar estado",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const resultados = $('actualizar estado').all();\n\nif (resultados.length === 0) {\n  return [{\n    json: {\n      success: false,\n      message: 'Alumno no encontrado o no activo',\n      alumno_id: $('arma query').first().json.alumno_id\n    }\n  }];\n}\n\nconst alumno = resultados[0].json;\n\nreturn [{\n  json: {\n    success: true,\n    message: `Alumno ${alumno.nombre} (ID: ${alumno.id}) derivado a Fla`,\n    alumno_id: alumno.id,\n    alumno_nombre: alumno.nombre,\n    nuevo_estado: alumno.estado,\n    actualizado_en: alumno.updated_at\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        576
+      ],
+      "id": "930082b5-7f68-40b0-99f1-44c4ac9aed51",
+      "name": "respuesta"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "arma query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "arma query": {
+      "main": [
+        [
+          {
+            "node": "actualizar estado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "actualizar estado": {
+      "main": [
+        [
+          {
+            "node": "respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {}
+}

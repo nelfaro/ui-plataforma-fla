@@ -1,0 +1,323 @@
+{
+  "n8n_id": "ktDkXcf811N3FTt3",
+  "n8n_name": "ERROR workflow",
+  "active": true,
+  "updatedAt": "2026-07-17T22:44:49.775Z",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        128
+      ],
+      "id": "08a00758-f3e9-49e5-889a-25863d819e11",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtenemos todos los datos que vienen del Error Trigger\nconst data = $input.first().json;\n\n// Rescatamos el mensaje y la descripción del error (si existen)\nlet mensajeOriginal = data.execution?.error?.message || 'Sin mensaje';\nlet descOriginal = data.execution?.error?.description || 'Sin detalles';\n\n// Función para verificar si tiene guiones bajos\nfunction verificarFormato(texto) {\n    if (texto && texto.includes('_')) {\n        return \"⚠️ [No se puede mostrar el mensaje original en Telegram por incompatibilidad de formato. Revisa el correo o el Sheet para leer el detalle exacto].\";\n    }\n    return texto;\n}\n\n// Retornamos todo el objeto original, pero le sumamos dos variables \"seguras\"\nreturn {\n    ...data,\n    mensaje_telegram: verificarFormato(mensajeOriginal),\n    desc_telegram: verificarFormato(descOriginal)\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        -160
+      ],
+      "id": "f1969741-42c1-4c2e-9c0b-299617a2de51",
+      "name": "Filtro Telegram"
+    },
+    {
+      "parameters": {
+        "chatId": "=72371120",
+        "text": "=🚨 *ASISTENTE-FLA Se produjo un error en uno de los workflows de n8n.*\n\n🔸 *Fecha y hora:* {{ $now.setZone('America/Argentina/Buenos_Aires').format('dd-MM-yyyy | HH:mm:ss') }}\n🔸 *Workflow:* {{ $json.workflow.name || 'Desconocido' }}\n🔸 *Nodo que falló:* {{ $json.execution.lastNodeExecuted || $json.execution.error.node?.name || 'Desconocido' }}\n🔸 *Tipo de error:* {{ $json.execution.error.name || 'Error General' }}\n\n🔸 *Mensaje de error:* {{ $json.mensaje_telegram }}\n\n🔸 *Detalle técnico:* {{ $json.desc_telegram }}\n\n🔗 *Ver ejecución fallida:* {{ $json.execution.url || 'No disponible' }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        -160
+      ],
+      "id": "a881d837-1111-498d-aa88-f64808703bfd",
+      "name": "Send a text message1",
+      "webhookId": "82b10282-377c-4740-95ef-b790981b82a9",
+      "credentials": {
+        "telegramApi": {
+          "id": "hgAScOupHXKwgmO2",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "=nelfaro@gmail.com",
+        "subject": "=🚨 ASISTENTE FLA - Error en n8n |\n{{ $json.workflow.name }}",
+        "emailType": "text",
+        "message": "=ASISTENTE FLA - Se produjo un error en uno de los workflows de n8n.\n\n🔸 Fecha y hora: {{ $now.setZone('America/Argentina/Buenos_Aires').format('yyyy-MM-dd | HH:mm:ss') }}\n\n🔸 Workflow: {{ $json.workflow.name || 'Desconocido' }}\n\n🔸 Nodo que falló: {{ $json.execution.lastNodeExecuted || $json.execution.error.node?.name || 'Desconocido' }}\n\n🔸 Tipo de error: {{ $json.execution.error.name || $json.execution.error.description || 'Error General' }}\n\n🔸 Mensaje de error: {{ $json.execution.error.message || 'Sin mensaje' }}\n\n🔸 Detalle técnico: {{ $json.execution.error.stack || $json.execution.error.description || 'Sin detalles' }}\n\n🔗 Ver ejecución fallida: {{ $json.execution.url || 'No disponible' }}\n\n--- Este es un mensaje generado automáticamente desde el Error Trigger de n8n. ---",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        48,
+        448
+      ],
+      "id": "998ddfb9-0a0b-4297-91e2-f7799f44b27e",
+      "name": "Send nelfaro@gmail.com1",
+      "webhookId": "fd52222b-56b3-4be3-9b6f-db763003e965",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1eGPvxQ6pu5kF1gFGwhwNpc71I07Yt0OEAk9jSnX6MPk",
+          "mode": "list",
+          "cachedResultName": "Error_Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1eGPvxQ6pu5kF1gFGwhwNpc71I07Yt0OEAk9jSnX6MPk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1eGPvxQ6pu5kF1gFGwhwNpc71I07Yt0OEAk9jSnX6MPk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "=={{ $now }}",
+            "workflow_name": "={{ $json.workflow.name }}",
+            "node_name": "={{ $json.execution.lastNodeExecuted || $json.execution.error.node?.name || 'Desconocido' }}",
+            "execution_url": "={{ $json.execution.url }}",
+            "error_name": "={{ $json.execution.error.name || 'Error General' }}",
+            "error_mesage": "={{ $json.execution.error.message }}",
+            "error_description": "={{ $json.execution.error.description }}",
+            "Fecha": "={{ $now.format('dd-MM-yyyy') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "workflow_name",
+              "displayName": "workflow_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "node_name",
+              "displayName": "node_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "execution_url",
+              "displayName": "execution_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "error_name",
+              "displayName": "error_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "error_mesage",
+              "displayName": "error_mesage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "error_description",
+              "displayName": "error_description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        48,
+        208
+      ],
+      "id": "6c97be9c-5796-44a7-ac21-c0397b31e57c",
+      "name": "Append row in sheet",
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filtro Telegram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send nelfaro@gmail.com1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtro Telegram": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "pinData": {
+    "Error Trigger": [
+      {
+        "json": {
+          "execution": {
+            "id": "1868",
+            "url": "https://agente-fla-n8n.x5miqk.easypanel.host/workflow/s2cVCHjS8E4eYr3G/executions/1868",
+            "error": {
+              "level": "warning",
+              "tags": {},
+              "description": "Failed query: SELECT MAX(timestamp) as timestamp FROM conversation_log LIMIT 1;",
+              "timestamp": 1784307211618,
+              "context": {},
+              "functionality": "regular",
+              "name": "NodeOperationError",
+              "node": {
+                "parameters": {
+                  "resource": "database",
+                  "operation": "executeQuery",
+                  "query": "{{ $json.query }}",
+                  "options": {}
+                },
+                "id": "af1a6142-7b9e-40a0-b1cb-7c63841c1176",
+                "name": "PostgreSQL - Query",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2.4,
+                "position": [
+                  432,
+                  0
+                ],
+                "credentials": {
+                  "postgres": {
+                    "id": "wPNcwJLWeQKZlTmC",
+                    "name": "Postgres account"
+                  }
+                }
+              },
+              "messages": [],
+              "message": "column \"timestamp\" does not exist",
+              "stack": "NodeOperationError: column \"timestamp\" does not exist\n    at parsePostgresError (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-nodes-base@file+packages+nodes-base_@aws-sdk+credential-providers@3.808.0_asn1.js@5_8da18263ca0574b0db58d4fefd8173ce/node_modules/n8n-nodes-base/nodes/Postgres/v2/helpers/utils.ts:123:9)\n    at /usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-nodes-base@file+packages+nodes-base_@aws-sdk+credential-providers@3.808.0_asn1.js@5_8da18263ca0574b0db58d4fefd8173ce/node_modules/n8n-nodes-base/nodes/Postgres/v2/helpers/utils.ts:398:19\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at ExecuteContext.execute (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-nodes-base@file+packages+nodes-base_@aws-sdk+credential-providers@3.808.0_asn1.js@5_8da18263ca0574b0db58d4fefd8173ce/node_modules/n8n-nodes-base/nodes/Postgres/v2/actions/database/executeQuery.operation.ts:160:9)\n    at ExecuteContext.router (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-nodes-base@file+packages+nodes-base_@aws-sdk+credential-providers@3.808.0_asn1.js@5_8da18263ca0574b0db58d4fefd8173ce/node_modules/n8n-nodes-base/nodes/Postgres/v2/actions/router.ts:41:17)\n    at ExecuteContext.execute (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-nodes-base@file+packages+nodes-base_@aws-sdk+credential-providers@3.808.0_asn1.js@5_8da18263ca0574b0db58d4fefd8173ce/node_modules/n8n-nodes-base/nodes/Postgres/v2/PostgresV2.node.ts:26:10)\n    at WorkflowExecute.executeNode (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file+packages+core_@opentelemetry+api@1.9.0_@opentelemetry+exporter-trace-otlp_cf5896492347c4895f0373f4acc773d7/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1067:8)\n    at WorkflowExecute.runNode (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file+packages+core_@opentelemetry+api@1.9.0_@opentelemetry+exporter-trace-otlp_cf5896492347c4895f0373f4acc773d7/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1367:11)\n    at /usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file+packages+core_@opentelemetry+api@1.9.0_@opentelemetry+exporter-trace-otlp_cf5896492347c4895f0373f4acc773d7/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1829:27\n    at /usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file+packages+core_@opentelemetry+api@1.9.0_@opentelemetry+exporter-trace-otlp_cf5896492347c4895f0373f4acc773d7/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:2521:11"
+            },
+            "lastNodeExecuted": "PostgreSQL - Query",
+            "mode": "webhook",
+            "executionContext": {
+              "version": 1,
+              "establishedAt": 1784307211503,
+              "source": "webhook",
+              "triggerNode": {
+                "name": "Webhook",
+                "type": "n8n-nodes-base.webhook"
+              },
+              "redaction": {
+                "version": 2,
+                "production": false,
+                "manual": false,
+                "source": "workflow"
+              }
+            }
+          },
+          "workflow": {
+            "id": "s2cVCHjS8E4eYr3G",
+            "name": "ultima-actividad-agente"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
+}

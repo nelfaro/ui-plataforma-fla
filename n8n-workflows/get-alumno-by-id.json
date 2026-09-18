@@ -1,5 +1,8 @@
 {
-  "name": "get-alumno-by-id",
+  "n8n_id": "TarOZNsZZ4q1KlbF",
+  "n8n_name": "get-alumno-by-id",
+  "active": true,
+  "updatedAt": "2026-07-30T01:01:09.046Z",
   "nodes": [
     {
       "parameters": {
@@ -11,62 +14,94 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        176,
-        224
+        -256,
+        0
       ],
-      "id": "344e4dfb-118f-49f0-a46e-e53724006a15",
+      "id": "50f1b8df-1b08-46a1-a2fb-941ffc5a7c8a",
       "name": "Webhook",
       "webhookId": "get-alumno-by-id"
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst { id } = input.query;\n\nconst query = `SELECT id, nombre, apellido, email, whatsapp, fecha_nacimiento, \n       categoria, tutor, horario_clase, estado, activo, created_at, updated_at\nFROM alumnos\nWHERE id = ${parseInt(id)} AND activo = TRUE;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];"
+        "jsCode": "const input = $input.first().json;\nlet id = input.id || (input.query && input.query.id) || (input.body && input.body.id);\n\n// Si no hay ID, devolver respuesta amigable DIRECTA\nif (!id || id === 'undefined' || id === 'null' || id === '') {\n  return [{\n    json: {\n      success: false,\n      message: 'No hay ningún alumno seleccionado. Por favor, selecciona un alumno válido.',\n      alumno: null\n    }\n  }];\n}\n\nconst idNum = Number(id);\nif (isNaN(idNum) || idNum <= 0) {\n  return [{\n    json: {\n      success: false,\n      message: `ID inválido: \"${id}\". Por favor, selecciona un alumno válido.`,\n      alumno: null\n    }\n  }];\n}\n\nconst query = `SELECT id, nombre, apellido, email, whatsapp, fecha_nacimiento, \n       categoria, tutor, horario_clase, estado, activo, created_at, updated_at\nFROM alumnos\nWHERE id = ${idNum} AND activo = TRUE;`;\n\nreturn [{\n  json: {\n    hasQuery: true,\n    query\n  }\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        448,
-        144
+        0,
+        0
       ],
-      "id": "dbe66350-d7eb-428d-835f-00a8b4bc754c",
+      "id": "601c8b94-9118-41b3-bc35-bcf4d9f4ade2",
       "name": "arma query"
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "{{ $('arma query').first().json.query }}",
+        "query": "{{ $('arma query').first().json.hasQuery ? $('arma query').first().json.query : 'SELECT NULL;' }}\n",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        688,
-        144
+        496,
+        32
       ],
-      "id": "30c7fb4c-3331-4af9-91c0-8189c6225edf",
+      "id": "55f74434-9f2d-4345-a5e4-7f201b52eb55",
       "name": "obtener alumno",
       "credentials": {
         "postgres": {
-          "id": "7vZZbkZhFbmui4On",
+          "id": "wPNcwJLWeQKZlTmC",
           "name": "Postgres account"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "const alumnos = $('obtener alumno').all();\n\nif (alumnos.length === 0) {\n  return [{\n    json: {\n      success: false,\n      message: 'Alumno no encontrado',\n      alumno: null\n    }\n  }];\n}\n\nconst alumno = alumnos[0].json;\n\nreturn [{\n  json: {\n    success: true,\n    alumno: alumno\n  }\n}];"
+        "jsCode": "// Si ya tiene success (viene del IF con error de validación)\nif ('success' in $json && !$json.success) {\n  return [$json];\n}\n\n// Si viene del PostgreSQL (éxito en la validación)\nconst alumnos = $('obtener alumno').all();\n\nif (alumnos.length === 0) {\n  return [{\n    json: {\n      success: false,\n      message: 'Alumno no encontrado',\n      alumno: null\n    }\n  }];\n}\n\nconst alumno = alumnos[0].json;\n\nreturn [{\n  json: {\n    success: true,\n    alumno: alumno\n  }\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        896,
-        144
+        688,
+        -128
       ],
-      "id": "cdd9cb63-4dd7-4082-850e-6e713644de2d",
+      "id": "152fb22f-9ac6-4dce-9b6f-8bd266236a5a",
       "name": "respuesta"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d4bd6ed4-4bd8-42d7-916a-3bcb0437d8bd",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        16
+      ],
+      "id": "455d815b-71a1-411e-a865-2c1bbe62e1f1",
+      "name": "If"
     }
   ],
-  "pinData": {},
   "connections": {
     "Webhook": {
       "main": [
@@ -83,7 +118,7 @@
       "main": [
         [
           {
-            "node": "obtener alumno",
+            "node": "If",
             "type": "main",
             "index": 0
           }
@@ -100,17 +135,74 @@
           }
         ]
       ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "obtener alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "09f7d344-6e5f-4a89-93e0-6353d8b6068d",
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
-  "id": "get-alumno-by-id-workflow",
-  "tags": []
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "agente-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "es-419,es;q=0.9",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2Bxl8q0nh7YNTT92gLklYhX5W1eFpe3VB8%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2BhSkT6aeIYKLKO24E1Je2oJ8VIo9ey2Oo%3D; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX19a1c3nPKBylOYkpfmTzJYs7ogCefAnBDoh%2B89cqwFOntjqodQSI%2Fia7nUgvPgzXyq5BHkWQvCmNw%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX1%2FSMXQzqbIA81nDptC2rv%2Br%2FtdlVEZrybxIWZ2dA5DGUQCmV3lk4zU2pdurQZ9UvGkPZrEeUGGPH5gzuRkuO%2BfO32hCuoKouilJXc3d5OGrx4u2gaZVJzqDjx9vr5C5ZNDpAAsWrwHLY8RfCZqyBbd%2F0TAZwfIjboo%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX1%2FD2DbAp8z%2FpoGLDjPFFubAsD5FbXw%2Fl2hlIWiRuKT%2Bf9ar8%2Fss%2FgjTRx7kuFKJYueI8udehLcvjyYrrdGD70k2PPq5jnCvyZnFU%2BH3ynMMqM6bgDoNdWp1AG7%2B2x75ocNqi0Oq6%2B2dxw2k8FqHGCmkxUtxK%2Bk9f8yDpn%2FRP5T6sBmSjsWooeetafNLrNbILbg15U7PoFmxdQ%3D%3D; rl_session=RudderEncrypt%3AU2FsdGVkX19CCAySno6QGBmalif%2BvN4nD8xpvkGyrK7cieOTE5h5gLlEREqeFeNfPKrLQRzFmfNJGFUG74nWSf5s8MICHY9aNEfrKTgpzXBlkxpod1KBTMF%2Bka%2Fu0pni2FyKAFbPgjH%2BCETGatkYnQ%3D%3D; ph_phc_kMstNfAgBcBkWSh6KdsgN09heqqNe5VNmalHP1Ni9Q4_posthog=%7B%22%24device_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22distinct_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22%24sesid%22%3A%5Bnull%2Cnull%2Cnull%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fasistente-ia-fla-n8n.x5miqk.easypanel.host%2Fworkflow%2FovC7bSUVy2yM6k1L%22%7D%2C%22%24user_state%22%3A%22anonymous%22%7D",
+            "priority": "u=1, i",
+            "referer": "https://agente-fla-ui-plataforma.x5miqk.easypanel.host/alumno/undefined",
+            "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\", \"Google Chrome\";v=\"150\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "x-api-key": "",
+            "x-forwarded-for": "201.235.17.183, 10.11.0.16, 172.18.0.1",
+            "x-forwarded-host": "agente-fla-ui-plataforma.x5miqk.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "ca60eb9448e6",
+            "x-real-ip": "10.11.0.16"
+          },
+          "params": {},
+          "query": {
+            "id": "undefined"
+          },
+          "body": {},
+          "webhookUrl": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/get-alumno-by-id",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
 }

@@ -1,0 +1,115 @@
+{
+  "n8n_id": "J83rBo0zHt1CRfJi",
+  "n8n_name": "get-conversation-logs",
+  "active": true,
+  "updatedAt": "2026-06-26T02:23:57.599Z",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "get-conversation-logs",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0ff3afe1-7c7a-40b5-b8ed-593326d342d2",
+      "name": "Webhook",
+      "webhookId": "311a00ea-7c23-4851-bc66-ba87ef27bd44"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst query = input.query || {};\nconst { whatsapp, limit = 50, offset = 0 } = query;\n\nif (!whatsapp) {\n  throw new Error('Parámetro requerido: whatsapp');\n}\n\nconst sqlQuery = `SELECT id, whatsapp, mensaje, tipo, direccion, tipo_media, mensaje_preview, lead_tipo, intencion, created_at\nFROM conversation_log\nWHERE whatsapp = '${whatsapp}'\nORDER BY created_at DESC\nLIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)};`;\n\nreturn [{json: {sqlQuery}}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "cd0497b2-eeb1-4267-8268-2cfc0c3374cd",
+      "name": "Build Query"
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $('postgres_node').all();\nreturn [{json: {success: true, messages: result.map(r => r.json), count: result.length}}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "2228a034-e31c-4074-9161-f6e5d80358a5",
+      "name": "Response Node"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query').first().json.sqlQuery }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        416,
+        0
+      ],
+      "id": "b0cd9674-9b10-48d3-b898-8213edf474a8",
+      "name": "postgres_node",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query": {
+      "main": [
+        [
+          {
+            "node": "postgres_node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "postgres_node": {
+      "main": [
+        [
+          {
+            "node": "Response Node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {}
+}

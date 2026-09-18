@@ -1,4 +1,8 @@
 {
+  "n8n_id": "s2cVCHjS8E4eYr3G",
+  "n8n_name": "ultima-actividad-agente",
+  "active": true,
+  "updatedAt": "2026-07-18T00:04:34.219Z",
   "nodes": [
     {
       "parameters": {
@@ -6,37 +10,46 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "webhook",
+      "id": "1f8adde2-de7a-46ae-bf80-c8db093e37d9",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "position": [-528, 112],
+      "position": [
+        0,
+        0
+      ],
       "webhookId": "ultima-actividad-agente"
     },
     {
       "parameters": {
-        "jsCode": "const query = `SELECT MAX(timestamp) as timestamp FROM conversation_log LIMIT 1;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];"
+        "jsCode": "const query = `SELECT MAX(created_at) as timestamp FROM conversation_log LIMIT 1;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];"
       },
-      "id": "arma_query",
+      "id": "842ba54c-c879-450d-b993-24fb52ce6915",
       "name": "Build Query",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-288, 112]
+      "position": [
+        240,
+        0
+      ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "={{ $json.query }}",
+        "query": "{{ $json.query }}",
         "options": {}
       },
-      "id": "postgres_query",
+      "id": "af1a6142-7b9e-40a0-b1cb-7c63841c1176",
       "name": "PostgreSQL - Query",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [-96, 112],
+      "position": [
+        432,
+        0
+      ],
       "credentials": {
         "postgres": {
-          "id": "7vZZbkZhFbmui4On",
+          "id": "wPNcwJLWeQKZlTmC",
           "name": "Postgres account"
         }
       }
@@ -45,36 +58,119 @@
       "parameters": {
         "jsCode": "const result = $input.first().json;\n\nreturn [{\n  json: {\n    timestamp: result.timestamp || null\n  }\n}];"
       },
-      "id": "format_response",
+      "id": "6f6bfc71-f0a7-48cb-96f8-14a7c663b696",
       "name": "Format Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [120, 112]
+      "position": [
+        656,
+        0
+      ]
     },
     {
       "parameters": {
         "options": {}
       },
-      "id": "response",
+      "id": "8d5daa82-1672-4e45-a07f-da4112d270ec",
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [320, 112]
+      "position": [
+        848,
+        0
+      ]
     }
   ],
   "connections": {
     "Webhook": {
-      "main": [[{"node": "arma_query", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Build Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "arma_query": {
-      "main": [[{"node": "postgres_query", "type": "main", "index": 0}]]
+    "Build Query": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "postgres_query": {
-      "main": [[{"node": "format_response", "type": "main", "index": 0}]]
+    "PostgreSQL - Query": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "format_response": {
-      "main": [[{"node": "response", "type": "main", "index": 0}]]
+    "Format Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "agente-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "es-419,es;q=0.9",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2Bxl8q0nh7YNTT92gLklYhX5W1eFpe3VB8%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2BhSkT6aeIYKLKO24E1Je2oJ8VIo9ey2Oo%3D; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX19oYEMRvN91pKxXzkOmPYnxcyfLjPOLnv1zBDGujbFgo31ik7gjBH%2FQM%2Fe2%2FZAI32PSiopBJ3vVng%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX19OwJGoQkHBT9wXg2k4ydBLVcQXsBuxpeuwB3SSp8T8lZ4eS%2F4wK7BUa6TQeuoopqPT3UWkKjFuW3ANVACPgavBLmbXSzh2dQRM8%2Fg3w2Yk9Lmt3tk18SdMlhBWF4VD%2FPTU8gM1pJUwXpY9acJnra2MZHMMECYwqNM%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX1%2BZh9W7XWF7PWaaevgxY7%2FXfBDyAd4khRE1O%2Fdkffp0VB6qc2dUX62It%2BK9Qhu1kJk4C5i15VTyMysmiBl697aX8qQMBZ5UaK7kpMJ%2B6BVYHKplbjTe%2BJeFsn02akHB77JKP4JVC47jAuELPltw%2BANsoho3eXKgw9OwkKL6xdQr%2BLSlJDhQogupQQ3ptnWL9F9teUEZu4LBzw%3D%3D; ph_phc_kMstNfAgBcBkWSh6KdsgN09heqqNe5VNmalHP1Ni9Q4_posthog=%7B%22%24device_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22distinct_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22%24sesid%22%3A%5B1784332489685%2C%22019f7245-f022-708e-8cf4-6502f78971ad%22%2C1784328613922%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fasistente-ia-fla-n8n.x5miqk.easypanel.host%2Fworkflow%2FovC7bSUVy2yM6k1L%22%7D%2C%22%24user_state%22%3A%22anonymous%22%7D; rl_session=RudderEncrypt%3AU2FsdGVkX18zCC4qSoJKLfevWiPL2Xhy%2BVMHdtNFF83%2FP2DKpMr9%2BI5%2FEGcETKqDVxtBLsfb50zQBQHrE1XOPRBwCzjv1h%2FsL2cTISm7oMAJPF5Oyb4aMiqfLoQMnxb20bzDswI%2BuM41Q1bjemvuzw%3D%3D",
+            "priority": "u=1, i",
+            "referer": "https://agente-fla-ui-plataforma.x5miqk.easypanel.host/dashboard",
+            "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\", \"Google Chrome\";v=\"150\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "x-forwarded-for": "201.235.17.183, 10.11.0.23, 172.18.0.1",
+            "x-forwarded-host": "agente-fla-ui-plataforma.x5miqk.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "17792bd965dd",
+            "x-real-ip": "10.11.0.23"
+          },
+          "params": {},
+          "query": {},
+          "webhookUrl": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/ultima-actividad-agente",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
 }

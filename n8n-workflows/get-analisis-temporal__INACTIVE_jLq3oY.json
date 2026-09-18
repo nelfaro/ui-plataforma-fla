@@ -1,0 +1,223 @@
+{
+  "n8n_id": "jLq3oYFpaEpoWhdd",
+  "n8n_name": "get-analisis-temporal",
+  "active": false,
+  "updatedAt": "2026-06-18T00:00:06.000Z",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "get-analisis-temporal",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        192
+      ],
+      "id": "ec85aa0d-7599-4ca5-bad9-8b9703ddb9fa",
+      "name": "Webhook",
+      "webhookId": "2277cb99-3489-4ee3-9207-337a58d49ec8"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst query = input.query || {};\nconst { startDate, endDate } = query;\n\nconst start = startDate || '2026-01-01';\nconst end = endDate || '2026-04-23';\n\nconst queryNuevos = `WITH semanas AS (\n  SELECT generate_series(\n    DATE_TRUNC('week', '${start}'::date),\n    DATE_TRUNC('week', '${end}'::date),\n    '1 week'::interval\n  )::date as semana_inicio\n)\nSELECT \n  TO_CHAR(s.semana_inicio, 'YYYY-WW') as semana,\n  COUNT(a.id)::integer as nuevos\nFROM semanas s\nLEFT JOIN alumnos a ON DATE_TRUNC('week', a.fecha_registro) = s.semana_inicio\nGROUP BY s.semana_inicio\nORDER BY s.semana_inicio ASC;`;\n\nconst queryConversion = `WITH semanas AS (\n  SELECT generate_series(\n    DATE_TRUNC('week', '${start}'::date),\n    DATE_TRUNC('week', '${end}'::date),\n    '1 week'::interval\n  )::date as semana_inicio\n)\nSELECT \n  TO_CHAR(s.semana_inicio, 'YYYY-WW') as semana,\n  ROUND(100.0 * COUNT(CASE WHEN a.estado IN ('REGISTRADO', 'ACTIVO') THEN 1 END) / \n    NULLIF(COUNT(a.id), 0), 1)::integer as conversion\nFROM semanas s\nLEFT JOIN alumnos a ON DATE_TRUNC('week', a.fecha_registro) = s.semana_inicio\nGROUP BY s.semana_inicio\nORDER BY s.semana_inicio ASC;`;\n\nconst queryIngresos = `SELECT \n  TO_CHAR(DATE_TRUNC('month', p.fecha_pago), 'YYYY-MM') as mes,\n  COALESCE(SUM(p.monto), 0)::decimal as ingresos\nFROM pagos_manuales p\nWHERE p.fecha_pago BETWEEN '${start}'::date AND '${end}'::date\nGROUP BY DATE_TRUNC('month', p.fecha_pago)\nORDER BY mes ASC;`;\n\nreturn [{\n  json: {\n    queryNuevos,\n    queryConversion,\n    queryIngresos\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        192,
+        192
+      ],
+      "id": "7d2d1f8e-465f-41bb-8849-9694e6e13eb1",
+      "name": "arma query"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('arma query').first().json.queryNuevos }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        400,
+        192
+      ],
+      "id": "3a8ba95f-4ee9-4db9-bd39-9962541028e8",
+      "name": "nuevos",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('arma query').first().json.queryConversion }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        608,
+        192
+      ],
+      "id": "d95efffa-cc59-4953-842c-621c706aee64",
+      "name": "conversion",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('arma query').first().json.queryIngresos }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        816,
+        192
+      ],
+      "id": "b75dd01d-a8d5-4abb-ab2b-c7be78492b05",
+      "name": "ingresos",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const nuevos = $('nuevos').all().map(row => row.json);\nconst conversion = $('conversion').all().map(row => row.json);\nconst ingresos = $('ingresos').all().map(row => row.json);\n\nreturn [{\n  json: {\n    items: {\n      nuevos_por_semana: nuevos,\n      conversion_por_semana: conversion,\n      ingresos_acumulados: ingresos\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        192
+      ],
+      "id": "deb4558c-58ad-4c96-961d-aa4f9f505c34",
+      "name": "respuesta"
+    },
+    {
+      "parameters": {
+        "url": "https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/auth-validate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $input.first().json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4d4e53b1-6d87-4fe9-af92-821ab3fd8c7b",
+      "name": "Validador",
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "arma query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "arma query": {
+      "main": [
+        [
+          {
+            "node": "nuevos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "nuevos": {
+      "main": [
+        [
+          {
+            "node": "conversion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "conversion": {
+      "main": [
+        [
+          {
+            "node": "ingresos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ingresos": {
+      "main": [
+        [
+          {
+            "node": "respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "asistente-ia-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "axios/1.15.2",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, compress, deflate, br",
+            "content-type": "application/json",
+            "x-api-key": "fla-2026-Clas3sd31ngl3s",
+            "x-forwarded-for": "201.235.17.183",
+            "x-forwarded-host": "asistente-ia-fla-n8n.x5miqk.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "dbf76c5580fc",
+            "x-real-ip": "201.235.17.183"
+          },
+          "params": {},
+          "query": {
+            "startDate": "2026-01-01",
+            "endDate": "2026-04-25"
+          },
+          "body": {},
+          "webhookUrl": "https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/get-analisis-temporal",
+          "executionMode": "production"
+        }
+      }
+    ]
+  }
+}

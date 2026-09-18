@@ -1,0 +1,204 @@
+{
+  "n8n_id": "7sqOI8QKnDuVkNVN",
+  "n8n_name": "registrar_alumno",
+  "active": true,
+  "updatedAt": "2026-06-30T00:50:40.268Z",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "nombre"
+            },
+            {
+              "name": "mail"
+            },
+            {
+              "name": "nivel"
+            },
+            {
+              "name": "notas"
+            },
+            {
+              "name": "whatsapp"
+            },
+            {
+              "name": "objetivo"
+            },
+            {
+              "name": "disponibilidad"
+            },
+            {
+              "name": "lead_tipo"
+            },
+            {
+              "name": "origen"
+            },
+            {
+              "name": "intencion"
+            },
+            {
+              "name": "kids_edad"
+            },
+            {
+              "name": "kids_colegio"
+            },
+            {
+              "name": "kids_turno"
+            },
+            {
+              "name": "kids_grado"
+            },
+            {
+              "name": "referencia"
+            },
+            {
+              "name": "tags"
+            },
+            {
+              "name": "resumen"
+            }
+          ]
+        }
+      },
+      "id": "df2103b3-36df-4782-9949-5a331dcf1663",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b4fa9aee-0cad-44e3-8f3a-b3fe3e3423c0",
+              "name": "resultado",
+              "value": "Alumno registrado con éxito en la base de datoss",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        0
+      ],
+      "id": "cc5f8dee-7e3a-4aa1-8e52-535f8b5a7263",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalizador del subworkflow registrar_alumno\n// Devuelve SIEMPRE [{ json: ... }] y completa defaults\n\nconst data = $input.first()?.json ?? {};\n\nconst norm = (v) => (v === undefined || v === null ? \"\" : String(v).trim());\n\nreturn [\n  {\n    json: {\n      whatsapp: norm(data.whatsapp),\n      nombre: norm(data.nombre) || \"No especificado\",\n      nivel: norm(data.nivel) || \"Sin definir\",\n      notas: norm(data.notas), // backup libre\n      objetivo: norm(data.objetivo),\n      disponibilidad: norm(data.disponibilidad),\n      lead_tipo: norm(data.lead_tipo),\n      origen: norm(data.origen),\n      intencion: norm(data.intencion),\n      completitud: norm(data.completitud),\n      kids_edad: norm(data.kids_edad),\n      kids_colegio: norm(data.kids_colegio),\n      kids_turno: norm(data.kids_turno),\n      kids_grado: norm(data.kids_grado),\n      referencia: norm(data.referencia),\n      tags: norm(data.tags),\n      resumen: norm(data.resumen)\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "7993eb89-1348-4531-a8bd-34365ffdba98",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO alumnos (\n  whatsapp, nombre, nivel, notas, objetivo, disponibilidad,\n  lead_tipo, origen, intencion, completitud,\n  categoria, tags, resumen, estado, fecha_registro\n) VALUES (\n  '{{ $json.whatsapp }}',\n  '{{ $json.nombre }}',\n  '{{ $json.nivel }}',\n  '{{ $json.notas }}',\n  '{{ $json.objetivo }}',\n  '{{ $json.disponibilidad }}',\n  '{{ ($json.lead_tipo || \"ADULTOS\").toUpperCase().replace(\"ADULTO\", \"ADULTOS\") }}',\n  '{{ $json.origen }}',\n  '{{ $json.intencion }}',\n  '{{ $json.completitud }}',\n  'ADULTOS',\n  '{{ $json.tags }}',\n  '{{ $json.resumen }}',\n  'REGISTRADO',\n  NOW()\n) ON CONFLICT (whatsapp) DO UPDATE SET\n  nombre = EXCLUDED.nombre,\n  nivel = EXCLUDED.nivel,\n  objetivo = EXCLUDED.objetivo,\n  disponibilidad = EXCLUDED.disponibilidad,\n  lead_tipo = EXCLUDED.lead_tipo,\n  intencion = EXCLUDED.intencion,\n  completitud = EXCLUDED.completitud,\n  categoria = EXCLUDED.categoria,\n  tags = EXCLUDED.tags,\n  resumen = EXCLUDED.resumen,\n  ultimo_contacto = NOW(),\n  updated_at = NOW();\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        416,
+        0
+      ],
+      "id": "39eb85bd-2c45-417a-97bc-25ee22bc292c",
+      "name": "registrar alumno",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "registrar alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "registrar alumno": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "nombre": "Sin definir",
+          "mail": "Sin definir",
+          "nivel": "Sin definir",
+          "notas": "",
+          "whatsapp": "158115077083215@lid",
+          "objetivo": "hablar fluido",
+          "disponibilidad": "Lunes y miércoles 18:00 a 19:00",
+          "lead_tipo": "ADULTO",
+          "origen": "ORGANICO",
+          "intencion": "INFO",
+          "kids_edad": "",
+          "kids_colegio": "",
+          "kids_turno": "",
+          "kids_grado": "",
+          "referencia": "",
+          "tags": "ADULTOS-REGULAR GRUPAL",
+          "resumen": "Adulto interesado en clases grupales para hablar fluido. Disponible lunes y miércoles 18:00 a 19:00. Origen: ORGANICO."
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
+}

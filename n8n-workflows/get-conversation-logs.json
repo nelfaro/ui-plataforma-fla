@@ -1,0 +1,117 @@
+{
+  "n8n_id": "GO191FK0JjuHoO5v",
+  "n8n_name": "get-conversation-logs",
+  "active": true,
+  "updatedAt": "2026-06-26T02:24:40.766Z",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "save-conversation-log",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ab2e3af0-549e-4b60-a8a0-afb44ab5eada",
+      "name": "Webhook",
+      "webhookId": "61363b26-b409-45f9-8842-abc1dbcd4815"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst body = input.body || input.query || {};\nconst { whatsapp, mensaje, tipo, direccion, tipo_media, lead_tipo, intencion } = body;\n\nif (!whatsapp || !mensaje) {\n  throw new Error('Faltan campos requeridos: whatsapp, mensaje');\n}\n\nconst mensaje_preview = String(mensaje).substring(0, 50);\nconst msg = String(mensaje).replace(/'/g, \"''\");\n\nconst query = `INSERT INTO conversation_log (whatsapp, mensaje, tipo, direccion, tipo_media, mensaje_preview, lead_tipo, intencion, created_at)\nVALUES ('${whatsapp}', '${msg}', '${tipo || 'mensaje'}', '${direccion || 'entrada'}', '${tipo_media || 'texto'}', '${mensaje_preview}', ${lead_tipo ? `'${lead_tipo}'` : 'null'}, ${intencion ? `'${intencion}'` : 'null'}, CURRENT_TIMESTAMP)\nRETURNING id, whatsapp, created_at;`;\n\nreturn [{json: {query}}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "12d35628-a90b-4612-a7ae-7e3515d9f749",
+      "name": "Build Query"
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $('postgres_node').first().json;\nreturn [{json: {success: true, id: result.id, whatsapp: result.whatsapp, created_at: result.created_at}}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "610fa209-578d-4f6c-92e6-f5cbeb8c3b35",
+      "name": "Response Node"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query').first().json.query }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        416,
+        0
+      ],
+      "id": "98553f09-15f5-4637-8815-a6d342926f73",
+      "name": "postgres_node",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query": {
+      "main": [
+        [
+          {
+            "node": "postgres_node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "postgres_node": {
+      "main": [
+        [
+          {
+            "node": "Response Node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {}
+}

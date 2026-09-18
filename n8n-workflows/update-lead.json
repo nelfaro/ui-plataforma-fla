@@ -1,1 +1,159 @@
-{"name":"update-lead","active":true,"nodes":[{"parameters":{"path":"update-lead","responseMode":"lastNode","options":{}},"type":"n8n-nodes-base.webhook","typeVersion":2.1,"position":[-300,0],"id":"webhook","name":"Webhook","webhookId":"update-lead"},{"parameters":{"jsCode":"const input = $input.first().json;\nconst body = input.body || input.query || {};\nconst { id, estado, estado_motivo, resumen, disponibilidad, tags, proxima_cita, notas } = body;\n\nif (!id) {\n  throw new Error('Falta el campo requerido: id');\n}\n\nconst updates = [];\nif (estado) updates.push(`estado = '${estado}'`);\nif (estado_motivo) updates.push(`estado_motivo = '${String(estado_motivo).replace(/'/g, \"''\")}' `);\nif (resumen) updates.push(`resumen = '${String(resumen).replace(/'/g, \"''\")}' `);\nif (disponibilidad) updates.push(`disponibilidad = '${String(disponibilidad).replace(/'/g, \"''\")}' `);\nif (tags) updates.push(`tags = '${tags}'`);\nif (proxima_cita) updates.push(`proxima_cita = '${proxima_cita}'::timestamp`);\nif (notas) updates.push(`notas = '${String(notas).replace(/'/g, \"''\")}' `);\n\nupdates.push('estado_fecha = CURRENT_TIMESTAMP');\nupdates.push('ultimo_contacto = CURRENT_TIMESTAMP');\nupdates.push('updated_at = CURRENT_TIMESTAMP');\n\nconst query = `UPDATE leads SET ${updates.join(', ')} WHERE id = ${parseInt(id)} RETURNING id, nombre, whatsapp, estado, estado_motivo, updated_at;`;\n\nreturn [{json: {query}}];"},"type":"n8n-nodes-base.code","typeVersion":2,"position":[-100,0],"id":"build_query","name":"Build Query"},{"parameters":{"operation":"executeQuery","query":"{{ $('build_query').first().json.query }}","options":{}},"type":"n8n-nodes-base.postgres","typeVersion":2.6,"position":[100,0],"id":"update_db","name":"PostgreSQL - Update","credentials":{"postgres":{"id":"7vZZbkZhFbmui4On","name":"Postgres account"}}},{"parameters":{"jsCode":"const result = $('update_db').first().json;\n\nif (!result) {\n  return [{json: {success: false, message: 'Lead no encontrado'}}];\n}\n\nreturn [{json: {success: true, message: 'Lead actualizado correctamente', lead: {id: result.id, nombre: result.nombre, estado: result.estado, estado_motivo: result.estado_motivo}}}];"},"type":"n8n-nodes-base.code","typeVersion":2,"position":[300,0],"id":"response","name":"Response"}],"connections":{"Webhook":{"main":[[{"node":"build_query","type":"main","index":0}]]},"build_query":{"main":[[{"node":"update_db","type":"main","index":0}]]},"update_db":{"main":[[{"node":"response","type":"main","index":0}]]}},"settings":{"executionOrder":"v1","binaryMode":"separate"}}
+{
+  "n8n_id": "FjVuLaSNlsdGxhOo",
+  "n8n_name": "update-lead",
+  "active": true,
+  "updatedAt": "2026-07-18T23:05:55.608Z",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "id"
+            },
+            {
+              "name": "estado"
+            },
+            {
+              "name": "estado_motivo"
+            },
+            {
+              "name": "resumen"
+            },
+            {
+              "name": "disponibilidad"
+            },
+            {
+              "name": "tags"
+            },
+            {
+              "name": "proxima_cita"
+            },
+            {
+              "name": "notas"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        272,
+        -80
+      ],
+      "id": "19bfb0b1-1328-48a3-b9fb-40dc27c815a5",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst body = input.body || input;\nconst { id, estado, estado_motivo, resumen, disponibilidad, tags, proxima_cita, notas } = body;\n\nif (!id) {\n  throw new Error('Falta el campo requerido: id');\n}\n\nconst isValid = (v) => v && v !== 'Sin definir' && v !== '' && v !== null;\nconst toSql = (v) => isValid(v) ? `'${String(v).replace(/'/g, \"''\")}'` : 'null';\n\nconst updates = [];\nif (estado) updates.push(`estado = '${estado}'`);\nif (isValid(estado_motivo)) updates.push(`estado_motivo = ${toSql(estado_motivo)}`);\nif (isValid(resumen)) updates.push(`resumen = ${toSql(resumen)}`);\nif (isValid(disponibilidad)) updates.push(`disponibilidad = ${toSql(disponibilidad)}`);\nif (isValid(tags)) updates.push(`tags = '${tags}'`);\nif (isValid(proxima_cita)) updates.push(`proxima_cita = '${proxima_cita}'::timestamp`);\nelse if (proxima_cita === 'Sin definir') updates.push(`proxima_cita = null`);\nif (isValid(notas)) updates.push(`notas = ${toSql(notas)}`);\n\nupdates.push('estado_fecha = CURRENT_TIMESTAMP');\nupdates.push('ultimo_contacto = CURRENT_TIMESTAMP');\nupdates.push('updated_at = CURRENT_TIMESTAMP');\n\nconst query = `UPDATE leads SET ${updates.join(', ')} WHERE id = ${parseInt(id)} RETURNING id, nombre, whatsapp, estado, estado_motivo, updated_at;`;\n\nreturn [{json: {query}}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        -80
+      ],
+      "id": "cb5c3ee9-34d3-48f3-acb9-068e0f337b1d",
+      "name": "Build Query"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        656,
+        -80
+      ],
+      "id": "868f8bb6-2213-4b9c-aedd-04eca7eed86f",
+      "name": "PostgreSQL - Update",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $('PostgreSQL - Update').first().json;\n\nif (!result || !result.id) {\n  return [{json: {success: false, message: 'Lead no encontrado'}}];\n}\n\nreturn [{json: {success: true, message: 'Lead actualizado correctamente', lead: {id: result.id, nombre: result.nombre, estado: result.estado, estado_motivo: result.estado_motivo}}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        -80
+      ],
+      "id": "67de16fe-7f20-429b-b7a3-f91ba3f92249",
+      "name": "Response"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Build Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Update": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "id": "1",
+          "estado": "TIBIO",
+          "estado_motivo": "es por un viaje que voy a hacer",
+          "resumen": "Nelson, ADULTO, objetivo: Viaje, origen: INSTAGRAM",
+          "disponibilidad": "Sin definir",
+          "tags": "ADULTO,INSTAGRAM",
+          "proxima_cita": "Sin definir",
+          "notas": "Sin definir"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
+}

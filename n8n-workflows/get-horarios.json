@@ -1,9 +1,12 @@
 {
-  "name": "get-horarios",
+  "n8n_id": "4crS0mDaqGsMweMi",
+  "n8n_name": "get-horarios",
+  "active": true,
+  "updatedAt": "2026-06-29T22:29:13.337Z",
   "nodes": [
     {
       "parameters": {
-        "url": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/auth-validate",
+        "url": "https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/auth-validate",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ $input.first().json }}",
@@ -12,10 +15,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        208,
-        -208
+        0,
+        0
       ],
-      "id": "edab190d-61e0-4bb0-809b-5d8c04ae9b5f",
+      "id": "45fbf5ce-899b-431f-a79d-96a1fad178b5",
       "name": "Validador",
       "disabled": true
     },
@@ -26,32 +29,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        448,
-        144
+        240,
+        352
       ],
-      "id": "dbe66350-d7eb-428d-835f-00a8b4bc754c",
+      "id": "cc677db6-df88-4716-a817-afdf2cb6390e",
       "name": "arma query"
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "{{ $('arma query').first().json.query }}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        688,
-        144
-      ],
-      "id": "30c7fb4c-3331-4af9-91c0-8189c6225edf",
-      "name": "obtener horarios",
-      "credentials": {
-        "postgres": {
-          "id": "7vZZbkZhFbmui4On",
-          "name": "Postgres account"
-        }
-      }
     },
     {
       "parameters": {
@@ -60,10 +42,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        896,
-        144
+        640,
+        352
       ],
-      "id": "cdd9cb63-4dd7-4082-850e-6e713644de2d",
+      "id": "c7db0dca-edc9-4452-92f5-5f1c508c1d24",
       "name": "respuesta"
     },
     {
@@ -76,10 +58,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        176,
-        224
+        -32,
+        432
       ],
-      "id": "344e4dfb-118f-49f0-a46e-e53724006a15",
+      "id": "a4633afe-9803-47b0-9d41-b414cf774c38",
       "name": "Webhook",
       "webhookId": "96ff5032-9976-4d79-a425-7da8277ed30c"
     },
@@ -96,74 +78,40 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        176,
-        32
+        -32,
+        240
       ],
-      "id": "2090a453-0895-420e-aeaf-c050b8f71d28",
+      "id": "0d24c93c-e18a-452c-9192-3618140034fe",
       "name": "When Executed by Another Workflow"
-    }
-  ],
-  "pinData": {
-    "Webhook": [
-      {
-        "json": {
-          "headers": {
-            "host": "agente-fla-n8n.x5miqk.easypanel.host",
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
-            "accept": "application/json, text/plain, */*",
-            "accept-encoding": "gzip, deflate, br, zstd",
-            "accept-language": "es-419,es;q=0.9",
-            "if-none-match": "W/\"1085-3lkIJjE/R7eRDC3ub23GyALjhBo\"",
-            "origin": "https://asistente-ia-fla-frontend.x5miqk.easypanel.host",
-            "priority": "u=1, i",
-            "referer": "https://asistente-ia-fla-frontend.x5miqk.easypanel.host/",
-            "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": "\"Windows\"",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site",
-            "x-forwarded-for": "201.235.17.183",
-            "x-forwarded-host": "agente-fla-n8n.x5miqk.easypanel.host",
-            "x-forwarded-port": "443",
-            "x-forwarded-proto": "https",
-            "x-forwarded-server": "17792bd965dd",
-            "x-real-ip": "201.235.17.183"
-          },
-          "params": {},
-          "query": {},
-          "body": {},
-          "webhookUrl": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/get-horarios",
-          "executionMode": "production"
-        },
-        "pairedItem": {
-          "item": 0
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('arma query').first().json.query }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        448,
+        352
+      ],
+      "id": "eb60af4e-3d94-4da6-807c-99e674208bab",
+      "name": "obtener horarios",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
         }
       }
-    ]
-  },
+    }
+  ],
   "connections": {
-    "Validador": {
-      "main": [
-        []
-      ]
-    },
     "arma query": {
       "main": [
         [
           {
             "node": "obtener horarios",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "obtener horarios": {
-      "main": [
-        [
-          {
-            "node": "respuesta",
             "type": "main",
             "index": 0
           }
@@ -191,18 +139,74 @@
           }
         ]
       ]
+    },
+    "obtener horarios": {
+      "main": [
+        [
+          {
+            "node": "respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "09f7d344-6e5f-4a89-93e0-6353d8b6068d",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "f4802d3c2c5422c1c22bebcbf4214605a665c7e251fd858859b294104b3e805e"
-  },
-  "id": "YYfCvvBhKi16kUwV",
-  "tags": []
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "agente-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "es-419,es;q=0.9",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2Bxl8q0nh7YNTT92gLklYhX5W1eFpe3VB8%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2BhSkT6aeIYKLKO24E1Je2oJ8VIo9ey2Oo%3D; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX19CLk%2BtO%2Bc5T4MGNXBRjjSCOTCDL5KzNWOe0V5Z2hSburgysK1VTOFYI5cJQvFo5V5lrXKIMx1Y9g%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX1%2B0T0P5t7gAHjQ0KecKnEw9Q5d0M25Hch6ttWYEFXLidorvrvsfvPmRBQ5UorkfFIK%2Fon2hgGxJxh2UJP6JEKVC6KW4JDtszrwQEzCOcRfeQOaEbf4pE7OfW%2Bfkb%2FDpAlR%2BltiOo0FtQm4WoqIDofB%2BXg0GPiy8Wq0%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX19j3I4OnYibjHGehpYfUbZukskPE1tFb2neyHl1DYw%2FpkWIaJKojXiqUudEEZKxw5e8AifSXPQT2g7sOxmOUhrHFHN%2B0FYYTubwhs1YlXbTLOWzA4u6UNuDwCJWalyeJt6R%2BlgDUuApZkNw%2BJBuRFTOo5dYEVeCnUNXCY70fEvgMsgsge9TBTSvmk%2FB8OP4sLvplAibtW5U%2FQ%3D%3D; ph_phc_kMstNfAgBcBkWSh6KdsgN09heqqNe5VNmalHP1Ni9Q4_posthog=%7B%22%24device_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22distinct_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22%24sesid%22%3A%5B1781831792625%2C%22019edd3d-87ba-7460-889b-ca15e8303611%22%2C1781828257722%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fasistente-ia-fla-n8n.x5miqk.easypanel.host%2Fworkflow%2FovC7bSUVy2yM6k1L%22%7D%2C%22%24user_state%22%3A%22anonymous%22%7D; rl_session=RudderEncrypt%3AU2FsdGVkX1%2FOC%2BvUnpkaD1JjwpL5nXuF9MrOLqRxy9x3EWYbFy9wiInSDg13IL4BXMKNUdivKCS6TXzMeg0JJdP1GiROqcY0%2FqRrGx6OGL7uFCbo3TgfIWzycRbGcqxmqVsmcVAjvMf41uNLLwmX2w%3D%3D",
+            "priority": "u=1, i",
+            "referer": "https://agente-fla-ui-plataforma.x5miqk.easypanel.host/alumno/2",
+            "sec-ch-ua": "\"Google Chrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "x-forwarded-for": "201.235.17.183, 10.11.0.23, 172.18.0.1",
+            "x-forwarded-host": "agente-fla-ui-plataforma.x5miqk.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "17792bd965dd",
+            "x-real-ip": "10.11.0.23"
+          },
+          "params": {},
+          "query": {},
+          "body": {},
+          "webhookUrl": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/get-horarios",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "categoria": "KIDS"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
 }

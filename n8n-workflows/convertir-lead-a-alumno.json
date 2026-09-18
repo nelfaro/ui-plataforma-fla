@@ -1,0 +1,251 @@
+{
+  "n8n_id": "vlU8BuUi4QMWoomm",
+  "n8n_name": "convertir-lead-a-alumno",
+  "active": true,
+  "updatedAt": "2026-09-17T20:06:34.378Z",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "whatsapp"
+            },
+            {
+              "name": "person_identifier"
+            },
+            {
+              "name": "horario_id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        4112,
+        368
+      ],
+      "id": "0679fb57-bac8-444e-a2c1-1c1b0278bc9f",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconsole.log('Input recibido:', JSON.stringify(input, null, 2));\n\nlet { whatsapp, person_identifier, horario_id } = input;\n\nif (!whatsapp) {\n  throw new Error('Falta parámetro: whatsapp. Input: ' + JSON.stringify(input));\n}\nif (!horario_id) {\n  throw new Error('Falta parámetro: horario_id');\n}\n\nconst wp = String(whatsapp).replace(/'/g, \"''\");\nconst pi = person_identifier ? String(person_identifier).replace(/'/g, \"''\") : null;\nconst hid = parseInt(horario_id);\n\nlet whereClause;\nif (pi) {\n  whereClause = `l.whatsapp = '${wp}' AND l.person_identifier = '${pi}'`;\n} else {\n  whereClause = `l.whatsapp = '${wp}'`;\n}\n\nconst query = `SELECT\n  (SELECT to_jsonb(l) FROM leads l WHERE ${whereClause} ORDER BY l.created_at DESC LIMIT 1) AS lead,\n  (SELECT to_jsonb(h) FROM horarios h WHERE h.id = ${hid}) AS horario;`;\n\nreturn [{ json: { query } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4336,
+        368
+      ],
+      "id": "911f82d4-a4e5-40e3-a4bf-546c5501592c",
+      "name": "Build Query Buscar Lead+Horario"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query Buscar Lead+Horario').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4528,
+        368
+      ],
+      "id": "ec0c5259-6951-4c8d-add0-1aa3dd196870",
+      "name": "PostgreSQL - Buscar",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $input.first().json || {};\nconst lead = result.lead;\nconst horario = result.horario;\n\nif (!lead || !lead.id) {\n  console.log('DEBUG - Lead no encontrado. Resultado:', JSON.stringify(result));\n  \n  // Obtener parámetros originales\n  const triggerData = $('When Executed by Another Workflow').first().json;\n  throw new Error(`Lead no encontrado para whatsapp='${triggerData.whatsapp}' y person_identifier='${triggerData.person_identifier}'. Verifica que el lead existe en la tabla leads.`);\n}\n\nif (!horario || !horario.id) {\n  throw new Error('No existe horario con ese id');\n}\n\nconst whatsapp = lead.whatsapp;\nconst cupoMax = (horario.cupo_maximo ?? horario.cupo_max);\nconst cupoActual = horario.cupo_actual ?? 0;\n\nif (cupoMax !== null && cupoMax !== undefined && cupoActual >= cupoMax) {\n  throw new Error('Horario sin cupo disponible');\n}\n\nconst esc = (v) => v === null || v === undefined ? null : String(v).replace(/'/g, \"''\");\nconst asSql = (v) => v === null ? 'null' : `'${v}'`;\n\nconst nombre = esc(lead.nombre);\nconst apellido = esc(lead.apellido);\nconst wp = esc(whatsapp);\nconst email = esc(lead.email);\nconst lead_tipo = esc(lead.lead_tipo);\nconst categoria = esc(lead.categoria);\nconst origen = esc(lead.origen);\nconst nivel = esc(lead.nivel);\nconst objetivo = esc(lead.objetivo);\nconst resumen = esc(lead.resumen);\nconst disponibilidad = esc(lead.disponibilidad);\nconst tags = esc(lead.tags);\nconst notas = esc(lead.notas);\n\nconst query = `INSERT INTO alumnos (nombre, apellido, whatsapp, email, lead_tipo, categoria, origen, nivel, objetivo, resumen, disponibilidad, tags, notas, estado, estado_motivo, estado_fecha, primer_contacto, ultimo_contacto, created_at, updated_at, activo)\nVALUES (${asSql(nombre)}, ${asSql(apellido)}, ${asSql(wp)}, ${asSql(email)}, ${asSql(lead_tipo)}, ${asSql(categoria)}, ${asSql(origen)}, ${asSql(nivel)}, ${asSql(objetivo)}, ${asSql(resumen)}, ${asSql(disponibilidad)}, ${asSql(tags)}, ${asSql(notas)}, 'REGISTRADO', 'Eligió horario y quedó registrado', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true)\nRETURNING id, nombre, whatsapp, estado;`;\n\nreturn [{ json: { query, lead_id: lead.id, horario_id: horario.id } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4736,
+        368
+      ],
+      "id": "c345ec87-9dcf-48b9-a897-df39f051ece0",
+      "name": "Build Query Insert Alumno"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query Insert Alumno').first().json.query }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4928,
+        368
+      ],
+      "id": "a29d39f6-21c0-4ba8-be93-fb7bcdb05f80",
+      "name": "PostgreSQL - Insert Alumno",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $input.first().json;\n\nif (!result || !result.id) {\n  return [{ json: { success: false, message: 'Error al crear alumno' } }];\n}\n\nreturn [{\n  json: {\n    success: true,\n    message: 'Lead convertido a alumno REGISTRADO exitosamente',\n    alumno_id: result.id,\n    nombre: result.nombre,\n    whatsapp: result.whatsapp,\n    estado: result.estado\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5600,
+        368
+      ],
+      "id": "e067933f-b32e-4d0f-8e37-3108f35ff205",
+      "name": "Response"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Update Lead with Alumno').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        5344,
+        368
+      ],
+      "id": "864afb4b-e477-4492-91f4-05f397231141",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const alumnoData = $input.first().json;\n\nif (!alumnoData || !alumnoData.id) {\n  throw new Error('No hay datos de alumno');\n}\n\nconst alumnoId = alumnoData.id;\nconst whatsapp = alumnoData.whatsapp;\n\nconst query = `UPDATE leads \nSET alumno_id = ${alumnoId}, \n    fecha_conversion = CURRENT_TIMESTAMP\nWHERE whatsapp = '${String(whatsapp).replace(/'/g, \"''\")}'\nRETURNING id, nombre, whatsapp, alumno_id, estado;`;\n\nreturn [{ json: { query } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5136,
+        368
+      ],
+      "id": "25337ac0-9d42-42f4-829c-09475dfa1401",
+      "name": "Update Lead with Alumno"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Build Query Buscar Lead+Horario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query Buscar Lead+Horario": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Buscar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Buscar": {
+      "main": [
+        [
+          {
+            "node": "Build Query Insert Alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query Insert Alumno": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Insert Alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Insert Alumno": {
+      "main": [
+        [
+          {
+            "node": "Update Lead with Alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Lead with Alumno": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "whatsapp": "+5493794260543",
+          "person_identifier": "Nelson Rodriguez",
+          "horario_id": "6"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
+}

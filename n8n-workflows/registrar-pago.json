@@ -1,0 +1,203 @@
+{
+  "n8n_id": "WDpCWOxaQyrKZKJZ",
+  "n8n_name": "registrar-pago",
+  "active": true,
+  "updatedAt": "2026-07-29T22:46:58.292Z",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "whatsapp"
+            },
+            {
+              "name": "monto"
+            },
+            {
+              "name": "tipo_pago"
+            },
+            {
+              "name": "canal"
+            },
+            {
+              "name": "moneda"
+            },
+            {
+              "name": "periodo"
+            },
+            {
+              "name": "estado_pago"
+            },
+            {
+              "name": "comprobante_url"
+            },
+            {
+              "name": "comprobante_monto"
+            },
+            {
+              "name": "horario_id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        16
+      ],
+      "id": "899e271c-4a8e-41c3-9bbd-d8ee15b2e7d7",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst body = input.body || input;\nconst { whatsapp } = body;\n\nif (!whatsapp) {\n  throw new Error('Falta el campo requerido: whatsapp');\n}\n\nconst wa = String(whatsapp).replace(/'/g, \"''\");\nconst query = `SELECT id, estado FROM alumnos WHERE whatsapp = '${wa}' LIMIT 1;`;\n\nreturn [{ json: { query } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        16
+      ],
+      "id": "8afc6c17-6ad2-4704-a80b-0b28bc2d1834",
+      "name": "Build Query Buscar Alumno"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query Buscar Alumno').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        576,
+        16
+      ],
+      "id": "6b6ee84a-2ecb-4297-aaeb-df7850caeeb9",
+      "name": "PostgreSQL - Buscar Alumno",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const webhookInput = $('When Executed by Another Workflow').first().json;\nconst body = webhookInput.body || webhookInput;\nconst {\n  monto,\n  tipo_pago,\n  canal,\n  moneda,\n  periodo,\n  estado_pago,\n  comprobante_url,\n  comprobante_monto,\n  horario_id\n} = body;\n\nconst alumnoRows = $input.all().map(i => i.json).filter(j => j && j.id);\nif (alumnoRows.length === 0) {\n  throw new Error('No existe un alumno pre-registrado con ese whatsapp. No se puede registrar el pago hasta que haya elegido un horario y quede pre-registrado (ver tool convertir-lead-a-alumno).');\n}\nconst alumno = alumnoRows[0];\n\nif (!monto) {\n  throw new Error('Falta el campo requerido: monto');\n}\nif (!comprobante_url) {\n  throw new Error('Falta el campo requerido: comprobante_url (link del comprobante ya guardado en Drive)');\n}\n\nconst montoNum = parseFloat(monto);\nconst compMontoNum = comprobante_monto ? parseFloat(comprobante_monto) : montoNum;\nconst tipo = tipo_pago ? String(tipo_pago).replace(/'/g, \"''\") : 'mensualidad';\nconst can = canal ? String(canal).replace(/'/g, \"''\") : 'whatsapp_comprobante';\nconst mon = moneda ? String(moneda).replace(/'/g, \"''\") : 'ARS';\nconst per = periodo ? String(periodo).replace(/'/g, \"''\") : new Date().toISOString().slice(0, 7);\nconst est = estado_pago ? String(estado_pago).replace(/'/g, \"''\") : 'PENDIENTE_VERIFICACION';\nconst compUrl = String(comprobante_url).replace(/'/g, \"''\");\nconst horId = horario_id ? parseInt(horario_id) : null;\n\nconst query = `INSERT INTO pagos (alumno_id, horario_id, tipo, canal, monto, moneda, periodo, estado, comprobante_url, comprobante_fecha, comprobante_monto, created_at, updated_at)\nVALUES (${alumno.id}, ${horId !== null ? horId : 'null'}, '${tipo}', '${can}', ${montoNum}, '${mon}', '${per}', '${est}', '${compUrl}', CURRENT_DATE, ${compMontoNum}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)\nRETURNING id, alumno_id, monto, estado, comprobante_url, periodo, created_at;`;\n\nreturn [{ json: { query, alumno_estado_actual: alumno.estado } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        784,
+        16
+      ],
+      "id": "60acf59b-99f3-47b7-944e-ade4d7cdf25c",
+      "name": "Build Query Insertar Pago"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query Insertar Pago').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        976,
+        16
+      ],
+      "id": "d8882a00-19dc-4caf-8421-55d98e09096c",
+      "name": "PostgreSQL - Insert Pago",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $input.first().json;\nconst extra = $('Build Query Insertar Pago').first().json;\n\nreturn [{\n  json: {\n    success: true,\n    message: 'Comprobante registrado, pendiente de verificación por Fla',\n    pago: {\n      id: result.id,\n      alumno_id: result.alumno_id,\n      monto: result.monto,\n      estado: result.estado,\n      comprobante_url: result.comprobante_url,\n      periodo: result.periodo,\n      created_at: result.created_at\n    },\n    alumno_estado_actual: extra.alumno_estado_actual\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        16
+      ],
+      "id": "234e8970-e78c-4c7d-85e7-44e8638a5e3f",
+      "name": "Response"
+    }
+  ],
+  "connections": {
+    "Build Query Buscar Alumno": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Buscar Alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Buscar Alumno": {
+      "main": [
+        [
+          {
+            "node": "Build Query Insertar Pago",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query Insertar Pago": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Insert Pago",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Insert Pago": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Build Query Buscar Alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {}
+}

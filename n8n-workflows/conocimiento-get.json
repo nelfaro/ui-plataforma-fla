@@ -1,5 +1,8 @@
 {
-  "name": "conocimiento-get",
+  "n8n_id": "hVxGILtQBrEJX3E5",
+  "n8n_name": "conocimiento-get",
+  "active": true,
+  "updatedAt": "2026-06-22T22:30:12.335Z",
   "nodes": [
     {
       "parameters": {
@@ -9,64 +12,144 @@
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [-400, 0],
-      "id": "webhook",
+      "position": [
+        80,
+        0
+      ],
+      "id": "c273e8b4-807f-464d-9b4f-333ade456373",
       "name": "Webhook",
       "webhookId": "conocimiento-get"
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst { categoria, segmento } = input.query || {};\n\nlet query = `SELECT id, categoria, segmento, titulo, contenido, activo FROM conocimiento_academia WHERE activo = true`;\n\nif (categoria) {\n  query += ` AND categoria = '${String(categoria).replace(/'/g, \"''\")}' `;\n}\nif (segmento) {\n  query += ` AND segmento = '${String(segmento).replace(/'/g, \"''\")}' `;\n}\n\nquery += ` ORDER BY categoria, segmento, titulo;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];"
+        "jsCode": "const input = $input.first().json;\nconst { categoria, segmento } = input.query || {};\n\nlet query = 'SELECT id, categoria, segmento, titulo, contenido, activo FROM conocimiento_academia WHERE activo = true';\n\nif (categoria) {\n  query += ` AND categoria = '${categoria}'`;\n}\nif (segmento) {\n  query += ` AND segmento = '${segmento}'`;\n}\n\nquery += ' ORDER BY categoria, segmento, titulo;';\n\nreturn [{\n  json: {\n    query\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-100, 0],
-      "id": "build_query",
+      "position": [
+        304,
+        0
+      ],
+      "id": "141da620-ba8d-4349-879f-7f49cd8497d0",
       "name": "Build Query"
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "{{ $('build_query').first().json.query }}",
+        "query": "{{ $('Build Query').first().json.query }}",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [200, 0],
-      "id": "query_db",
+      "position": [
+        496,
+        0
+      ],
+      "id": "355fa7cc-2e6f-46b3-9101-1e91eb27c90c",
       "name": "Query DB",
       "credentials": {
         "postgres": {
-          "id": "7vZZbkZhFbmui4On",
+          "id": "wPNcwJLWeQKZlTmC",
           "name": "Postgres account"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "const items = $('query_db').all().map(row => row.json);\n\nreturn [{\n  json: {\n    items,\n    total: items.length\n  }\n}];"
+        "jsCode": "const items = $('Query DB').all().map(row => row.json);\n\nreturn [{\n  json: {\n    items,\n    total: items.length\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [400, 0],
-      "id": "response",
+      "position": [
+        720,
+        0
+      ],
+      "id": "2499f069-2625-4675-bae8-617adc70e311",
       "name": "Response"
     }
   ],
   "connections": {
     "Webhook": {
-      "main": [[{"node": "build_query", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Build Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "build_query": {
-      "main": [[{"node": "query_db", "type": "main", "index": 0}]]
+    "Build Query": {
+      "main": [
+        [
+          {
+            "node": "Query DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "query_db": {
-      "main": [[{"node": "response", "type": "main", "index": 0}]]
+    "Query DB": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "agente-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "es-419,es;q=0.9",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2Bxl8q0nh7YNTT92gLklYhX5W1eFpe3VB8%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2BhSkT6aeIYKLKO24E1Je2oJ8VIo9ey2Oo%3D; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX19iB6ocW%2BWBMae13HYF0K%2FpDvYC5P42b445m0IKCX0oZjcduLqrnEz7qnf%2B0iJLK9m745OBH1BV7A%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX1%2B2APMOQKm7Jcx2rv8PXXoBCIS9tupPVGf94t1rf1BxaVx5AcbVJHnTDKJUOh%2FnHYUSmbkjAsKgru%2F0kNnIrbFZRKespxrtc1PKyfX7Hpih1cbogeE1w78XSo7P%2F6%2BNOFswtpJpPTmUaqjAwqeGBoB6r8j7VjOa3oM%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX18zWT9rufaC6%2BFv7Iov1g7huVyB9hOqcF7hUSTHyGbPHLkMHvQdLwHVZ9TZfwA7FKAtwYJK1bUxKhqARzBWzFWH8cIoCdV9aopUelWlnLQec1S1h0ZAcsLY1%2FuhO05dJZ5S9MsPBzomiaT0uhtWI2lP4KVt65MJj6UNlHkCv5X2zf0Q17tzSQu%2B11Ml4L1NqOlYKxQjb8tYFw%3D%3D; rl_session=RudderEncrypt%3AU2FsdGVkX1%2FTExP6yDwqhMuTzk10xUldUE8RCf1u6D%2FMFXlewdI5GU2Z4gmV4Z5mH50lqkQ3ledJSb1zLDZsdZijUcmCTn4ZYLz1qo7qrWah5Kaz3RzLlTukiwBY4mP%2FhAfr8B9hXBfJWUwQnzy4Cg%3D%3D; ph_phc_kMstNfAgBcBkWSh6KdsgN09heqqNe5VNmalHP1Ni9Q4_posthog=%7B%22%24device_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22distinct_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22%24sesid%22%3A%5B1782166087320%2C%22019ef129-96ad-751b-aac8-5d895dc2c7a0%22%2C1782162495142%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fasistente-ia-fla-n8n.x5miqk.easypanel.host%2Fworkflow%2FovC7bSUVy2yM6k1L%22%7D%2C%22%24user_state%22%3A%22anonymous%22%7D",
+            "priority": "u=1, i",
+            "referer": "https://agente-fla-ui-plataforma.x5miqk.easypanel.host/conocimiento",
+            "sec-ch-ua": "\"Google Chrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "x-forwarded-for": "201.235.17.183, 10.11.0.23, 172.18.0.1",
+            "x-forwarded-host": "agente-fla-ui-plataforma.x5miqk.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "17792bd965dd",
+            "x-real-ip": "10.11.0.23"
+          },
+          "params": {},
+          "query": {
+            "categoria": "PRECIOS"
+          },
+          "body": {},
+          "webhookUrl": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/conocimiento-get",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
   }
 }

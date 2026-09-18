@@ -1,0 +1,310 @@
+{
+  "n8n_id": "CGfkwm2t4B6I0JA2",
+  "n8n_name": "procesar-comprobante-pago",
+  "active": true,
+  "updatedAt": "2026-09-18T01:46:02.113Z",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "whatsapp"
+            },
+            {
+              "name": "person_identifier"
+            },
+            {
+              "name": "horario_id"
+            },
+            {
+              "name": "monto"
+            },
+            {
+              "name": "tipo_pago"
+            },
+            {
+              "name": "canal"
+            },
+            {
+              "name": "moneda"
+            },
+            {
+              "name": "periodo"
+            },
+            {
+              "name": "comprobante_url"
+            },
+            {
+              "name": "comprobante_monto"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f1a10000-0000-0000-0000-000000000001",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "const triggerData = $('When Executed by Another Workflow').first().json;\nconst { whatsapp, person_identifier, horario_id, monto, comprobante_url } = triggerData;\n\nif (!whatsapp) {\n  throw new Error('Falta whatsapp en trigger');\n}\nif (!horario_id) {\n  throw new Error('Falta horario_id');\n}\nif (!monto) {\n  throw new Error('Falta monto');\n}\nif (!comprobante_url) {\n  throw new Error('Falta comprobante_url (el comprobante debe estar ya subido a Drive antes de llamar esta tool)');\n}\n\nconst wp = String(whatsapp).replace(/'/g, \"''\");\nconst pi = person_identifier ? String(person_identifier).replace(/'/g, \"''\") : null;\nconst hid = parseInt(horario_id);\n\nlet leadWhere;\nif (pi) {\n  // Si hay un solo lead con ese whatsapp, no exigir match exacto de person_identifier\n  // (el agente puede mandar 'Nelson' cuando la BD guardo 'Nelson Rodriguez').\n  // Si hay varios leads con el mismo whatsapp, exigir coincidencia parcial en cualquier direccion.\n  leadWhere = `l.whatsapp = '${wp}' AND (\n    (SELECT COUNT(*) FROM leads l2 WHERE l2.whatsapp = '${wp}') = 1\n    OR l.person_identifier ILIKE '%' || '${pi}' || '%'\n    OR '${pi}' ILIKE '%' || l.person_identifier || '%'\n  )`;\n} else {\n  leadWhere = `l.whatsapp = '${wp}'`;\n}\n\nconst query = `SELECT\n  (SELECT to_jsonb(l) FROM leads l WHERE ${leadWhere} ORDER BY l.created_at DESC LIMIT 1) AS lead,\n  (SELECT to_jsonb(h) FROM horarios h WHERE h.id = ${hid}) AS horario,\n  (SELECT to_jsonb(a) FROM alumnos a WHERE a.whatsapp = '${wp}' ORDER BY a.created_at DESC LIMIT 1) AS alumno_existente;`;\n\nreturn [{ json: { query } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "f1a10000-0000-0000-0000-000000000002",
+      "name": "Build Query Buscar Lead+Horario+Alumno"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query Buscar Lead+Horario+Alumno').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        440,
+        0
+      ],
+      "id": "f1a10000-0000-0000-0000-000000000003",
+      "name": "PostgreSQL - Buscar",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $input.first().json || {};\nconst lead = result.lead;\nconst horario = result.horario;\nconst alumnoExistente = result.alumno_existente;\n\nif (!lead && !alumnoExistente) {\n  throw new Error('No existe un lead ni un alumno con ese whatsapp.');\n}\nif (!horario) {\n  throw new Error('No existe un horario con ese id.');\n}\n\nconst cupoMax = (horario.cupo_maximo ?? horario.cupo_max);\nconst cupoActual = horario.cupo_actual ?? 0;\nif (!alumnoExistente && cupoMax !== null && cupoMax !== undefined && cupoActual >= cupoMax) {\n  throw new Error('Ese horario ya no tiene cupo disponible.');\n}\n\nconst source = lead || alumnoExistente;\n\nconst esc = (v) => v === null || v === undefined ? null : String(v).replace(/'/g, \"''\");\nconst asSql = (v) => v === null ? 'null' : `'${v}'`;\n\nconst nombre = esc(source.nombre);\nconst apellido = esc(source.apellido);\nconst whatsapp = esc(source.whatsapp);\nconst email = esc(source.email);\nconst lead_tipo = esc(source.lead_tipo ?? source.categoria);\nconst categoria = esc(source.categoria ?? source.lead_tipo);\nconst origen = esc(source.origen);\nconst nivel = esc(source.nivel);\nconst objetivo = esc(source.objetivo);\nconst resumen = esc(source.resumen);\nconst disponibilidad = esc(source.disponibilidad);\nconst tags = esc(source.tags);\nconst notas = esc(source.notas);\n\nconst query = `INSERT INTO alumnos (nombre, apellido, whatsapp, email, lead_tipo, categoria, origen, nivel, objetivo, resumen, disponibilidad, tags, notas, estado, estado_motivo, estado_fecha, primer_contacto, ultimo_contacto, created_at, updated_at, activo)\nVALUES (${asSql(nombre)}, ${asSql(apellido)}, ${asSql(whatsapp)}, ${asSql(email)}, ${asSql(lead_tipo)}, ${asSql(categoria)}, ${asSql(origen)}, ${asSql(nivel)}, ${asSql(objetivo)}, ${asSql(resumen)}, ${asSql(disponibilidad)}, ${asSql(tags)}, ${asSql(notas)}, 'REGISTRADO', 'Envió comprobante de pago y quedó registrado', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true)\nON CONFLICT ON CONSTRAINT unique_whatsapp DO UPDATE SET\n  estado = 'REGISTRADO',\n  estado_motivo = CASE WHEN alumnos.estado = 'REGISTRADO' THEN alumnos.estado_motivo ELSE 'Envió comprobante de pago y quedó registrado' END,\n  ultimo_contacto = CURRENT_TIMESTAMP,\n  updated_at = CURRENT_TIMESTAMP\nRETURNING id, nombre, whatsapp, estado;`;\n\nreturn [{ json: { query, es_primer_pago: !alumnoExistente, horario_id: horario.id } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ],
+      "id": "f1a10000-0000-0000-0000-000000000004",
+      "name": "Build Query Upsert Alumno"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query Upsert Alumno').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        880,
+        0
+      ],
+      "id": "f1a10000-0000-0000-0000-000000000005",
+      "name": "PostgreSQL - Upsert Alumno",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const alumno = $input.first().json;\nconst prev = $('Build Query Upsert Alumno').first().json;\nconst horarioId = prev.horario_id;\n\nconst query = `INSERT INTO alumnos_horarios (alumno_id, horario_id, fecha_inscripcion, activo)\nVALUES (${alumno.id}, ${horarioId}, CURRENT_TIMESTAMP, true)\nON CONFLICT DO NOTHING;`;\n\nreturn [{ json: { query, alumno_id: alumno.id, alumno_nombre: alumno.nombre, alumno_whatsapp: alumno.whatsapp, es_primer_pago: prev.es_primer_pago } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        0
+      ],
+      "id": "f1a10000-0000-0000-0000-000000000006",
+      "name": "Build Query Vincular Horario"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query Vincular Horario').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1320,
+        0
+      ],
+      "id": "f1a10000-0000-0000-0000-000000000007",
+      "name": "PostgreSQL - Vincular Horario",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $('Build Query Vincular Horario').first().json;\nconst triggerData = $('When Executed by Another Workflow').first().json;\nconst {\n  monto,\n  tipo_pago,\n  canal,\n  moneda,\n  periodo,\n  comprobante_url,\n  comprobante_monto,\n  horario_id\n} = triggerData;\n\nconst alumno_id = prev.alumno_id;\nif (!alumno_id) {\n  throw new Error('No se pudo obtener el id del alumno recién creado/actualizado.');\n}\n\nconst TIPOS_VALIDOS = ['CUOTA_MENSUAL', 'PACK_4', 'PACK_8', 'INSCRIPCION', 'OTRO'];\nconst CANALES_VALIDOS = ['MERCADOPAGO', 'TRANSFERENCIA_BCO', 'EFECTIVO', 'OTRO'];\n\nconst montoNum = parseFloat(monto);\nconst compMontoNum = comprobante_monto ? parseFloat(comprobante_monto) : montoNum;\n\nlet tipo = tipo_pago ? String(tipo_pago).toUpperCase() : null;\nif (!tipo || !TIPOS_VALIDOS.includes(tipo)) {\n  tipo = prev.es_primer_pago ? 'INSCRIPCION' : 'CUOTA_MENSUAL';\n}\n\nlet can = canal ? String(canal).toUpperCase() : null;\nif (!can || !CANALES_VALIDOS.includes(can)) {\n  can = 'OTRO';\n}\n\nconst mon = moneda ? String(moneda).replace(/'/g, \"''\") : 'ARS';\nconst per = periodo ? String(periodo).replace(/'/g, \"''\") : new Date().toISOString().slice(0, 7);\nconst compUrl = String(comprobante_url).replace(/'/g, \"''\");\nconst horId = horario_id ? parseInt(horario_id) : null;\n\nconst query = `INSERT INTO pagos (alumno_id, horario_id, tipo, canal, monto, moneda, periodo, estado, comprobante_url, comprobante_fecha, comprobante_monto, created_at, updated_at)\nVALUES (${alumno_id}, ${horId !== null ? horId : 'null'}, '${tipo}', '${can}', ${montoNum}, '${mon}', '${per}', 'PENDIENTE_VERIFICACION', '${compUrl}', CURRENT_DATE, ${compMontoNum}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)\nRETURNING id, alumno_id, monto, estado, comprobante_url, periodo, created_at;`;\n\nreturn [{ json: { query, alumno_id: prev.alumno_id, alumno_nombre: prev.alumno_nombre, alumno_whatsapp: prev.alumno_whatsapp } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        0
+      ],
+      "id": "f1a10000-0000-0000-0000-000000000008",
+      "name": "Build Query Insert Pago"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query Insert Pago').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1760,
+        0
+      ],
+      "id": "f1a10000-0000-0000-0000-000000000009",
+      "name": "PostgreSQL - Insert Pago",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const pago = $input.first().json;\nconst extra = $('Build Query Insert Pago').first().json;\n\nreturn [{\n  json: {\n    success: true,\n    message: 'Alumno registrado y comprobante recibido, pendiente de verificación por Fla',\n    alumno: {\n      id: extra.alumno_id,\n      nombre: extra.alumno_nombre,\n      whatsapp: extra.alumno_whatsapp,\n      estado: 'REGISTRADO'\n    },\n    pago: {\n      id: pago.id,\n      alumno_id: pago.alumno_id,\n      monto: pago.monto,\n      estado: pago.estado,\n      comprobante_url: pago.comprobante_url,\n      periodo: pago.periodo,\n      created_at: pago.created_at\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        0
+      ],
+      "id": "f1a10000-0000-0000-0000-000000000010",
+      "name": "Response"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Build Query Buscar Lead+Horario+Alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query Buscar Lead+Horario+Alumno": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Buscar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Buscar": {
+      "main": [
+        [
+          {
+            "node": "Build Query Upsert Alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query Upsert Alumno": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Upsert Alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Upsert Alumno": {
+      "main": [
+        [
+          {
+            "node": "Build Query Vincular Horario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query Vincular Horario": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Vincular Horario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Vincular Horario": {
+      "main": [
+        [
+          {
+            "node": "Build Query Insert Pago",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query Insert Pago": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Insert Pago",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Insert Pago": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

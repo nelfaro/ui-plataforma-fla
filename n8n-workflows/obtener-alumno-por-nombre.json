@@ -1,0 +1,159 @@
+{
+  "n8n_id": "4U9hTDYvuHMAp7cd",
+  "n8n_name": "obtener-alumno-por-nombre",
+  "active": true,
+  "updatedAt": "2026-09-11T23:28:32.975Z",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "nombre"
+            }
+          ]
+        }
+      },
+      "id": "c055762a-8fe7-4141-a639-df2372f30060",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        320,
+        576
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "b5942df6-0160-4ef7-965d-57583acdc8aa",
+      "name": "Replace me with your logic",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        528,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "path": "obtener-alumno-por-nombre",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        304,
+        304
+      ],
+      "id": "671cf67b-a7ec-4b15-85b6-c46cc65300af",
+      "name": "Webhook",
+      "webhookId": "obtener-alumno-por-nombre"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst nombre = (input.nombre || '').trim();\n\nif (!nombre || nombre.length < 2) {\n  return [{\n    json: {\n      success: false,\n      message: 'Nombre debe tener al menos 2 caracteres',\n      resultados: []\n    }\n  }];\n}\n\nconst query = `SELECT id, nombre, apellido, email, whatsapp, categoria, estado, activo, created_at\nFROM alumnos\nWHERE nombre ILIKE '%${nombre.replace(/'/g, \"''\")}%' \nAND activo = TRUE\nORDER BY nombre ASC\nLIMIT 10;`;\n\nreturn [{\n  json: { query }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        576
+      ],
+      "id": "68b1d665-2346-40fc-b2a6-a8c7eb7eb2a6",
+      "name": "arma query"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('arma query').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        768,
+        576
+      ],
+      "id": "946bccc8-8112-46a8-90bc-07016ff01215",
+      "name": "buscar alumnos",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const resultados = $('buscar alumnos').all();\nconst alumnos = resultados.map(r => r.json);\n\nreturn [{\n  json: {\n    success: true,\n    cantidad: alumnos.length,\n    resultados: alumnos\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        576
+      ],
+      "id": "8adee888-8d93-42ec-9d82-f4a4c2c8f4de",
+      "name": "respuesta"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "arma query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "arma query": {
+      "main": [
+        [
+          {
+            "node": "buscar alumnos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar alumnos": {
+      "main": [
+        [
+          {
+            "node": "respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "nombre": null
+        }
+      }
+    ]
+  }
+}

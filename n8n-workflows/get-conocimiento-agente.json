@@ -1,61 +1,97 @@
 {
+  "n8n_id": "pqhCzVlVrwCO6kH6",
+  "n8n_name": "get-conocimiento-agente",
+  "active": true,
+  "updatedAt": "2026-07-16T22:51:05.701Z",
   "nodes": [
     {
       "parameters": {
         "workflowInputs": {
           "values": [
-            { "name": "pregunta" },
-            { "name": "lead_tipo" },
-            { "name": "whatsapp" }
+            {
+              "name": "pregunta"
+            },
+            {
+              "name": "lead_tipo"
+            },
+            {
+              "name": "whatsapp"
+            }
           ]
         }
       },
-      "id": "trigger-input",
+      "id": "73310a3a-ee75-448f-9046-02c823090c86",
       "name": "When Executed by Another Workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
-      "position": [-600, 200]
-    },
-    {
-      "parameters": {
-        "jsCode": "const { pregunta, lead_tipo } = $input.first().json;\n\nconst segmentosMap = {\n  KIDS: ['KIDS', 'GENERAL'],\n  ADOLESCENTE: ['KIDS', 'ADULTOS', 'GENERAL'],\n  ADULTO: ['ADULTOS', 'PERSONALIZADO', 'GENERAL'],\n  AU_PAIR: ['AU_PAIR', 'GENERAL'],\n  GENERAL: ['GENERAL']\n};\n\nconst segmentos = segmentosMap[lead_tipo] || segmentosMap['GENERAL'];\n\nreturn [{\n  json: {\n    pregunta: pregunta || 'información general',\n    lead_tipo: lead_tipo || 'GENERAL',\n    segmentos\n  }\n}];"
-      },
-      "id": "mapear-segmentos",
-      "name": "Mapear Segmentos",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [-400, 200]
+      "position": [
+        16,
+        -944
+      ]
     },
     {
       "parameters": {
         "jsCode": "const { segmentos } = $input.first().json;\nconst segmentosStr = segmentos.map(s => `'${s}'`).join(',');\n\nconst query = `SELECT id, categoria, segmento, titulo, contenido, activo FROM conocimiento_academia WHERE segmento IN (${segmentosStr}) AND activo = true ORDER BY categoria, segmento, titulo LIMIT 20`;\n\nreturn [{ json: { query } }];"
       },
-      "id": "build-query",
+      "id": "d5f34c59-8310-40ae-be79-d5b68a94ff7b",
       "name": "Build Query",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-200, 200]
+      "position": [
+        416,
+        -304
+      ],
+      "disabled": true
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "={{ $json.query }}"
+        "query": "{{ $json.query }}",
+        "options": {}
       },
-      "id": "query-postgres",
+      "id": "f5fd304b-70f6-4991-9b96-ba3f2f1a1ce2",
       "name": "Query PostgreSQL",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
-      "position": [0, 200]
+      "position": [
+        624,
+        -304
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      },
+      "disabled": true
     },
     {
       "parameters": {
-        "jsCode": "const rows = $input.all().map(i => i.json);\nconst normData = $('Mapear Segmentos').first().json;\n\nif (!rows || rows.length === 0) {\n  return [{\n    json: {\n      contexto_encontrado: false,\n      contexto: 'Sin contexto disponible.',\n      pregunta: normData.pregunta,\n      lead_tipo: normData.lead_tipo,\n      items_encontrados: 0\n    }\n  }];\n}\n\nconst contexto = rows\n  .map(r => `**${r.categoria} (${r.segmento})**\\n${r.titulo}\\n${r.contenido}`)\n  .join('\\n\\n');\n\nreturn [{\n  json: {\n    contexto_encontrado: true,\n    contexto,\n    pregunta: normData.pregunta,\n    lead_tipo: normData.lead_tipo,\n    items_encontrados: rows.length\n  }\n}];"
+        "jsCode": "const rows = $input.all().map(i => i.json);\nconst normData = $('Mapear Segmentos2').first().json;\n\nif (!rows || rows.length === 0) {\n  return [{\n    json: {\n      contexto_encontrado: false,\n      contexto: 'Sin contexto disponible.',\n      pregunta: normData.pregunta,\n      lead_tipo: normData.lead_tipo,\n      items_encontrados: 0\n    }\n  }];\n}\n\nconst contexto = rows\n  .map(r => `**${r.categoria} (${r.segmento})**\\n${r.titulo}\\n${r.contenido}`)\n  .join('\\n\\n');\n\nreturn [{\n  json: {\n    contexto_encontrado: true,\n    contexto,\n    pregunta: normData.pregunta,\n    lead_tipo: normData.lead_tipo,\n    items_encontrados: rows.length\n  }\n}];"
       },
-      "id": "procesar-resultados",
+      "id": "d720b9a4-c8fb-41a8-b865-b93c3630abbc",
       "name": "Procesar Resultados",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [200, 200]
+      "position": [
+        816,
+        -304
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const { pregunta, lead_tipo } = $input.first().json;\n\nconst segmentosMap = {\n  KIDS: ['KIDS', 'GENERAL'],\n  ADOLESCENTE: ['KIDS', 'ADULTOS', 'GENERAL'],\n  ADULTO: ['ADULTOS', 'PERSONALIZADO', 'GENERAL'],\n  AU_PAIR: ['AU_PAIR', 'GENERAL'],\n  GENERAL: ['GENERAL']\n};\n\nconst segmentos = segmentosMap[lead_tipo] || segmentosMap['GENERAL'];\n\nreturn [{\n  json: {\n    pregunta: pregunta || 'información general',\n    lead_tipo: lead_tipo || 'GENERAL',\n    segmentos\n  }\n}];"
+      },
+      "id": "8c3fdfe2-3ad5-4f6e-a7b1-8f6248ad3908",
+      "name": "Mapear Segmentos2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -304
+      ],
+      "disabled": true
     },
     {
       "parameters": {
@@ -78,53 +114,379 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"max_tokens\": 500,\n  \"temperature\": 0.2,\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Sos un asistente de soporte para Clases de Inglés con Fla.\\n\\nTarea: responder la pregunta del alumno usando SOLO la información del CONTEXTO.\\n\\nREGLAS:\\n1. Si la información NO está en el contexto, responde: 'No tengo esa información. Te recomiendo que contactes directamente a Fla.'\\n2. Sé conciso (máximo 3-4 líneas).\\n3. Usa el tono de Fla: amable, cálido, cercano.\\n4. Nunca menciones 'contexto', 'base de datos' o detalles técnicos.\\n5. Si hay información sobre precios, horarios o detalles: transcribela fielmente.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify('CONTEXTO:\\n' + ($json.contexto_encontrado ? $json.contexto : 'Sin información disponible') + '\\n\\nPREGUNTA DEL ALUMNO: ' + $json.pregunta) }}\n    }\n  ]\n}"
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"max_tokens\": 300,\n  \"temperature\": 0.1,\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Sos un asistente de soporte para Clases de Inglés con Fla.\\n\\nTarea: responder la pregunta del usuario usando SOLO la información del CONTEXTO.\\n\\nREGLAS CRÍTICAS (NO NEGOCIABLES):\\n1. NUNCA inventes, supongas o agregues información que NO esté en el CONTEXTO.\\n2. Si la información NO está exactamente en el contexto, responde textualmente: 'No tengo esa información. Te paso al equipo de Fla para que te den los detalles.'\\n3. Si hay información sobre precios en el contexto, transcribela exactamente como aparece. NO CAMBIES monedas, NO AGREGUES planes adicionales.\\n4. Sé conciso (máximo 2-3 líneas).\\n5. Tono: amable, cálido, cercano. Como si fuera Fla respondiendo.\\n6. Nunca menciones 'contexto', 'base de datos' o detalles técnicos.\\n\\nEJEMPLO DE RESPUESTA CORRECTA:\\nContexto: 'Las clases grupales para adultos tienen un valor de $97.000.'\\nPregunta: '¿Cuánto cuesta?'\\nRespuesta: 'Las clases grupales tienen un valor de $97.000. ¿Querés más info?'\\n\\nEJEMPLO DE RESPUESTA INCORRECTA (PROHIBIDA):\\nRespuesta: 'Ofrecemos diferentes planes: Conversación a $200, Negocio a $250...' ← NUNCA HAGAS ESTO SI NO ESTÁ EN EL CONTEXTO.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify('CONTEXTO:\\n' + ($json.contexto_encontrado ? $json.contexto : 'Sin información disponible en la base de datos.') + '\\n\\nPREGUNTA DEL USUARIO: ' + $json.pregunta) }}\n    }\n  ]\n}",
+        "options": {}
       },
-      "id": "sintetizar-openai",
-      "name": "Sintetizar con OpenAI",
+      "id": "5ce22650-c2d5-4edd-90f8-a252bad3b96d",
+      "name": "Sintetizar con OpenAI2",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [400, 200],
+      "position": [
+        1024,
+        -304
+      ],
       "credentials": {
         "openAiApi": {
-          "id": "9B6RX8Rc1tRmIZNI",
-          "name": "OpenAI API Key"
+          "id": "bznJ7tqJGM25Nv9r",
+          "name": "OpenAI account"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
         "jsCode": "const synth = $input.first().json;\nconst procData = $('Procesar Resultados').first().json;\n\nlet respuesta = 'No tengo esa información disponible.';\nif (synth?.choices?.[0]?.message?.content) {\n  respuesta = synth.choices[0].message.content.trim();\n}\n\nreturn [{\n  json: {\n    resultado: respuesta,\n    confianza: procData.contexto_encontrado ? 'ALTA' : 'BAJA',\n    items_consultados: procData.items_encontrados\n  }\n}];"
       },
-      "id": "retornar-agente",
+      "id": "118a6dc3-5ac1-463b-a3c8-e02133fbc79a",
+      "name": "Retornar al Agente2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        -304
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const { segmentos } = $input.first().json;\nconst segmentosStr = segmentos.map(s => `'${s}'`).join(',');\n\nconst query = `SELECT id, categoria, segmento, titulo, contenido, activo FROM conocimiento_academia WHERE segmento IN (${segmentosStr}) AND activo = true ORDER BY categoria, segmento, titulo LIMIT 20`;\n\nreturn [{ json: { query, type: 'conocimiento' } }];"
+      },
+      "id": "91c99830-d220-4b2c-b5ae-c673a5df04fd",
+      "name": "Build Query - Conocimiento",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        -1088
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { query: 'SELECT clave, valor, descripcion FROM academia_config ORDER BY clave', type: 'config' } }];"
+      },
+      "id": "7c566ed6-9d79-40bc-815f-555472fa3383",
+      "name": "Build Query - Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        -784
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.query }}",
+        "options": {}
+      },
+      "id": "a966d0b6-c1ec-4a19-9d70-d6ada457c25a",
+      "name": "Query PostgreSQL - Conocimiento",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        880,
+        -1088
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.query }}",
+        "options": {}
+      },
+      "id": "e7c78557-92cc-4e46-87bc-67649a940fbc",
+      "name": "Query PostgreSQL - Config",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        880,
+        -784
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const { pregunta, lead_tipo } = $input.first().json;\n\n// Mapa de lead_tipo -> segmentos reales en conocimiento_academia.\n// Se aceptan variantes singular/plural porque el modelo puede mandar\n// 'ADULTO' o 'ADULTOS' indistintamente (no hay enum forzado en el tool call).\nconst segmentosMap = {\n  KIDS: ['KIDS', 'GENERAL'],\n  ADOLESCENTE: ['KIDS', 'ADULTOS', 'GENERAL'],\n  ADULTO: ['ADULTOS', 'GENERAL'],\n  ADULTOS: ['ADULTOS', 'GENERAL'],\n  PERSONALIZADO: ['PERSONALIZADO', 'GENERAL'],\n  AU_PAIR: ['AU_PAIR', 'GENERAL'],\n  GENERAL: ['GENERAL']\n};\n\n// Fallback amplio: si el lead_tipo viene vacío o no coincide con ninguna\n// clave conocida (por ejemplo, en el primer mensaje de una charla nueva,\n// antes de determinar el segmento), buscamos en TODOS los segmentos en\n// vez de devolver un resultado vacío.\nconst TODOS_LOS_SEGMENTOS = ['KIDS', 'ADULTOS', 'PERSONALIZADO', 'AU_PAIR', 'GENERAL'];\n\nconst ltNormalizado = (lead_tipo || '').toString().trim().toUpperCase();\nconst segmentos = segmentosMap[ltNormalizado] || TODOS_LOS_SEGMENTOS;\n\nreturn [{\n  json: {\n    pregunta: pregunta || 'información general',\n    lead_tipo: lead_tipo || 'GENERAL',\n    segmentos\n  }\n}];"
+      },
+      "id": "3f62f494-34d7-4dea-b1c9-e99961038ee0",
+      "name": "Mapear Segmentos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        -944
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "4aec6171-ee3b-4028-98ae-9953b820853e",
+      "name": "Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [
+        1072,
+        -944
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst normData = $('Mapear Segmentos').first().json;\n\nlet conocimientoContexto = '';\nlet configContexto = '';\n\nitems.forEach(item => {\n  const data = item.json;\n\n  // El campo 'type' que se arma en \"Build Query\" no sobrevive al paso por\n  // el nodo Postgres (reemplaza el json del item por las columnas de la\n  // fila devuelta). Por eso distinguimos por la FORMA de los datos, no\n  // por 'type':\n  const esConocimiento = data.categoria !== undefined && data.contenido !== undefined;\n  const esConfig = data.clave !== undefined && data.valor !== undefined;\n\n  if (esConocimiento) {\n    conocimientoContexto += `**${data.categoria}**\\n${data.titulo}\\n${data.contenido}\\n\\n`;\n  } else if (esConfig) {\n    configContexto += `${data.clave}: ${data.valor}\\n`;\n  }\n});\n\nlet contextoTotal = '';\n\nif (conocimientoContexto.trim()) {\n  contextoTotal += 'INFORMACIÓN SOBRE CLASES:\\n' + conocimientoContexto;\n}\n\nif (configContexto.trim()) {\n  contextoTotal += '\\nINFORMACIÓN DE CONTACTO Y CONFIGURACIÓN:\\n' + configContexto;\n}\n\nconst tieneContenido = contextoTotal.trim().length > 0;\n\nreturn [{\n  json: {\n    contexto_encontrado: tieneContenido,\n    contexto: tieneContenido ? contextoTotal.trim() : 'Sin información disponible.',\n    pregunta: normData.pregunta,\n    lead_tipo: normData.lead_tipo\n  }\n}];"
+      },
+      "id": "2014b716-a85d-44ac-96d5-c5a75ed2aa48",
+      "name": "Procesar Contextos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        -944
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $credentials.openAiApi.apiKey }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"max_tokens\": 250,\n  \"temperature\": 0.0,\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"ERES ASISTENTE DE FLA. INSTRUCCIONES CRÍTICAS Y NO NEGOCIABLES:\\n\\n🚫 PROHIBICIONES ABSOLUTAS:\\n- NUNCA inventes información.\\n- NUNCA supongas o agregues detalles que no estén en el CONTEXTO.\\n- NUNCA cambies monedas, precios, horarios, o números.\\n- NUNCA menciones 'contexto', 'base de datos', detalles técnicos.\\n- NUNCA hagas listas de opciones que no están en el contexto.\\n\\n✅ SI LA INFORMACIÓN ESTÁ EN EL CONTEXTO:\\n- Transcribela fielmente, tal como aparece.\\n- Sé conciso (máximo 2 líneas).\\n- Tono: amable, cálido, natural. Como si Fla respondiera.\\n\\n❌ SI LA INFORMACIÓN NO ESTÁ EN EL CONTEXTO:\\n- Responde EXACTAMENTE esto: 'Esa información todavía no la tengo. Voy a consultarlo con la profe Fla y te paso la info.'\\n- No hagas excepciones. No inventes. No 'asumas'.\\n\\n📋 CONTEXTO DISPONIBLE - Lee con atención:\\n\\nEJEMPLOS DE RESPUESTAS CORRECTAS:\\nP: '¿Cuánto cuesta?'\\nC: 'Las clases grupales tienen un valor de $97.000.'\\nP: '¿Tienen plan de negocio?'\\nC: 'Esa información todavía no la tengo. Voy a consultarlo con la profe Fla y te paso la info.'\\n\\nEJEMPLOS DE RESPUESTAS PROHIBIDAS:\\n- 'Ofrecemos planes de Conversación a $200 y Negocio a $250' ← NO EXISTE EN CONTEXTO\\n- 'Tenemos varios programas disponibles: ...' ← ALUCINACIÓN\\n- 'Generalmente las clases cuestan entre...' ← NO ESTÁ EN CONTEXTO\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify('CONTEXTO DISPONIBLE:\\n' + $json.contexto + '\\n\\n---\\n\\nPREGUNTA: ' + $json.pregunta) }}\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "e5205705-4973-445d-9812-7d4304d4e07c",
+      "name": "Sintetizar con OpenAI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1472,
+        -944
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "bznJ7tqJGM25Nv9r",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const synth = $input.first().json;\nconst procData = $('Procesar Contextos').first().json;\n\nlet respuesta = 'Esa información todavía no la tengo. Voy a consultarlo con la profe Fla y te paso la info.';\nif (synth?.choices?.[0]?.message?.content) {\n  respuesta = synth.choices[0].message.content.trim();\n}\n\nreturn [{\n  json: {\n    resultado: respuesta,\n    confianza: procData.contexto_encontrado ? 'ALTA' : 'BAJA'\n  }\n}];"
+      },
+      "id": "a5ae67ea-cbb8-4991-8b7b-89625fd216de",
       "name": "Retornar al Agente",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [600, 200]
+      "position": [
+        1680,
+        -944
+      ]
     }
   ],
   "connections": {
     "When Executed by Another Workflow": {
-      "main": [[{ "node": "Mapear Segmentos", "type": "main", "index": 0 }]]
-    },
-    "Mapear Segmentos": {
-      "main": [[{ "node": "Build Query", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Mapear Segmentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Build Query": {
-      "main": [[{ "node": "Query PostgreSQL", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Query PostgreSQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Query PostgreSQL": {
-      "main": [[{ "node": "Procesar Resultados", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Procesar Resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Procesar Resultados": {
-      "main": [[{ "node": "Sintetizar con OpenAI", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Sintetizar con OpenAI2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapear Segmentos2": {
+      "main": [
+        [
+          {
+            "node": "Build Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sintetizar con OpenAI2": {
+      "main": [
+        [
+          {
+            "node": "Retornar al Agente2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query - Conocimiento": {
+      "main": [
+        [
+          {
+            "node": "Query PostgreSQL - Conocimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query - Config": {
+      "main": [
+        [
+          {
+            "node": "Query PostgreSQL - Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query PostgreSQL - Conocimiento": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query PostgreSQL - Config": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Mapear Segmentos": {
+      "main": [
+        [
+          {
+            "node": "Build Query - Conocimiento",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build Query - Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Results": {
+      "main": [
+        [
+          {
+            "node": "Procesar Contextos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Procesar Contextos": {
+      "main": [
+        [
+          {
+            "node": "Sintetizar con OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Sintetizar con OpenAI": {
-      "main": [[{ "node": "Retornar al Agente", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Retornar al Agente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "pinData": {},
-  "meta": {
-    "templateCredsSetupCompleted": true
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "pregunta": "precio de las clases",
+          "lead_tipo": "ADULTO",
+          "whatsapp": "158115077083215@lid"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
   }
 }

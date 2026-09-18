@@ -1,0 +1,193 @@
+{
+  "n8n_id": "yPaWPyYbu8o777M9",
+  "n8n_name": "obtener-alumno-por-whatsapp",
+  "active": false,
+  "updatedAt": "2026-06-18T00:04:44.830Z",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "whatsapp"
+            }
+          ]
+        }
+      },
+      "id": "f392662d-2ac6-45d6-aae5-20ce5a2f719e",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const whatsapp = $input.first()?.json?.whatsapp;\n\nif (!whatsapp) {\n  throw new Error('whatsapp es requerido');\n}\n\nconst queries = {\n  alumno: `SELECT id, whatsapp, nombre, estado, tags, email, nivel, objetivo, disponibilidad, notas, kids_nombre, kids_edad, kids_colegio, kids_turno, kids_grado, referencia, lead_tipo, origen, intencion, completitud, resumen, estado_pago, fecha_pago_ultimo, foto_url, fecha_registro, created_at, updated_at FROM alumnos WHERE whatsapp = '${whatsapp}'`,\n  inscripciones: `SELECT i.id, i.horario_id, h.nombre as horario_nombre, i.estado, i.fecha_inicio, i.fecha_fin FROM inscripciones i LEFT JOIN horarios h ON i.horario_id = h.id WHERE i.alumno_id = (SELECT id FROM alumnos WHERE whatsapp = '${whatsapp}') AND i.estado = 'ACTIVA'`,\n  pagos: `SELECT id, tipo, canal, monto, estado, fecha FROM pagos WHERE alumno_id = (SELECT id FROM alumnos WHERE whatsapp = '${whatsapp}') ORDER BY fecha DESC LIMIT 3`\n};\n\nreturn [{\n  json: { queries, whatsapp }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "4aaad3c6-4655-4a54-b48d-5bb7a7bf9813",
+      "name": "Armar queries"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Armar queries').first().json.queries.alumno }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        448,
+        0
+      ],
+      "id": "7d97d22e-f3cb-4882-8cd7-3b5ee549f3f0",
+      "name": "Get alumno",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Armar queries').first().json.queries.inscripciones }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        640,
+        0
+      ],
+      "id": "4c2c05c1-e359-4264-aa3c-f1b0191c046b",
+      "name": "Get inscripciones",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Armar queries').first().json.queries.pagos }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        848,
+        0
+      ],
+      "id": "fb698b42-3604-4e30-afa2-5ff7933edc21",
+      "name": "Get pagos",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const alumnoData = $('Get alumno').first()?.json;\nconst inscripcionesData = $('Get inscripciones').all().map(row => row.json);\nconst pagosData = $('Get pagos').all().map(row => row.json);\n\nlet response = {\n  success: false,\n  alumno: null,\n  inscripciones: [],\n  pagos_recientes: []\n};\n\nif (alumnoData) {\n  response.success = true;\n  response.alumno = alumnoData;\n  response.inscripciones = inscripcionesData;\n  response.pagos_recientes = pagosData;\n}\n\nreturn [{ json: response }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "f0028f87-d9af-44af-b707-9f2941352d0f",
+      "name": "Armbar respuesta"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Armar queries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armar queries": {
+      "main": [
+        [
+          {
+            "node": "Get alumno",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get inscripciones",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get pagos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get alumno": {
+      "main": [
+        [
+          {
+            "node": "Armbar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get inscripciones": {
+      "main": [
+        [
+          {
+            "node": "Armbar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get pagos": {
+      "main": [
+        [
+          {
+            "node": "Armbar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {}
+}

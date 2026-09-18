@@ -1,0 +1,174 @@
+{
+  "n8n_id": "qzh22lo5i7d4sLBJ",
+  "n8n_name": "registrar-alumno-existente",
+  "active": false,
+  "updatedAt": "2026-09-12T00:42:32.304Z",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "nombre"
+            },
+            {
+              "name": "whatsapp"
+            }
+          ]
+        }
+      },
+      "id": "c055762a-8fe7-4141-a639-df2372f30060",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        272,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst body = input.body || input;\nconst { nombre, apellido, whatsapp, email, telefono, lead_tipo, categoria, nivel, objetivo, disponibilidad, notas, horario_id } = body;\n\nif (!nombre) {\n  throw new Error('Falta el campo requerido: nombre');\n}\nif (!whatsapp) {\n  throw new Error('Falta el campo requerido: whatsapp');\n}\n\nconst esc = (v) => v === null || v === undefined || v === '' ? null : String(v).replace(/'/g, \"''\");\nconst asSql = (v) => v === null ? 'null' : `'${v}'`;\n\nconst nom = esc(nombre);\nconst ap = esc(apellido);\nconst wa = esc(whatsapp);\nconst em = esc(email);\nconst tel = esc(telefono);\nconst lt = esc(lead_tipo);\nconst cat = esc(categoria);\nconst niv = esc(nivel);\nconst obj = esc(objetivo);\nconst disp = esc(disponibilidad);\nconst not = esc(notas);\nconst horId = horario_id ? parseInt(horario_id) : null;\n\nconst query = `INSERT INTO alumnos (nombre, apellido, whatsapp, email, telefono, lead_tipo, categoria, nivel, objetivo, disponibilidad, notas, estado, estado_motivo, estado_fecha, primer_contacto, ultimo_contacto, created_at, updated_at, activo)\nVALUES (${asSql(nom)}, ${asSql(ap)}, ${asSql(wa)}, ${asSql(em)}, ${asSql(tel)}, ${asSql(lt)}, ${asSql(cat)}, ${asSql(niv)}, ${asSql(obj)}, ${asSql(disp)}, ${asSql(not)}, 'ACTIVO', 'Alumno/tutor existente registrado por el agente (no pasó por el funnel de leads)', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true)\nRETURNING id, nombre, whatsapp, estado;`;\n\nreturn [{ json: { query, horario_id: horId } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        208
+      ],
+      "id": "6b280cab-9d21-465a-a0e0-6688f990692b",
+      "name": "Build Query Insert Alumno"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query Insert Alumno').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        704,
+        208
+      ],
+      "id": "92a32ec7-e81b-4f9c-848d-717fd2f43dd8",
+      "name": "PostgreSQL - Insert Alumno",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const alumno = $input.first().json;\nconst prev = $('Build Query Insert Alumno').first().json;\nconst horarioId = prev.horario_id;\n\n// Si vino horario_id, linkeamos alumnos_horarios e incrementamos el cupo.\n// Si no vino, ejecutamos un SELECT inofensivo para no romper la cadena\n// de nodos (no hace falta un IF separado para este caso).\nlet query;\nif (horarioId) {\n  query = `INSERT INTO alumnos_horarios (alumno_id, horario_id, fecha_inscripcion, activo) VALUES (${alumno.id}, ${horarioId}, CURRENT_TIMESTAMP, true);\\nUPDATE horarios SET cupo_actual = COALESCE(cupo_actual, 0) + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ${horarioId};`;\n} else {\n  query = 'SELECT 1;';\n}\n\nreturn [{ json: { query, alumno_id: alumno.id, alumno_nombre: alumno.nombre, alumno_whatsapp: alumno.whatsapp, alumno_estado: alumno.estado, horario_id: horarioId } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        208
+      ],
+      "id": "b5e56370-89b6-41a1-a027-64798c619a76",
+      "name": "Build Query Vincular Horario"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $('Build Query Vincular Horario').first().json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1104,
+        208
+      ],
+      "id": "0722a11f-7e59-4181-a141-5cd9e6b7de85",
+      "name": "PostgreSQL - Vincular",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $('Build Query Vincular Horario').first().json;\n\nreturn [{\n  json: {\n    success: true,\n    message: 'Alumno/tutor existente registrado correctamente',\n    alumno: {\n      id: prev.alumno_id,\n      nombre: prev.alumno_nombre,\n      whatsapp: prev.alumno_whatsapp,\n      estado: prev.alumno_estado\n    },\n    horario_id: prev.horario_id || null\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        208
+      ],
+      "id": "927537ff-50d2-491a-a99f-cd912525f791",
+      "name": "Response"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Build Query Insert Alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query Insert Alumno": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Insert Alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Insert Alumno": {
+      "main": [
+        [
+          {
+            "node": "Build Query Vincular Horario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query Vincular Horario": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Vincular",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Vincular": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "binaryMode": "separate"
+  },
+  "pinData": {}
+}
