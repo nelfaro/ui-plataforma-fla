@@ -49,7 +49,22 @@ El usuario probó con un comprobante real. Aparecieron dos problemas reales, amb
 2. **La búsqueda de lead por `person_identifier` era demasiado estricta.** El agente pasó `person_identifier: "Nelson"` pero el lead en la base tenía guardado `"Nelson Rodriguez"` (nombre completo capturado en `create-lead`) — el match exacto fallaba y la tool tiraba "No existe un lead ni un alumno con ese whatsapp" a pesar de que el lead sí existía.
    - **Fix:** la búsqueda ahora usa el `person_identifier` solo para desambiguar cuando hay **más de un** lead con el mismo whatsapp (caso real: familia con varios hijos usando el WhatsApp de un padre). Si hay un solo lead para ese whatsapp, lo toma directo sin exigir que el nombre coincida exactamente. Verificado contra el registro real de Nelson en la base — ahora lo encuentra correctamente.
 
-**Pendiente:** que el usuario/Nelson reenvíe el comprobante para confirmar que ahora se completa todo el circuito (alumno creado, pago pendiente visible en `/pagos-pendientes`).
+**Confirmado (2026-09-18):** Nelson reenvió el comprobante y el circuito de backend funcionó completo — lead encontrado, alumno creado (`REGISTRADO`), pago insertado (`PENDIENTE_VERIFICACION`, con `comprobante_url` real de Drive), y el usuario lo aprobó desde `/pagos-pendientes` (alumno pasó a `ACTIVO`, pago a `VERIFICADO`).
+
+### ✅ Bug adicional: la Ficha del Alumno no mostraba los datos (2026-09-18)
+
+A pesar de que los datos estaban bien guardados en la DB, la página `/alumno/:id` los mostraba vacíos: "Estado de Pago" en blanco, "Horario: Sin asignar", "Nivel"/"Origen"/"Intención" vacíos.
+
+**Causa:** `get-alumno-by-id` (`TarOZNsZZ4q1KlbF`) tenía un `SELECT` que solo traía `id, nombre, apellido, email, whatsapp, fecha_nacimiento, categoria, tutor, horario_clase, estado, activo, created_at, updated_at` — nunca seleccionaba `nivel`, `objetivo`, `origen`, `intencion`, `estado_pago`, `fecha_pago_ultimo`, `disponibilidad`, `resumen`, `notas`, `tags`, `lead_tipo`, `completitud`, `foto_url`, aunque todas esas columnas existen y tenían datos. Esto es un bug preexistente, no algo introducido por el flujo de pagos — recién se hizo visible ahora que hay datos reales para mostrar.
+
+Además, `procesar-comprobante-pago` vinculaba el horario solo en la tabla relacional `alumnos_horarios`, pero el dashboard lee el horario desde `alumnos.horario_clase` (texto plano, comparado por nombre) — ese campo nunca se completaba.
+
+**Fix:**
+1. `get-alumno-by-id`: se amplió el `SELECT` para incluir todas las columnas que el frontend ya esperaba.
+2. `procesar-comprobante-pago`: el upsert de alumno ahora también setea `horario_clase = <nombre del horario>` (ej: "KIDS Lu-Mi"), tanto al crear como al actualizar.
+3. Backfill puntual: se corrigió el registro ya existente de Nelson (`alumno.id = 2`) para que refleje el horario sin necesidad de reenviar el comprobante.
+
+Verificado contra el endpoint real (`get-alumno-by-id?id=2`) — ahora devuelve todos los campos poblados.
 
 ---
 

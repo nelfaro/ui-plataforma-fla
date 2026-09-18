@@ -2,7 +2,7 @@
   "n8n_id": "TarOZNsZZ4q1KlbF",
   "n8n_name": "get-alumno-by-id",
   "active": true,
-  "updatedAt": "2026-07-30T01:01:09.046Z",
+  "updatedAt": "2026-09-18T02:01:28.561Z",
   "nodes": [
     {
       "parameters": {
@@ -23,7 +23,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nlet id = input.id || (input.query && input.query.id) || (input.body && input.body.id);\n\n// Si no hay ID, devolver respuesta amigable DIRECTA\nif (!id || id === 'undefined' || id === 'null' || id === '') {\n  return [{\n    json: {\n      success: false,\n      message: 'No hay ningún alumno seleccionado. Por favor, selecciona un alumno válido.',\n      alumno: null\n    }\n  }];\n}\n\nconst idNum = Number(id);\nif (isNaN(idNum) || idNum <= 0) {\n  return [{\n    json: {\n      success: false,\n      message: `ID inválido: \"${id}\". Por favor, selecciona un alumno válido.`,\n      alumno: null\n    }\n  }];\n}\n\nconst query = `SELECT id, nombre, apellido, email, whatsapp, fecha_nacimiento, \n       categoria, tutor, horario_clase, estado, activo, created_at, updated_at\nFROM alumnos\nWHERE id = ${idNum} AND activo = TRUE;`;\n\nreturn [{\n  json: {\n    hasQuery: true,\n    query\n  }\n}];\n"
+        "jsCode": "const input = $input.first().json;\nlet id = input.id || (input.query && input.query.id) || (input.body && input.body.id);\n\n// Si no hay ID, devolver respuesta amigable DIRECTA\nif (!id || id === 'undefined' || id === 'null' || id === '') {\n  return [{\n    json: {\n      success: false,\n      message: 'No hay ningún alumno seleccionado. Por favor, selecciona un alumno válido.',\n      alumno: null\n    }\n  }];\n}\n\nconst idNum = Number(id);\nif (isNaN(idNum) || idNum <= 0) {\n  return [{\n    json: {\n      success: false,\n      message: `ID inválido: \"${id}\". Por favor, selecciona un alumno válido.`,\n      alumno: null\n    }\n  }];\n}\n\nconst query = `SELECT id, nombre, apellido, email, whatsapp, fecha_nacimiento,\n       categoria, tutor, horario_clase, estado, activo, created_at, updated_at,\n       nivel, objetivo, origen, intencion, disponibilidad, resumen, notas,\n       estado_pago, fecha_pago_ultimo, lead_tipo, tags, completitud, foto_url\nFROM alumnos\nWHERE id = ${idNum} AND activo = TRUE;`;\n\nreturn [{\n  json: {\n    hasQuery: true,\n    query\n  }\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
