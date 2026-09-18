@@ -1,0 +1,219 @@
+{
+  "n8n_id": "zourA8E5gwTrPd93",
+  "n8n_name": "update-alumno",
+  "active": true,
+  "updatedAt": "2026-06-22T22:06:21.095Z",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\n// El body está dentro de json.body\nconst bodyData = input.body || {};\nconst id = bodyData.id;\n\nif (!id) {\n  throw new Error(`ID es requerido. Recibido: ${JSON.stringify(bodyData)}`);\n}\n\nconst { nombre, estado, lead_tipo, horario_clase, notas, email } = bodyData;\n\n// Construir query con valores directos\nlet setClauses = [\"updated_at = NOW()\"];\n\nif (nombre) setClauses.unshift(`nombre = '${nombre.replace(/'/g, \"''\")}'`);\nif (estado) setClauses.unshift(`estado = '${estado}'`);\nif (lead_tipo) setClauses.unshift(`lead_tipo = '${lead_tipo}'`);\nif (horario_clase) setClauses.unshift(`horario_clase = '${horario_clase.replace(/'/g, \"''\")}'`);\nif (notas) setClauses.unshift(`notas = '${notas.replace(/'/g, \"''\")}'`);\nif (email) setClauses.unshift(`email = '${email.replace(/'/g, \"''\")}'`);\n\nconst query = `UPDATE alumnos SET ${setClauses.join(', ')} WHERE id = ${id} RETURNING id, nombre, estado, lead_tipo, horario_clase, email, updated_at;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        16
+      ],
+      "id": "9b994011-020d-4601-ba93-77d734a9a3c3",
+      "name": "Code in JavaScript1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "update-alumno",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -256,
+        224
+      ],
+      "id": "94958dae-b1ea-4ddb-938c-9419594bb080",
+      "name": "Webhook",
+      "webhookId": "a3c17000-0759-4445-b96f-dad20990a9d5"
+    },
+    {
+      "parameters": {
+        "url": "https://asistente-ia-fla-n8n.x5miqk.easypanel.host/webhook/auth-validate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $input.first().json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "02c8ee67-96f9-4a69-afc5-1925e4987913",
+      "name": "Validador",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst data = input.body || {};\nconst { id, nombre, email, whatsapp, nivel, estado, categoria, horario_clase, origen, intencion, estado_pago, fecha_pago_ultimo, notas } = data;\n\nif (!id) {\n  throw new Error('ID es requerido');\n}\n\nconst updates = [];\nif (nombre !== undefined) updates.push(`nombre = '${nombre.replace(/'/g, \"''\")}' `);\nif (email !== undefined) updates.push(`email = ${email ? `'${email.replace(/'/g, \"''\")}' ` : 'NULL'}`);\nif (whatsapp !== undefined) updates.push(`whatsapp = ${whatsapp ? `'${whatsapp.replace(/'/g, \"''\")}' ` : 'NULL'}`);\nif (nivel !== undefined) updates.push(`nivel = ${nivel ? `'${nivel}' ` : 'NULL'}`);\nif (estado !== undefined) updates.push(`estado = '${estado}' `);\nif (categoria !== undefined) updates.push(`categoria = '${categoria}' `);\nif (horario_clase !== undefined) updates.push(`horario_clase = ${horario_clase ? `'${horario_clase.replace(/'/g, \"''\")}' ` : 'NULL'}`);\nif (origen !== undefined) updates.push(`origen = ${origen ? `'${origen.replace(/'/g, \"''\")}' ` : 'NULL'}`);\nif (intencion !== undefined) updates.push(`intencion = ${intencion ? `'${intencion.replace(/'/g, \"''\")}' ` : 'NULL'}`);\nif (estado_pago !== undefined) updates.push(`estado_pago = ${estado_pago ? `'${estado_pago}' ` : 'NULL'}`);\nif (fecha_pago_ultimo !== undefined) updates.push(`fecha_pago_ultimo = ${fecha_pago_ultimo ? `'${fecha_pago_ultimo}' ` : 'NULL'}`);\nif (notas !== undefined) updates.push(`notas = ${notas ? `'${notas.replace(/'/g, \"''\")}' ` : 'NULL'}`);\n\nif (updates.length === 0) {\n  throw new Error('No hay campos para actualizar');\n}\n\nupdates.push('updated_at = NOW()');\n\nconst query = `UPDATE alumnos SET ${updates.join(', ')} WHERE id = ${parseInt(id)} RETURNING id, nombre, email, whatsapp, nivel, estado, categoria, horario_clase, origen, intencion, estado_pago, fecha_pago_ultimo, notas, activo, created_at, updated_at;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        224
+      ],
+      "id": "35e75b4c-1ed4-4d28-a658-b8590b751e94",
+      "name": "Build Query"
+    },
+    {
+      "parameters": {
+        "jsCode": "const resultado = $('actualiza_alumno').all();\n\nif (resultado.length === 0) {\n  return [{\n    json: {\n      success: false,\n      message: 'Alumno no encontrado',\n      alumno: null\n    }\n  }];\n}\n\nconst alumno = resultado[0].json;\n\nreturn [{\n  json: {\n    success: true,\n    message: 'Alumno actualizado correctamente',\n    alumno: alumno\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        224
+      ],
+      "id": "9f06df03-8a9f-4bca-a5c9-601844b739e3",
+      "name": "Response"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        400,
+        224
+      ],
+      "id": "ef32047d-b6a8-4b18-8989-2590dda68a68",
+      "name": "actualiza_alumno",
+      "credentials": {
+        "postgres": {
+          "id": "wPNcwJLWeQKZlTmC",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Code in JavaScript1": {
+      "main": [
+        []
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query": {
+      "main": [
+        [
+          {
+            "node": "actualiza_alumno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "actualiza_alumno": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ktDkXcf811N3FTt3",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "Code in JavaScript1": [
+      {
+        "json": {
+          "query": "UPDATE alumnos SET email = 'abbasiomara@gmail.com.ar', estado = 'ACTIVO', nombre = 'Siomara Abba', updated_at = NOW() WHERE id = 8 RETURNING id, nombre, estado, lead_tipo, horario_clase, email, updated_at;"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "agente-fla-n8n.x5miqk.easypanel.host",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+            "content-length": "310",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "es-419,es;q=0.9",
+            "content-type": "application/json",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2Bxl8q0nh7YNTT92gLklYhX5W1eFpe3VB8%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2BhSkT6aeIYKLKO24E1Je2oJ8VIo9ey2Oo%3D; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX1%2BQtheKr8jKEWitfJ3Go3aIAUEudi9SaETiPEK7iFvtT7JjhBKCrLbrSSUxfyLFQF0c2l3vQraENw%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX18%2F2w1ATWfAQyh%2FEoK85AfWcj%2FbjEldtgXivY%2BgSFqjLNQmx2tHR9TsMoae00Qh55fh508pywJE1HcmrdXd8hv3LCG4%2Fp6x%2Fh67YlNht6CPvoThXbjtWQROdXHFJ5rnR6Fma8BMpJfxaOm0GnCJLEKiBLTwvZ4vFHA%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX1%2FLB7kBoF2sCMI9zzQPMaIAHPRotGXJYL%2Fk%2B35j7XATLB%2BntosFx59rm6W8Kqvh8BqprgSXITtXRMIyOl5GX02FYB1WeFI2E4do3FljoV0CzflWNYVKfkr3lfWf4PIzv9HV0Z0W2o1GiEu1Waz0GTHqjOQq6xCj%2BOtsYdKBXyVja%2BqATO8oNyhWjGnexcqHpXFgUSpdP0LBYQ%3D%3D; rl_session=RudderEncrypt%3AU2FsdGVkX1%2FA42EmqKVYel2YRFh42gXBvsnKYojMBNiLkPVrB1lXlfIEjKZv3W9%2BVrE1EqhzfloPiJk8PxlUtUYoEeb9hASHUkliPVZxHdqlYLO1zBsG2me0ssYgs1%2FzgfN9TmnxKgSUPmY3wes6GA%3D%3D; ph_phc_kMstNfAgBcBkWSh6KdsgN09heqqNe5VNmalHP1Ni9Q4_posthog=%7B%22%24device_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22distinct_id%22%3A%228f4e1e0c2bf772be0cdb567b63c3003cd82dd87f870f69fbef1961e2c903b8ec%232d1fecc1-41f8-45ba-a1e5-ed81f9d9e46a%22%2C%22%24sesid%22%3A%5B1782163726677%2C%22019ef129-96ad-751b-aac8-5d895dc2c7a0%22%2C1782162495142%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fasistente-ia-fla-n8n.x5miqk.easypanel.host%2Fworkflow%2FovC7bSUVy2yM6k1L%22%7D%2C%22%24user_state%22%3A%22anonymous%22%7D",
+            "origin": "https://agente-fla-ui-plataforma.x5miqk.easypanel.host",
+            "priority": "u=1, i",
+            "referer": "https://agente-fla-ui-plataforma.x5miqk.easypanel.host/alumno/8",
+            "sec-ch-ua": "\"Google Chrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "x-api-key": "",
+            "x-forwarded-for": "201.235.17.183, 10.11.0.23, 172.18.0.1",
+            "x-forwarded-host": "agente-fla-ui-plataforma.x5miqk.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "17792bd965dd",
+            "x-real-ip": "10.11.0.23"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "id": 8,
+            "nombre": "Siomara Abba",
+            "apellido": null,
+            "email": "abbasiomara@gmail.com.ar",
+            "whatsapp": "54 9 3385 43-0519",
+            "fecha_nacimiento": null,
+            "categoria": "ADOLESCENTE",
+            "tutor": null,
+            "horario_clase": null,
+            "estado": "ACTIVO",
+            "activo": true,
+            "created_at": "2026-06-22T21:08:05.773Z",
+            "updated_at": "2026-06-22T21:40:40.458Z"
+          },
+          "webhookUrl": "https://agente-fla-n8n.x5miqk.easypanel.host/webhook/update-alumno",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  }
+}

@@ -384,6 +384,14 @@
     "updatedAt": "2026-07-06T21:02:03.420Z"
   },
   {
+    "file": "update-alumno.json",
+    "id": "zourA8E5gwTrPd93",
+    "name": "update-alumno",
+    "active": true,
+    "nodeCount": 6,
+    "updatedAt": "2026-06-22T22:06:21.095Z"
+  },
+  {
     "file": "update-cupo-horario.json",
     "id": "36OiNFuFU17LcpFq",
     "name": "update-cupo-horario",
