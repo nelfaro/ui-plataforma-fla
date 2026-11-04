@@ -1,48 +1,48 @@
-import api from './api';
-import { MESSAGES } from '../config/constants';
+import axios from 'axios';
 
-// Login
+// La sesión vive en una cookie HttpOnly emitida por el servidor.
+// En localStorage solo se guarda el nombre de usuario para pintar la UI.
+const USER_KEY = 'user';
+
+// Login (valida contra el servidor)
 export const loginUser = async (usuario, password) => {
-  // Credenciales hardcodeadas (como en Streamlit)
-  if (usuario.toLowerCase() !== 'fla' || password !== 'academia2026') {
-    throw new Error('Usuario o contraseña incorrectos');
-  }
-  
-  const token = 'fla-token-' + Date.now();
-  const userData = { usuario: 'fla' };
-  
-  localStorage.setItem('token', token);
-  localStorage.setItem('user', JSON.stringify(userData));
-  
-  return { token, user: userData };
+  const { data } = await axios.post('/api/auth/login', { usuario, password });
+  localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+  return { user: data.user };
 };
 
 // Logout
-export const logoutUser = () => {
+export const logoutUser = async () => {
+  try {
+    await axios.post('/api/auth/logout');
+  } catch {
+    // si falla igual limpiamos el estado local
+  }
+  localStorage.removeItem(USER_KEY);
   localStorage.removeItem('token');
-  localStorage.removeItem('user');
 };
 
-// Obtener usuario actual
+// Verifica con el servidor si la sesión sigue vigente
+export const checkSession = async () => {
+  try {
+    const { data } = await axios.get('/api/auth/me');
+    localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+    return data.user;
+  } catch {
+    localStorage.removeItem(USER_KEY);
+    return null;
+  }
+};
+
+// Obtener usuario actual (solo informativo)
 export const getCurrentUser = () => {
-  const user = localStorage.getItem('user');
+  const user = localStorage.getItem(USER_KEY);
   return user ? JSON.parse(user) : null;
-};
-
-// Verificar autenticación
-export const isAuthenticated = () => {
-  return !!localStorage.getItem('token');
-};
-
-// Obtener token
-export const getToken = () => {
-  return localStorage.getItem('token');
 };
 
 export default {
   loginUser,
   logoutUser,
-  getCurrentUser,
-  isAuthenticated,
-  getToken
+  checkSession,
+  getCurrentUser
 };

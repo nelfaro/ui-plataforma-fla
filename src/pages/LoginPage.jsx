@@ -24,24 +24,16 @@ export const LoginPage = () => {
 
     setLoading(true);
     try {
-      // Credenciales hardcodeadas (como en Streamlit)
-      if (usuario.toLowerCase() === 'fla' && password === 'academia2026') {
-        // Login exitoso
-        localStorage.setItem('token', 'fla-token-' + Date.now());
-        localStorage.setItem('user', JSON.stringify({ usuario: 'fla' }));
-        
-        // Actualiza el estado de autenticación en el hook
-        const result = await login(usuario, password);
-        
-        if (result.success) {
-          success('¡Bienvenido a Academia Fla!');
-          // Redirige después de 500ms
-          setTimeout(() => {
-            navigate('/dashboard', { replace: true });
-          }, 500);
-        }
+      // La validación real la hace el servidor
+      const result = await login(usuario, password);
+
+      if (result.success) {
+        success('¡Bienvenido a Academia Fla!');
+        setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+        }, 500);
       } else {
-        showError('Usuario o contraseña incorrectos');
+        showError(result.message || 'Usuario o contraseña incorrectos');
       }
     } catch (err) {
       showError('Error al iniciar sesión');

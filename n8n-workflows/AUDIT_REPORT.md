@@ -14,7 +14,7 @@ Cambios aplicados en n8n (todos vía API, verificados con re-lectura post-cambio
 
 ### ⚠️ Pendiente — requiere una acción manual tuya (no lo puedo hacer yo)
 
-**No existe ninguna credencial de Google Drive en esta instancia de n8n** (confirmado consultando `/credentials` — solo hay Telegram, Google Gemini, Odoo, Chatwoot, Postgres, OpenAI). Por eso, aunque el prompt siempre dijo "el comprobante se guarda en Drive", **nunca se guardó nada** — el nodo `Analyze image` del Cerebro solo analiza la imagen con GPT-4o-mini y no sube nada a ningún lado. `comprobante_url` nunca existió de verdad.
+**No existe ninguna credencial de Google Drive en esta instancia de n8n** (confirmado consultando `/credentials` — solo hay Telegram, Google Gemini, Chatwoot, Postgres, OpenAI). Por eso, aunque el prompt siempre dijo "el comprobante se guarda en Drive", **nunca se guardó nada** — el nodo `Analyze image` del Cerebro solo analiza la imagen con GPT-4o-mini y no sube nada a ningún lado. `comprobante_url` nunca existió de verdad.
 
 Para que `procesar-comprobante-pago` funcione de punta a punta necesito que:
 1. En n8n → Credentials → New → busques "Google Drive OAuth2 API" → conectes con la cuenta de Google donde querés guardar los comprobantes (ej. `iaclasesdeinglesconfla@gmail.com`) → guardar.
@@ -133,7 +133,7 @@ También existe `alumnos_horarios` (tabla puente alumno↔horario) que ni `conve
 - `registrar-derivacion-a-fla`: el input del sub-workflow se llama `alumn_id` (typo, falta la "o") y el nodo tool en el Cerebro tiene el mapping vacío (`value: {}`) — probablemente el parámetro nunca llega bien.
 - 3 tools activas con **descripción vacía** en el Cerebro (sin guía para el LLM sobre cuándo usarlas): `obtener-alumno-por-nombre`, `obtener-tutor-por-nombre`, `registrar-derivacion-a-fla`.
 - `register-pago` (`OptI5tQlHynoPvZi`, distinto de `registrar-pago`) **no es un bug** — es un webhook aparte que usa el dashboard React (`src/services/alumnos.js`) para que Fla registre pagos a mano. No está wireado al agente.
-- Workflows huérfanos/duplicados en la instancia (no afectan al agente pero generan ruido): `get-conversation-logs` x2, `get-analisis-temporal` x2 (una inactiva), `obtener-alumno-por-whatsapp` x2 (una inactiva), `registrar-pago` inactiva vieja (`b7K0ZXAsKj6v8B0L`), `My workflow` / `My workflow 2`, `Tool buscar en Odoo` (inactiva), `auth-webhook-validation` (inactiva), `Academia_Ingles_Cerebro_IA` inactiva (`qygPcdsi9Xn8ulN5`).
+- Workflows huérfanos/duplicados en la instancia (no afectan al agente pero generan ruido): `get-conversation-logs` x2, `get-analisis-temporal` x2 (una inactiva), `obtener-alumno-por-whatsapp` x2 (una inactiva), `registrar-pago` inactiva vieja (`b7K0ZXAsKj6v8B0L`), `My workflow` / `My workflow 2`, `auth-webhook-validation` (inactiva), `Academia_Ingles_Cerebro_IA` inactiva (`qygPcdsi9Xn8ulN5`).
 
 ## 4. Sobre los archivos locales del repo
 
