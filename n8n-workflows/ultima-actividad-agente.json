@@ -2,13 +2,14 @@
   "n8n_id": "s2cVCHjS8E4eYr3G",
   "n8n_name": "ultima-actividad-agente",
   "active": true,
-  "updatedAt": "2026-07-18T00:04:34.219Z",
+  "updatedAt": "2026-11-04T23:20:38.775Z",
   "nodes": [
     {
       "parameters": {
         "path": "ultima-actividad-agente",
         "responseMode": "responseNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "id": "1f8adde2-de7a-46ae-bf80-c8db093e37d9",
       "name": "Webhook",
@@ -130,7 +131,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

@@ -2,7 +2,7 @@
   "n8n_id": "7sqOI8QKnDuVkNVN",
   "n8n_name": "registrar_alumno",
   "active": true,
-  "updatedAt": "2026-06-30T00:50:40.268Z",
+  "updatedAt": "2026-11-04T21:54:11.988Z",
   "nodes": [
     {
       "parameters": {
@@ -167,7 +167,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

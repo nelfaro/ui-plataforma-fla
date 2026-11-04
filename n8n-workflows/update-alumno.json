@@ -2,7 +2,7 @@
   "n8n_id": "zourA8E5gwTrPd93",
   "n8n_name": "update-alumno",
   "active": true,
-  "updatedAt": "2026-06-22T22:06:21.095Z",
+  "updatedAt": "2026-11-04T23:22:10.979Z",
   "nodes": [
     {
       "parameters": {
@@ -23,7 +23,8 @@
         "httpMethod": "POST",
         "path": "update-alumno",
         "responseMode": "lastNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -144,7 +145,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

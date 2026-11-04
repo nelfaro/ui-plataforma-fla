@@ -2,7 +2,7 @@
   "n8n_id": "FjVuLaSNlsdGxhOo",
   "n8n_name": "update-lead",
   "active": true,
-  "updatedAt": "2026-07-18T23:05:55.608Z",
+  "updatedAt": "2026-11-04T21:54:11.988Z",
   "nodes": [
     {
       "parameters": {
@@ -131,7 +131,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

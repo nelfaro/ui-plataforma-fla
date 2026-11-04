@@ -2,14 +2,15 @@
   "n8n_id": "kGETJEKDayx0LZJ0",
   "n8n_name": "update-horario",
   "active": true,
-  "updatedAt": "2026-06-18T00:08:59.703Z",
+  "updatedAt": "2026-11-04T23:21:53.037Z",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "PUT",
         "path": "update-horario",
         "responseMode": "lastNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -125,7 +126,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

@@ -2,7 +2,7 @@
   "n8n_id": "l9n7fGRBeb8VNAIo",
   "n8n_name": "registrar-derivacion-a-fla",
   "active": true,
-  "updatedAt": "2026-09-17T21:10:29.240Z",
+  "updatedAt": "2026-11-04T21:54:11.988Z",
   "nodes": [
     {
       "parameters": {
@@ -140,7 +140,7 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "binaryMode": "separate",
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",

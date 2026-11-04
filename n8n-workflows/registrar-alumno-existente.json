@@ -2,7 +2,7 @@
   "n8n_id": "qzh22lo5i7d4sLBJ",
   "n8n_name": "registrar-alumno-existente",
   "active": false,
-  "updatedAt": "2026-09-12T00:42:32.304Z",
+  "updatedAt": "2026-11-04T21:54:11.988Z",
   "nodes": [
     {
       "parameters": {
@@ -167,7 +167,7 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "binaryMode": "separate"
   },
   "pinData": {}

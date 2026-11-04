@@ -2,7 +2,7 @@
   "n8n_id": "LbIjKIvn5Uqfyxa0",
   "n8n_name": "Cerebro v2",
   "active": true,
-  "updatedAt": "2026-09-18T01:42:42.624Z",
+  "updatedAt": "2026-11-04T21:54:11.988Z",
   "nodes": [
     {
       "parameters": {
@@ -162,13 +162,13 @@
       "alwaysOutputData": true,
       "retryOnFail": true,
       "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
       "credentials": {
         "httpBasicAuth": {
           "id": "748nzoccTGLvj9oU",
           "name": "Chawoot credential Fla"
         }
-      },
-      "onError": "continueRegularOutput"
+      }
     },
     {
       "parameters": {
@@ -195,13 +195,13 @@
       "id": "5181424c-124e-42e9-82de-b784bbb6c401",
       "name": "Buscar conversacion",
       "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
       "credentials": {
         "httpBasicAuth": {
           "id": "748nzoccTGLvj9oU",
           "name": "Chawoot credential Fla"
         }
-      },
-      "onError": "continueRegularOutput"
+      }
     },
     {
       "parameters": {
@@ -2587,7 +2587,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

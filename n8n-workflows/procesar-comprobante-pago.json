@@ -2,7 +2,7 @@
   "n8n_id": "CGfkwm2t4B6I0JA2",
   "n8n_name": "procesar-comprobante-pago",
   "active": true,
-  "updatedAt": "2026-09-18T02:02:28.581Z",
+  "updatedAt": "2026-11-04T21:54:11.988Z",
   "nodes": [
     {
       "parameters": {
@@ -304,7 +304,8 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "availableInMCP": true
   },
   "pinData": {}
 }

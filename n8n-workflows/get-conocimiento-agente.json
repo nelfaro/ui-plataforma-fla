@@ -2,7 +2,7 @@
   "n8n_id": "pqhCzVlVrwCO6kH6",
   "n8n_name": "get-conocimiento-agente",
   "active": true,
-  "updatedAt": "2026-07-16T22:51:05.701Z",
+  "updatedAt": "2026-11-04T21:54:11.988Z",
   "nodes": [
     {
       "parameters": {
@@ -57,13 +57,13 @@
         624,
         -304
       ],
+      "disabled": true,
       "credentials": {
         "postgres": {
           "id": "wPNcwJLWeQKZlTmC",
           "name": "Postgres account"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -125,13 +125,13 @@
         1024,
         -304
       ],
+      "disabled": true,
       "credentials": {
         "openAiApi": {
           "id": "bznJ7tqJGM25Nv9r",
           "name": "OpenAI account"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -469,7 +469,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

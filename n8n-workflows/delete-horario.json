@@ -2,14 +2,15 @@
   "n8n_id": "oM75f2nLUL7PHHpF",
   "n8n_name": "delete-horario",
   "active": true,
-  "updatedAt": "2026-06-17T23:52:39.166Z",
+  "updatedAt": "2026-11-04T23:21:59.093Z",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "DELETE",
         "path": "delete-horario",
         "responseMode": "lastNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -125,7 +126,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

@@ -2,14 +2,15 @@
   "n8n_id": "OptI5tQlHynoPvZi",
   "n8n_name": "register-pago",
   "active": true,
-  "updatedAt": "2026-07-29T23:10:01.772Z",
+  "updatedAt": "2026-11-04T23:21:34.494Z",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "register-pago",
         "responseMode": "lastNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -157,7 +158,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

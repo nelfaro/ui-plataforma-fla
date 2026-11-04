@@ -2,7 +2,7 @@
   "n8n_id": "4crS0mDaqGsMweMi",
   "n8n_name": "get-horarios",
   "active": true,
-  "updatedAt": "2026-06-29T22:29:13.337Z",
+  "updatedAt": "2026-11-04T23:14:11.393Z",
   "nodes": [
     {
       "parameters": {
@@ -53,7 +53,8 @@
         "path": "get-horarios",
         "responseMode": "lastNode",
         "responseData": "allEntries",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -155,7 +156,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

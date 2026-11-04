@@ -2,7 +2,7 @@
   "n8n_id": "J83rBo0zHt1CRfJi",
   "n8n_name": "get-conversation-logs",
   "active": true,
-  "updatedAt": "2026-06-26T02:23:57.599Z",
+  "updatedAt": "2026-11-04T21:54:11.988Z",
   "nodes": [
     {
       "parameters": {
@@ -105,7 +105,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

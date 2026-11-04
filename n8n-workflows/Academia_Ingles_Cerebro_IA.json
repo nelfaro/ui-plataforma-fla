@@ -2,7 +2,7 @@
   "n8n_id": "pBYf6cv9kCeTwEWU",
   "n8n_name": "Academia_Ingles_Cerebro_IA",
   "active": false,
-  "updatedAt": "2026-09-07T21:18:46.400Z",
+  "updatedAt": "2026-11-04T21:54:11.988Z",
   "nodes": [
     {
       "parameters": {
@@ -162,13 +162,13 @@
       "alwaysOutputData": true,
       "retryOnFail": true,
       "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
       "credentials": {
         "httpBasicAuth": {
           "id": "748nzoccTGLvj9oU",
           "name": "Chawoot credential Fla"
         }
-      },
-      "onError": "continueRegularOutput"
+      }
     },
     {
       "parameters": {
@@ -195,13 +195,13 @@
       "id": "eeaabb81-7ad7-4903-9c31-9392cbd507c7",
       "name": "Buscar conversacion",
       "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
       "credentials": {
         "httpBasicAuth": {
           "id": "748nzoccTGLvj9oU",
           "name": "Chawoot credential Fla"
         }
-      },
-      "onError": "continueRegularOutput"
+      }
     },
     {
       "parameters": {
@@ -3750,7 +3750,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

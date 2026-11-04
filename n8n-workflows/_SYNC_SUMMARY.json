@@ -1,19 +1,11 @@
 [
   {
-    "file": "Academia_Ingles_Cerebro_IA__INACTIVE_qygPcd.json",
-    "id": "qygPcdsi9Xn8ulN5",
-    "name": "Academia_Ingles_Cerebro_IA",
-    "active": false,
-    "nodeCount": 55,
-    "updatedAt": "2026-06-17T23:43:14.000Z"
-  },
-  {
     "file": "Academia_Ingles_Cerebro_IA.json",
     "id": "pBYf6cv9kCeTwEWU",
     "name": "Academia_Ingles_Cerebro_IA",
     "active": false,
     "nodeCount": 80,
-    "updatedAt": "2026-09-07T21:18:46.400Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "Alumnos List.json",
@@ -21,7 +13,7 @@
     "name": "Alumnos List",
     "active": true,
     "nodeCount": 4,
-    "updatedAt": "2026-06-17T23:46:22.202Z"
+    "updatedAt": "2026-11-04T23:18:17.650Z"
   },
   {
     "file": "Analytics Weekly.json",
@@ -29,15 +21,7 @@
     "name": "Analytics Weekly",
     "active": true,
     "nodeCount": 4,
-    "updatedAt": "2026-06-23T19:58:22.142Z"
-  },
-  {
-    "file": "auth-webhook-validation.json",
-    "id": "pVwfPHZSJcSAn2fb",
-    "name": "auth-webhook-validation",
-    "active": false,
-    "nodeCount": 13,
-    "updatedAt": "2026-06-17T23:51:07.000Z"
+    "updatedAt": "2026-11-04T23:17:51.596Z"
   },
   {
     "file": "Cerebro v2.json",
@@ -45,7 +29,7 @@
     "name": "Cerebro v2",
     "active": true,
     "nodeCount": 55,
-    "updatedAt": "2026-09-18T01:42:42.624Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "conocimiento-get.json",
@@ -53,7 +37,7 @@
     "name": "conocimiento-get",
     "active": true,
     "nodeCount": 4,
-    "updatedAt": "2026-06-22T22:30:12.335Z"
+    "updatedAt": "2026-11-04T23:18:24.073Z"
   },
   {
     "file": "conocimiento-post.json",
@@ -61,7 +45,7 @@
     "name": "conocimiento-post",
     "active": true,
     "nodeCount": 4,
-    "updatedAt": "2026-06-22T23:47:12.863Z"
+    "updatedAt": "2026-11-04T23:21:28.599Z"
   },
   {
     "file": "convertir-lead-a-alumno.json",
@@ -69,7 +53,7 @@
     "name": "convertir-lead-a-alumno",
     "active": true,
     "nodeCount": 8,
-    "updatedAt": "2026-09-17T20:06:34.378Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "create-horario.json",
@@ -77,7 +61,7 @@
     "name": "create-horario",
     "active": true,
     "nodeCount": 5,
-    "updatedAt": "2026-07-18T01:52:28.748Z"
+    "updatedAt": "2026-11-04T23:21:40.384Z"
   },
   {
     "file": "create-lead.json",
@@ -85,7 +69,7 @@
     "name": "create-lead",
     "active": true,
     "nodeCount": 5,
-    "updatedAt": "2026-07-18T14:13:12.055Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "delete-horario.json",
@@ -93,7 +77,7 @@
     "name": "delete-horario",
     "active": true,
     "nodeCount": 5,
-    "updatedAt": "2026-06-17T23:52:39.166Z"
+    "updatedAt": "2026-11-04T23:21:59.093Z"
   },
   {
     "file": "ERROR workflow.json",
@@ -101,7 +85,7 @@
     "name": "ERROR workflow",
     "active": true,
     "nodeCount": 5,
-    "updatedAt": "2026-07-17T22:44:49.775Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "etiquetar-alumno.json",
@@ -109,7 +93,7 @@
     "name": "etiquetar-alumno",
     "active": true,
     "nodeCount": 4,
-    "updatedAt": "2026-06-17T23:53:22.185Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "get-academia-config.json",
@@ -117,7 +101,7 @@
     "name": "get-academia-config",
     "active": true,
     "nodeCount": 4,
-    "updatedAt": "2026-07-05T00:58:54.992Z"
+    "updatedAt": "2026-11-04T23:17:38.450Z"
   },
   {
     "file": "get-alumno-by-id.json",
@@ -125,7 +109,7 @@
     "name": "get-alumno-by-id",
     "active": true,
     "nodeCount": 5,
-    "updatedAt": "2026-07-30T01:01:09.046Z"
+    "updatedAt": "2026-11-04T23:17:58.159Z"
   },
   {
     "file": "get-alumnos-list.json",
@@ -133,15 +117,7 @@
     "name": "get-alumnos-list",
     "active": true,
     "nodeCount": 5,
-    "updatedAt": "2026-07-03T17:55:09.018Z"
-  },
-  {
-    "file": "get-analisis-temporal__INACTIVE_jLq3oY.json",
-    "id": "jLq3oYFpaEpoWhdd",
-    "name": "get-analisis-temporal",
-    "active": false,
-    "nodeCount": 7,
-    "updatedAt": "2026-06-18T00:00:06.000Z"
+    "updatedAt": "2026-11-04T23:17:31.893Z"
   },
   {
     "file": "get-analisis-temporal.json",
@@ -149,7 +125,7 @@
     "name": "get-analisis-temporal",
     "active": true,
     "nodeCount": 7,
-    "updatedAt": "2026-06-23T01:59:02.934Z"
+    "updatedAt": "2026-11-04T23:18:04.716Z"
   },
   {
     "file": "get-conocimiento-agente.json",
@@ -157,15 +133,7 @@
     "name": "get-conocimiento-agente",
     "active": true,
     "nodeCount": 16,
-    "updatedAt": "2026-07-16T22:51:05.701Z"
-  },
-  {
-    "file": "get-conversation-logs__DUP_J83rBo.json",
-    "id": "J83rBo0zHt1CRfJi",
-    "name": "get-conversation-logs",
-    "active": true,
-    "nodeCount": 4,
-    "updatedAt": "2026-06-26T02:23:57.599Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "get-conversation-logs.json",
@@ -173,7 +141,15 @@
     "name": "get-conversation-logs",
     "active": true,
     "nodeCount": 4,
-    "updatedAt": "2026-06-26T02:24:40.766Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
+  },
+  {
+    "file": "get-conversation-logs__DUP_J83rBo.json",
+    "id": "J83rBo0zHt1CRfJi",
+    "name": "get-conversation-logs",
+    "active": true,
+    "nodeCount": 4,
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "get-conversion-funnel.json",
@@ -181,7 +157,7 @@
     "name": "get-conversion-funnel",
     "active": true,
     "nodeCount": 3,
-    "updatedAt": "2026-07-03T02:30:47.101Z"
+    "updatedAt": "2026-11-04T23:17:45.070Z"
   },
   {
     "file": "get-funnel-by-origin.json",
@@ -189,7 +165,7 @@
     "name": "get-funnel-by-origin",
     "active": true,
     "nodeCount": 3,
-    "updatedAt": "2026-07-03T01:15:19.275Z"
+    "updatedAt": "2026-11-04T23:20:49.594Z"
   },
   {
     "file": "get-horarios.json",
@@ -197,7 +173,7 @@
     "name": "get-horarios",
     "active": true,
     "nodeCount": 6,
-    "updatedAt": "2026-06-29T22:29:13.337Z"
+    "updatedAt": "2026-11-04T23:14:11.393Z"
   },
   {
     "file": "get-lead-by-id.json",
@@ -205,7 +181,7 @@
     "name": "get-lead-by-id",
     "active": true,
     "nodeCount": 4,
-    "updatedAt": "2026-06-24T01:13:24.773Z"
+    "updatedAt": "2026-11-04T23:18:11.440Z"
   },
   {
     "file": "get-leads-distribution.json",
@@ -213,7 +189,7 @@
     "name": "get-leads-distribution",
     "active": true,
     "nodeCount": 3,
-    "updatedAt": "2026-07-03T02:28:24.004Z"
+    "updatedAt": "2026-11-04T23:18:30.289Z"
   },
   {
     "file": "get-leads-list.json",
@@ -221,7 +197,7 @@
     "name": "get-leads-list",
     "active": true,
     "nodeCount": 5,
-    "updatedAt": "2026-06-29T21:07:50.356Z"
+    "updatedAt": "2026-11-04T23:17:18.529Z"
   },
   {
     "file": "get-leads-origin.json",
@@ -229,7 +205,7 @@
     "name": "get-leads-origin",
     "active": true,
     "nodeCount": 3,
-    "updatedAt": "2026-07-03T02:29:36.551Z"
+    "updatedAt": "2026-11-04T23:17:25.542Z"
   },
   {
     "file": "get-leads-pipeline.json",
@@ -237,7 +213,7 @@
     "name": "get-leads-pipeline",
     "active": true,
     "nodeCount": 6,
-    "updatedAt": "2026-06-23T01:31:56.635Z"
+    "updatedAt": "2026-11-04T23:18:36.622Z"
   },
   {
     "file": "get-pagos-pendientes.json",
@@ -245,7 +221,7 @@
     "name": "get-pagos-pendientes",
     "active": true,
     "nodeCount": 5,
-    "updatedAt": "2026-09-17T22:06:58.378Z"
+    "updatedAt": "2026-11-04T23:17:11.759Z"
   },
   {
     "file": "KPIs Dashboard.json",
@@ -253,15 +229,7 @@
     "name": "KPIs Dashboard",
     "active": true,
     "nodeCount": 3,
-    "updatedAt": "2026-07-03T01:14:10.315Z"
-  },
-  {
-    "file": "My workflow 2.json",
-    "id": "YvuQ9nnPpCtuGVGO",
-    "name": "My workflow 2",
-    "active": false,
-    "nodeCount": 5,
-    "updatedAt": "2026-07-29T22:18:43.000Z"
+    "updatedAt": "2026-11-04T23:18:43.234Z"
   },
   {
     "file": "My workflow.json",
@@ -269,7 +237,7 @@
     "name": "My workflow",
     "active": true,
     "nodeCount": 3,
-    "updatedAt": "2026-06-19T01:10:50.068Z"
+    "updatedAt": "2026-11-04T23:21:47.451Z"
   },
   {
     "file": "obtener-alumno-por-nombre.json",
@@ -277,15 +245,7 @@
     "name": "obtener-alumno-por-nombre",
     "active": true,
     "nodeCount": 6,
-    "updatedAt": "2026-09-11T23:28:32.975Z"
-  },
-  {
-    "file": "obtener-alumno-por-whatsapp__INACTIVE_yPaWPy.json",
-    "id": "yPaWPyYbu8o777M9",
-    "name": "obtener-alumno-por-whatsapp",
-    "active": false,
-    "nodeCount": 6,
-    "updatedAt": "2026-06-18T00:04:44.830Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "obtener-alumno-por-whatsapp.json",
@@ -293,7 +253,15 @@
     "name": "obtener-alumno-por-whatsapp",
     "active": true,
     "nodeCount": 4,
-    "updatedAt": "2026-07-17T20:10:03.770Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
+  },
+  {
+    "file": "obtener-alumno-por-whatsapp__INACTIVE_yPaWPy.json",
+    "id": "yPaWPyYbu8o777M9",
+    "name": "obtener-alumno-por-whatsapp",
+    "active": false,
+    "nodeCount": 6,
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "obtener-tutor-por-nombre.json",
@@ -301,7 +269,7 @@
     "name": "obtener-tutor-por-nombre",
     "active": true,
     "nodeCount": 6,
-    "updatedAt": "2026-09-11T23:29:44.292Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "procesar-comprobante-pago.json",
@@ -309,7 +277,7 @@
     "name": "procesar-comprobante-pago",
     "active": true,
     "nodeCount": 10,
-    "updatedAt": "2026-09-18T01:46:02.113Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "register-pago.json",
@@ -317,15 +285,7 @@
     "name": "register-pago",
     "active": true,
     "nodeCount": 6,
-    "updatedAt": "2026-07-29T23:10:01.772Z"
-  },
-  {
-    "file": "registrar_alumno.json",
-    "id": "7sqOI8QKnDuVkNVN",
-    "name": "registrar_alumno",
-    "active": true,
-    "nodeCount": 4,
-    "updatedAt": "2026-06-30T00:50:40.268Z"
+    "updatedAt": "2026-11-04T23:21:34.494Z"
   },
   {
     "file": "registrar-alumno-existente.json",
@@ -333,7 +293,7 @@
     "name": "registrar-alumno-existente",
     "active": false,
     "nodeCount": 6,
-    "updatedAt": "2026-09-12T00:42:32.304Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "registrar-derivacion-a-fla.json",
@@ -341,15 +301,7 @@
     "name": "registrar-derivacion-a-fla",
     "active": true,
     "nodeCount": 6,
-    "updatedAt": "2026-09-17T21:10:29.240Z"
-  },
-  {
-    "file": "registrar-pago__INACTIVE_b7K0ZX.json",
-    "id": "b7K0ZXAsKj6v8B0L",
-    "name": "registrar-pago",
-    "active": false,
-    "nodeCount": 5,
-    "updatedAt": "2026-06-18T00:06:57.943Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "registrar-pago.json",
@@ -357,7 +309,23 @@
     "name": "registrar-pago",
     "active": true,
     "nodeCount": 6,
-    "updatedAt": "2026-07-29T22:46:58.292Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
+  },
+  {
+    "file": "registrar-pago__INACTIVE_b7K0ZX.json",
+    "id": "b7K0ZXAsKj6v8B0L",
+    "name": "registrar-pago",
+    "active": false,
+    "nodeCount": 5,
+    "updatedAt": "2026-11-04T21:54:11.988Z"
+  },
+  {
+    "file": "registrar_alumno.json",
+    "id": "7sqOI8QKnDuVkNVN",
+    "name": "registrar_alumno",
+    "active": true,
+    "nodeCount": 4,
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "ultima-actividad-agente.json",
@@ -365,7 +333,7 @@
     "name": "ultima-actividad-agente",
     "active": true,
     "nodeCount": 5,
-    "updatedAt": "2026-07-18T00:04:34.219Z"
+    "updatedAt": "2026-11-04T23:20:38.775Z"
   },
   {
     "file": "update-academia-config.json",
@@ -373,7 +341,7 @@
     "name": "update-academia-config",
     "active": true,
     "nodeCount": 7,
-    "updatedAt": "2026-07-06T21:02:03.420Z"
+    "updatedAt": "2026-11-04T23:21:22.563Z"
   },
   {
     "file": "update-alumno.json",
@@ -381,7 +349,7 @@
     "name": "update-alumno",
     "active": true,
     "nodeCount": 6,
-    "updatedAt": "2026-06-22T22:06:21.095Z"
+    "updatedAt": "2026-11-04T23:22:10.979Z"
   },
   {
     "file": "update-cupo-horario.json",
@@ -389,7 +357,7 @@
     "name": "update-cupo-horario",
     "active": true,
     "nodeCount": 5,
-    "updatedAt": "2026-06-18T00:08:24.609Z"
+    "updatedAt": "2026-11-04T23:21:16.556Z"
   },
   {
     "file": "update-horario.json",
@@ -397,7 +365,7 @@
     "name": "update-horario",
     "active": true,
     "nodeCount": 5,
-    "updatedAt": "2026-06-18T00:08:59.703Z"
+    "updatedAt": "2026-11-04T23:21:53.037Z"
   },
   {
     "file": "update-lead.json",
@@ -405,7 +373,7 @@
     "name": "update-lead",
     "active": true,
     "nodeCount": 4,
-    "updatedAt": "2026-07-18T23:05:55.608Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "validar-comprobante-pago.json",
@@ -413,7 +381,7 @@
     "name": "validar-comprobante-pago",
     "active": false,
     "nodeCount": 16,
-    "updatedAt": "2026-06-18T00:09:24.023Z"
+    "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
     "file": "verificar-pago.json",
@@ -421,6 +389,6 @@
     "name": "verificar-pago",
     "active": true,
     "nodeCount": 6,
-    "updatedAt": "2026-09-17T22:15:10.577Z"
+    "updatedAt": "2026-11-04T23:22:04.952Z"
   }
 ]

@@ -2,7 +2,7 @@
   "n8n_id": "vlU8BuUi4QMWoomm",
   "n8n_name": "convertir-lead-a-alumno",
   "active": true,
-  "updatedAt": "2026-09-17T20:06:34.378Z",
+  "updatedAt": "2026-11-04T21:54:11.988Z",
   "nodes": [
     {
       "parameters": {
@@ -228,7 +228,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

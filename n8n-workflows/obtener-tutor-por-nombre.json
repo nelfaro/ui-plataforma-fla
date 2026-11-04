@@ -2,7 +2,7 @@
   "n8n_id": "p0solkr2eWizz9fw",
   "n8n_name": "obtener-tutor-por-nombre",
   "active": true,
-  "updatedAt": "2026-09-11T23:29:44.292Z",
+  "updatedAt": "2026-11-04T21:54:11.988Z",
   "nodes": [
     {
       "parameters": {
@@ -140,7 +140,7 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "binaryMode": "separate",
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
