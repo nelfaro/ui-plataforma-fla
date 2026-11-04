@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import * as authService from '../services/auth';
 import { MESSAGES } from '../config/constants';
 
@@ -6,6 +6,15 @@ export const useAuth = () => {
   const [user, setUser] = useState(authService.getCurrentUser());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Al cargar la app se confirma con el servidor que la sesión siga vigente
+  useEffect(() => {
+    let activo = true;
+    authService.checkSession().then((u) => {
+      if (activo) setUser(u);
+    });
+    return () => { activo = false; };
+  }, []);
 
   const login = useCallback(async (usuario, password) => {
     setLoading(true);
@@ -15,7 +24,7 @@ export const useAuth = () => {
       setUser(data.user || { usuario });
       return { success: true, message: MESSAGES.SUCCESS_LOGIN };
     } catch (err) {
-      const message = err.response?.data?.mensaje || MESSAGES.ERROR_LOGIN;
+      const message = err.response?.data?.error || MESSAGES.ERROR_LOGIN;
       setError(message);
       return { success: false, message };
     } finally {
@@ -24,14 +33,15 @@ export const useAuth = () => {
   }, []);
 
   const logout = useCallback(() => {
-    authService.logoutUser();
-    setUser(null);
-    setError(null);
-    // Fuerza reload de la página
-    window.location.href = '/login';
+    authService.logoutUser().finally(() => {
+      setUser(null);
+      setError(null);
+      // Fuerza reload de la página
+      window.location.href = '/login';
+    });
   }, []);
 
-  const isAuthenticated = !!user && !!authService.getToken();
+  const isAuthenticated = !!user;
 
   return {
     user,

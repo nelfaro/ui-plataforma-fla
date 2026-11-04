@@ -2,11 +2,9 @@ import axios from 'axios';
 
 // Usar proxy local de Easypanel (evita CORS)
 const API_BASE_URL = '/api/webhook';
-const API_KEY = import.meta.env.VITE_API_KEY || '';
 
 const axiosInstance = axios.create({
   headers: {
-    'x-api-key': API_KEY,
     'Content-Type': 'application/json'
   }
 });
