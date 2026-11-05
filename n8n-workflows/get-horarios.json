@@ -2,7 +2,7 @@
   "n8n_id": "4crS0mDaqGsMweMi",
   "n8n_name": "get-horarios",
   "active": true,
-  "updatedAt": "2026-11-04T23:14:11.393Z",
+  "updatedAt": "2026-11-05T00:23:59.222Z",
   "nodes": [
     {
       "parameters": {
@@ -24,7 +24,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst { categoria } = input;\n\nlet query = `SELECT id, nombre, tipo, nivel, categoria, dia_1, dia_2, \n       hora_inicio, hora_fin, cupo_max, cupo_actual, precio_mensual, \n       descripcion, activo, created_at, updated_at\nFROM horarios\nWHERE activo = TRUE`;\n\n// Agregar filtro por categoría si se proporciona\nif (categoria) {\n  query += ` AND categoria = '${categoria}'`;\n}\n\nquery += ` ORDER BY nombre ASC;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];\n"
+        "jsCode": "const input = $input.first().json;\nconst raw = input.categoria ? String(input.categoria).trim().toUpperCase() : '';\nconst cat = raw === 'ADULTOS' ? 'ADULTO' : raw;\nconst VALIDAS = ['KIDS', 'ADULTO', 'ADOLESCENTE', 'PERSONALIZADO', 'AU_PAIR'];\n\nlet query = `SELECT id, nombre, tipo, nivel, categoria, dia_1, dia_2,\n       hora_inicio, hora_fin, cupo_max, cupo_actual, precio_mensual,\n       descripcion, activo, created_at, updated_at\nFROM horarios\nWHERE activo = TRUE`;\n\nif (cat && VALIDAS.includes(cat)) {\n  query += ` AND categoria = '${cat}'`;\n} else if (cat) {\n  query += ` AND false`; // categoría desconocida: sin resultados (evita inyección)\n}\n\nquery += ` ORDER BY nombre ASC;`;\n\nreturn [{ json: { query, categoria: cat } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -37,7 +37,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const horarios = $('obtener horarios').all().map(row => {\n  const h = row.json;\n  return {\n    ...h,\n    ocupacion_porcentaje: Math.round((h.cupo_actual / h.cupo_max) * 100),\n    cupos_libres: h.cupo_max - h.cupo_actual\n  };\n});\n\nreturn [{\n  json: {\n    success: true,\n    items: horarios\n  }\n}];"
+        "jsCode": "const cat = $('arma query').first().json.categoria || '';\nconst rows = $('obtener horarios').all()\n  .map((row) => row.json)\n  .filter((h) => h && h.id !== undefined && h.id !== null);\n\nconst horarios = rows.map((h) => ({\n  ...h,\n  ocupacion_porcentaje: h.cupo_max ? Math.round((h.cupo_actual / h.cupo_max) * 100) : null,\n  cupos_libres: h.cupo_max !== null && h.cupo_max !== undefined ? h.cupo_max - h.cupo_actual : null\n}));\n\nlet nota = '';\nif (horarios.length === 0) {\n  if (cat === 'PERSONALIZADO' || cat === 'AU_PAIR') {\n    nota = 'Las clases personalizadas y de Au Pair no tienen grilla fija: los días y horarios se coordinan a medida con Fla. NO confirmes días ni horas ni reserves nada; pedile su disponibilidad y avisale a Fla con solicitar-contacto-fla.';\n  } else {\n    nota = 'No hay horarios publicados para esta categoría por ahora. NO inventes horarios; pedile su disponibilidad y avisale a Fla con solicitar-contacto-fla.';\n  }\n} else {\n  nota = 'Ofrecé SOLO estos horarios. No confirmes ni inventes ningún otro día u hora, y no digas que reservaste: el lugar se asegura recién con el pago.';\n}\n\nreturn [{ json: { success: true, total: horarios.length, items: horarios, nota } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -99,6 +99,7 @@
       ],
       "id": "eb60af4e-3d94-4da6-807c-99e674208bab",
       "name": "obtener horarios",
+      "alwaysOutputData": true,
       "credentials": {
         "postgres": {
           "id": "wPNcwJLWeQKZlTmC",

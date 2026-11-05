@@ -28,8 +28,8 @@
     "id": "LbIjKIvn5Uqfyxa0",
     "name": "Cerebro v2",
     "active": true,
-    "nodeCount": 55,
-    "updatedAt": "2026-11-04T21:54:11.988Z"
+    "nodeCount": 56,
+    "updatedAt": "2026-11-05T00:35:52.558Z"
   },
   {
     "file": "conocimiento-get.json",
@@ -69,7 +69,7 @@
     "name": "create-lead",
     "active": true,
     "nodeCount": 5,
-    "updatedAt": "2026-11-04T21:54:11.988Z"
+    "updatedAt": "2026-11-05T00:22:53.957Z"
   },
   {
     "file": "delete-horario.json",
@@ -133,7 +133,7 @@
     "name": "get-conocimiento-agente",
     "active": true,
     "nodeCount": 16,
-    "updatedAt": "2026-11-04T21:54:11.988Z"
+    "updatedAt": "2026-11-05T00:32:09.124Z"
   },
   {
     "file": "get-conversation-logs.json",
@@ -173,7 +173,7 @@
     "name": "get-horarios",
     "active": true,
     "nodeCount": 6,
-    "updatedAt": "2026-11-04T23:14:11.393Z"
+    "updatedAt": "2026-11-05T00:23:59.222Z"
   },
   {
     "file": "get-lead-by-id.json",
@@ -328,6 +328,14 @@
     "updatedAt": "2026-11-04T21:54:11.988Z"
   },
   {
+    "file": "solicitar-contacto-fla.json",
+    "id": "1cZjlw0DWC0MSaoF",
+    "name": "solicitar-contacto-fla",
+    "active": true,
+    "nodeCount": 6,
+    "updatedAt": "2026-11-05T00:26:03.423Z"
+  },
+  {
     "file": "ultima-actividad-agente.json",
     "id": "s2cVCHjS8E4eYr3G",
     "name": "ultima-actividad-agente",
@@ -373,7 +381,7 @@
     "name": "update-lead",
     "active": true,
     "nodeCount": 4,
-    "updatedAt": "2026-11-04T21:54:11.988Z"
+    "updatedAt": "2026-11-05T00:23:22.036Z"
   },
   {
     "file": "validar-comprobante-pago.json",

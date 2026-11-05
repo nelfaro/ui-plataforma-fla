@@ -1,0 +1,172 @@
+{
+  "n8n_id": "1cZjlw0DWC0MSaoF",
+  "n8n_name": "solicitar-contacto-fla",
+  "active": true,
+  "updatedAt": "2026-11-05T00:26:03.423Z",
+  "nodes": [
+    {
+      "id": "708f5c7e-3ca4-4304-b9cb-0bdd5cd26c88",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "whatsapp"
+            },
+            {
+              "name": "nombre"
+            },
+            {
+              "name": "motivo"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "626d167d-3fcf-4480-9230-e6205eaf915b",
+      "name": "Armar consulta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const i = $input.first().json;\nconst esc = (v) => String(v ?? '').replace(/'/g, \"''\");\nconst wa = String(i.whatsapp || '').replace(/[^0-9A-Za-z+@._-]/g, '');\nconst motivo = String(i.motivo || 'Sin motivo indicado').trim().slice(0, 500);\nconst nombre = String(i.nombre || '').trim();\n\nconst query = `WITH upd AS (\n  UPDATE leads SET\n    notas = COALESCE(notas || chr(10), '') || '[Pidió contacto con Fla ' || to_char(NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires', 'DD/MM HH24:MI') || '] ${esc(motivo)}',\n    ultimo_contacto = CURRENT_TIMESTAMP,\n    updated_at = CURRENT_TIMESTAMP\n  WHERE whatsapp = '${esc(wa)}'\n  RETURNING id, nombre, lead_tipo, estado\n)\nSELECT\n  (SELECT valor FROM academia_config WHERE clave = 'telegram_chat_id_avisos') AS chat_id,\n  (SELECT id FROM upd) AS lead_id,\n  (SELECT nombre FROM upd) AS lead_nombre,\n  (SELECT lead_tipo FROM upd) AS lead_tipo,\n  (SELECT estado FROM upd) AS lead_estado;`;\n\nreturn [{ json: { query, whatsapp: wa, motivo, nombre } }];\n"
+      }
+    },
+    {
+      "id": "c745f6a8-62e3-4844-b386-cf5dee914a58",
+      "name": "Registrar en lead",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "resource": "database",
+        "operation": "executeQuery",
+        "query": "={{ $json.query }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "53cb2bca-0930-4271-ad88-11aa51ae16d6",
+      "name": "Armar mensaje",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst base = $('Armar consulta').first().json;\nconst h = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n\nconst nombre = r.lead_nombre || base.nombre || 'Sin nombre';\nconst lineas = ['🔔 <b>Un lead necesita a Fla</b>', '', `👤 ${h(nombre)}`, `📱 ${h(base.whatsapp)}`];\nif (r.lead_tipo) lineas.push(`🏷️ ${h(r.lead_tipo)}${r.lead_estado ? ' · ' + h(r.lead_estado) : ''}`);\nlineas.push('', `💬 ${h(base.motivo)}`);\n\nreturn [{ json: { chat_id: r.chat_id, texto: lineas.join('\\n'), lead_id: r.lead_id } }];\n"
+      }
+    },
+    {
+      "id": "44e31ade-6f44-4099-bccb-630288ed565f",
+      "name": "Avisar a Fla",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        896,
+        0
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $json.chat_id }}",
+        "text": "={{ $json.texto }}",
+        "additionalFields": {
+          "parse_mode": "HTML",
+          "appendAttribution": false
+        }
+      },
+      "onError": "continueRegularOutput",
+      "webhookId": "de3cfd54-cf75-4699-bd90-c8e5de08ad35"
+    },
+    {
+      "id": "a1f2ee15-f8e4-4617-b852-e59d481f4ab1",
+      "name": "Respuesta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nif (!r || r.error || r.ok === false) {\n  return [{ json: { success: false, message: 'No se pudo avisar a Fla en este momento. Decile a la persona que Fla la va a contactar apenas pueda, sin dar una hora.' } }];\n}\nreturn [{ json: { success: true, message: 'Fla ya fue avisada por Telegram. Podés decirle a la persona que Fla la contacta en cuanto pueda (sin prometer hora ni medio).' } }];\n"
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Armar consulta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armar consulta": {
+      "main": [
+        [
+          {
+            "node": "Registrar en lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar en lead": {
+      "main": [
+        [
+          {
+            "node": "Armar mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armar mensaje": {
+      "main": [
+        [
+          {
+            "node": "Avisar a Fla",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avisar a Fla": {
+      "main": [
+        [
+          {
+            "node": "Respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "pinData": {}
+}
