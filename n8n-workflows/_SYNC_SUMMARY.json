@@ -380,8 +380,8 @@
     "id": "FjVuLaSNlsdGxhOo",
     "name": "update-lead",
     "active": true,
-    "nodeCount": 7,
-    "updatedAt": "2026-11-09T14:06:28.847Z"
+    "nodeCount": 4,
+    "updatedAt": "2026-11-09T14:28:50.984Z"
   },
   {
     "file": "validar-comprobante-pago.json",
