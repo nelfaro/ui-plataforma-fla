@@ -2,13 +2,14 @@
   "n8n_id": "48EtLxbiQQGE4Snd",
   "n8n_name": "get-pagos-pendientes",
   "active": true,
-  "updatedAt": "2026-09-17T22:06:58.378Z",
+  "updatedAt": "2026-11-04T23:17:11.759Z",
   "nodes": [
     {
       "parameters": {
         "path": "get-pagos-pendientes",
         "responseMode": "lastNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -137,7 +138,8 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "availableInMCP": true
   },
   "pinData": {}
 }

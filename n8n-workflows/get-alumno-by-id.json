@@ -2,14 +2,15 @@
   "n8n_id": "TarOZNsZZ4q1KlbF",
   "n8n_name": "get-alumno-by-id",
   "active": true,
-  "updatedAt": "2026-09-18T02:01:28.561Z",
+  "updatedAt": "2026-11-04T23:17:58.159Z",
   "nodes": [
     {
       "parameters": {
         "path": "get-alumno-by-id",
         "responseMode": "lastNode",
         "responseData": "allEntries",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -158,7 +159,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

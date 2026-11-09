@@ -2,7 +2,7 @@
   "n8n_id": "b7K0ZXAsKj6v8B0L",
   "n8n_name": "registrar-pago",
   "active": false,
-  "updatedAt": "2026-06-18T00:06:57.943Z",
+  "updatedAt": "2026-11-04T21:54:11.988Z",
   "nodes": [
     {
       "parameters": {
@@ -156,7 +156,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false
+    "availableInMCP": true
   },
   "pinData": {}
 }

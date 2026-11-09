@@ -2,7 +2,7 @@
   "n8n_id": "4crS0mDaqGsMweMi",
   "n8n_name": "get-horarios",
   "active": true,
-  "updatedAt": "2026-06-29T22:29:13.337Z",
+  "updatedAt": "2026-11-09T13:08:55.881Z",
   "nodes": [
     {
       "parameters": {
@@ -24,7 +24,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst { categoria } = input;\n\nlet query = `SELECT id, nombre, tipo, nivel, categoria, dia_1, dia_2, \n       hora_inicio, hora_fin, cupo_max, cupo_actual, precio_mensual, \n       descripcion, activo, created_at, updated_at\nFROM horarios\nWHERE activo = TRUE`;\n\n// Agregar filtro por categoría si se proporciona\nif (categoria) {\n  query += ` AND categoria = '${categoria}'`;\n}\n\nquery += ` ORDER BY nombre ASC;`;\n\nreturn [{\n  json: {\n    query\n  }\n}];\n"
+        "jsCode": "const input = $input.first().json;\nconst raw = input.categoria ? String(input.categoria).trim().toUpperCase() : '';\nconst cat = raw === 'ADULTOS' ? 'ADULTO' : raw;\nconst VALIDAS = ['KIDS', 'ADULTO', 'ADOLESCENTE', 'PERSONALIZADO', 'AU_PAIR'];\n\nlet query = `SELECT id, nombre, tipo, nivel, categoria, dia_1, dia_2,\n       hora_inicio, hora_fin, cupo_max, cupo_actual, precio_mensual,\n       descripcion, activo, created_at, updated_at\nFROM horarios\nWHERE activo = TRUE`;\n\nif (cat && VALIDAS.includes(cat)) {\n  query += ` AND categoria = '${cat}'`;\n} else if (cat) {\n  query += ` AND false`; // categoría desconocida: sin resultados (evita inyección)\n}\n\nquery += ` ORDER BY nombre ASC;`;\n\nreturn [{ json: { query, categoria: cat } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -37,7 +37,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const horarios = $('obtener horarios').all().map(row => {\n  const h = row.json;\n  return {\n    ...h,\n    ocupacion_porcentaje: Math.round((h.cupo_actual / h.cupo_max) * 100),\n    cupos_libres: h.cupo_max - h.cupo_actual\n  };\n});\n\nreturn [{\n  json: {\n    success: true,\n    items: horarios\n  }\n}];"
+        "jsCode": "const cat = $('arma query').first().json.categoria || '';\nconst rows = $('obtener horarios').all()\n  .map((row) => row.json)\n  .filter((h) => h && h.id !== undefined && h.id !== null);\n\nconst horarios = rows.map((h) => ({\n  ...h,\n  ocupacion_porcentaje: h.cupo_max ? Math.round((h.cupo_actual / h.cupo_max) * 100) : null,\n  cupos_libres: h.cupo_max !== null && h.cupo_max !== undefined ? h.cupo_max - h.cupo_actual : null\n}));\n\nconst compacto = (h) => ({\n  nombre: h.nombre, categoria: h.categoria, tipo: h.tipo, nivel: h.nivel,\n  dia_1: h.dia_1, dia_2: h.dia_2, hora_inicio: h.hora_inicio, hora_fin: h.hora_fin,\n  cupos_libres: h.cupos_libres\n});\nconst disponibles = horarios.filter((h) => h.cupos_libres === null || h.cupos_libres > 0).map(compacto);\nconst completos = horarios.filter((h) => h.cupos_libres !== null && h.cupos_libres <= 0).map(compacto);\n\nlet nota = '';\nif (horarios.length === 0) {\n  if (cat === 'PERSONALIZADO' || cat === 'AU_PAIR') {\n    nota = 'Las clases personalizadas y de Au Pair no tienen grilla fija: los días y horarios se coordinan a medida con Fla. NO confirmes días ni horas ni reserves nada; pedile su disponibilidad y avisale a Fla con solicitar-contacto-fla.';\n  } else {\n    nota = 'No hay horarios abiertos para esta categoría por ahora (los horarios se abren según la demanda). NO inventes horarios; pedile su disponibilidad y avisale a Fla con solicitar-contacto-fla.';\n  }\n} else if (disponibles.length === 0) {\n  nota = 'Los horarios abiertos de esta categoría están todos completos. NO ofrezcas ninguno ni anotes a nadie: avisale a Fla con solicitar-contacto-fla (ella maneja la lista de espera).';\n} else {\n  nota = 'Ofrecé SOLO los de \"disponibles\" (tienen cupos libres), con sus días y horas exactos.' +\n    (completos.length ? ' Los de \"completos\" NO los ofrezcas.' : '') +\n    ' No confirmes ni inventes ningún otro día u hora, y no digas que reservaste: el lugar queda definitivamente reservado recién cuando se realiza el pago. Los horarios se abren según la demanda: si ninguno le sirve, avisale a Fla con solicitar-contacto-fla.';\n}\n\nreturn [{ json: { success: true, total: horarios.length, disponibles, completos, items: horarios, nota } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -53,7 +53,8 @@
         "path": "get-horarios",
         "responseMode": "lastNode",
         "responseData": "allEntries",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -98,6 +99,7 @@
       ],
       "id": "eb60af4e-3d94-4da6-807c-99e674208bab",
       "name": "obtener horarios",
+      "alwaysOutputData": true,
       "credentials": {
         "postgres": {
           "id": "wPNcwJLWeQKZlTmC",
@@ -155,7 +157,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

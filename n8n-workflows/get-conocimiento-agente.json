@@ -2,7 +2,7 @@
   "n8n_id": "pqhCzVlVrwCO6kH6",
   "n8n_name": "get-conocimiento-agente",
   "active": true,
-  "updatedAt": "2026-07-16T22:51:05.701Z",
+  "updatedAt": "2026-11-09T13:12:32.501Z",
   "nodes": [
     {
       "parameters": {
@@ -57,13 +57,13 @@
         624,
         -304
       ],
+      "disabled": true,
       "credentials": {
         "postgres": {
           "id": "wPNcwJLWeQKZlTmC",
           "name": "Postgres account"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -125,13 +125,13 @@
         1024,
         -304
       ],
+      "disabled": true,
       "credentials": {
         "openAiApi": {
           "id": "bznJ7tqJGM25Nv9r",
           "name": "OpenAI account"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -149,7 +149,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const { segmentos } = $input.first().json;\nconst segmentosStr = segmentos.map(s => `'${s}'`).join(',');\n\nconst query = `SELECT id, categoria, segmento, titulo, contenido, activo FROM conocimiento_academia WHERE segmento IN (${segmentosStr}) AND activo = true ORDER BY categoria, segmento, titulo LIMIT 20`;\n\nreturn [{ json: { query, type: 'conocimiento' } }];"
+        "jsCode": "const { segmentos } = $input.first().json;\nconst segmentosStr = segmentos.map((s) => `'${String(s).replace(/'/g, \"''\")}'`).join(',');\n\nconst query = `SELECT id, categoria, segmento, titulo, contenido, activo FROM conocimiento_academia WHERE segmento IN (${segmentosStr}) AND activo = true ORDER BY segmento, categoria, titulo LIMIT 100`;\n\nreturn [{ json: { query, type: 'conocimiento' } }];\n"
       },
       "id": "91c99830-d220-4b2c-b5ae-c673a5df04fd",
       "name": "Build Query - Conocimiento",
@@ -217,7 +217,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const { pregunta, lead_tipo } = $input.first().json;\n\n// Mapa de lead_tipo -> segmentos reales en conocimiento_academia.\n// Se aceptan variantes singular/plural porque el modelo puede mandar\n// 'ADULTO' o 'ADULTOS' indistintamente (no hay enum forzado en el tool call).\nconst segmentosMap = {\n  KIDS: ['KIDS', 'GENERAL'],\n  ADOLESCENTE: ['KIDS', 'ADULTOS', 'GENERAL'],\n  ADULTO: ['ADULTOS', 'GENERAL'],\n  ADULTOS: ['ADULTOS', 'GENERAL'],\n  PERSONALIZADO: ['PERSONALIZADO', 'GENERAL'],\n  AU_PAIR: ['AU_PAIR', 'GENERAL'],\n  GENERAL: ['GENERAL']\n};\n\n// Fallback amplio: si el lead_tipo viene vacío o no coincide con ninguna\n// clave conocida (por ejemplo, en el primer mensaje de una charla nueva,\n// antes de determinar el segmento), buscamos en TODOS los segmentos en\n// vez de devolver un resultado vacío.\nconst TODOS_LOS_SEGMENTOS = ['KIDS', 'ADULTOS', 'PERSONALIZADO', 'AU_PAIR', 'GENERAL'];\n\nconst ltNormalizado = (lead_tipo || '').toString().trim().toUpperCase();\nconst segmentos = segmentosMap[ltNormalizado] || TODOS_LOS_SEGMENTOS;\n\nreturn [{\n  json: {\n    pregunta: pregunta || 'información general',\n    lead_tipo: lead_tipo || 'GENERAL',\n    segmentos\n  }\n}];"
+        "jsCode": "const { pregunta, lead_tipo } = $input.first().json;\n\n// lead_tipo -> segmentos de conocimiento_academia. Acepta singular/plural.\nconst segmentosMap = {\n  KIDS: ['KIDS', 'GENERAL'],\n  ADOLESCENTE: ['KIDS', 'ADULTOS', 'GENERAL'],\n  'KIDS-ADOLESCENTES': ['KIDS', 'ADULTOS', 'GENERAL'],\n  ADULTO: ['ADULTOS', 'PERSONALIZADO', 'GENERAL'],\n  ADULTOS: ['ADULTOS', 'PERSONALIZADO', 'GENERAL'],\n  PERSONALIZADO: ['PERSONALIZADO', 'GENERAL'],\n  // Las clases de Au Pair son clases comunes: usan los precios de adultos / personalizadas\n  AU_PAIR: ['AU_PAIR', 'ADULTOS', 'PERSONALIZADO', 'GENERAL'],\n  GENERAL: ['GENERAL']\n};\n\n// Si lead_tipo viene vacío o desconocido, se busca en TODOS los segmentos.\nconst TODOS = ['KIDS', 'ADULTOS', 'PERSONALIZADO', 'AU_PAIR', 'GENERAL'];\n\nconst lt = (lead_tipo || '').toString().trim().toUpperCase();\nconst segmentos = segmentosMap[lt] || TODOS;\n\nreturn [{\n  json: {\n    pregunta: pregunta || 'información general',\n    lead_tipo: lead_tipo || 'GENERAL',\n    segmentos\n  }\n}];\n"
       },
       "id": "3f62f494-34d7-4dea-b1c9-e99961038ee0",
       "name": "Mapear Segmentos",
@@ -241,7 +241,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nconst normData = $('Mapear Segmentos').first().json;\n\nlet conocimientoContexto = '';\nlet configContexto = '';\n\nitems.forEach(item => {\n  const data = item.json;\n\n  // El campo 'type' que se arma en \"Build Query\" no sobrevive al paso por\n  // el nodo Postgres (reemplaza el json del item por las columnas de la\n  // fila devuelta). Por eso distinguimos por la FORMA de los datos, no\n  // por 'type':\n  const esConocimiento = data.categoria !== undefined && data.contenido !== undefined;\n  const esConfig = data.clave !== undefined && data.valor !== undefined;\n\n  if (esConocimiento) {\n    conocimientoContexto += `**${data.categoria}**\\n${data.titulo}\\n${data.contenido}\\n\\n`;\n  } else if (esConfig) {\n    configContexto += `${data.clave}: ${data.valor}\\n`;\n  }\n});\n\nlet contextoTotal = '';\n\nif (conocimientoContexto.trim()) {\n  contextoTotal += 'INFORMACIÓN SOBRE CLASES:\\n' + conocimientoContexto;\n}\n\nif (configContexto.trim()) {\n  contextoTotal += '\\nINFORMACIÓN DE CONTACTO Y CONFIGURACIÓN:\\n' + configContexto;\n}\n\nconst tieneContenido = contextoTotal.trim().length > 0;\n\nreturn [{\n  json: {\n    contexto_encontrado: tieneContenido,\n    contexto: tieneContenido ? contextoTotal.trim() : 'Sin información disponible.',\n    pregunta: normData.pregunta,\n    lead_tipo: normData.lead_tipo\n  }\n}];"
+        "jsCode": "const items = $input.all();\nconst normData = $('Mapear Segmentos').first().json;\n\nconst lt = String(normData.lead_tipo || '').toUpperCase();\nconst esKids = ['KIDS', 'ADOLESCENTE', 'KIDS-ADOLESCENTES'].includes(lt);\nconst esAdulto = ['ADULTO', 'ADULTOS', 'PERSONALIZADO', 'AU_PAIR'].includes(lt);\n// Cada segmento recibe solo SU link (evita mandar el de niños a un adulto)\nconst omitir = (clave) =>\n  (esAdulto && ['link_propuesta_kids', 'instagram_kids', 'web_kids'].includes(clave)) ||\n  (esKids && clave === 'link_propuesta_adultos');\n\nlet conocimiento = '';\nlet config = '';\n\nitems.forEach((item) => {\n  const data = item.json;\n  // Se distingue por la forma de los datos (el Postgres reemplaza el json del item)\n  const esConocimiento = data.categoria !== undefined && data.contenido !== undefined;\n  const esConfig = data.clave !== undefined && data.valor !== undefined;\n\n  if (esConocimiento) {\n    conocimiento += `- [${data.segmento} / ${data.categoria}] ${String(data.titulo || '').trim()}: ${String(data.contenido || '').trim()}\\n`;\n  } else if (esConfig) {\n    if (!omitir(data.clave)) config += `- ${data.clave}: ${data.valor}\\n`;\n  }\n});\n\nlet contexto = '';\nif (conocimiento.trim()) contexto += 'INFORMACIÓN DE LA ACADEMIA (base de conocimiento):\\n' + conocimiento;\nif (config.trim()) contexto += '\\nCONFIGURACIÓN (dirección, datos de pago y operativos):\\n' + config;\n\nreturn [{\n  json: {\n    contexto_encontrado: contexto.trim().length > 0,\n    contexto: contexto.trim() || 'Sin información disponible.',\n    pregunta: normData.pregunta,\n    lead_tipo: normData.lead_tipo\n  }\n}];\n"
       },
       "id": "2014b716-a85d-44ac-96d5-c5a75ed2aa48",
       "name": "Procesar Contextos",
@@ -293,7 +293,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const synth = $input.first().json;\nconst procData = $('Procesar Contextos').first().json;\n\nlet respuesta = 'Esa información todavía no la tengo. Voy a consultarlo con la profe Fla y te paso la info.';\nif (synth?.choices?.[0]?.message?.content) {\n  respuesta = synth.choices[0].message.content.trim();\n}\n\nreturn [{\n  json: {\n    resultado: respuesta,\n    confianza: procData.contexto_encontrado ? 'ALTA' : 'BAJA'\n  }\n}];"
+        "jsCode": "const p = $('Procesar Contextos').first().json;\n\nif (!p.contexto_encontrado) {\n  return [{ json: {\n    resultado: 'No hay información cargada para esta consulta. NO inventes nada: decile que lo consultás con Fla y avisale con solicitar-contacto-fla.',\n    confianza: 'BAJA'\n  } }];\n}\n\nconst instruccion = [\n  'Usá SOLO los DATOS OFICIALES de abajo para responder lo que preguntó la persona. NO los vuelques todos juntos: elegí lo que corresponde a su pregunta.',\n  'Si el dato que piden no figura, NO lo inventes ni lo completes con suposiciones: decí que lo consultás con Fla y llamá a solicitar-contacto-fla.',\n  'Precio: informá el valor de SU caso (grupal, personalizado, hermanos) con una línea de detalle. Hermanos: hacé la cuenta a la vista (cuota x cantidad, menos 10%, total final) con los valores de abajo. Escribí los montos con punto de miles, tal cual figuran.',\n  'Propuesta: mandá el link que corresponde (link_propuesta_kids para niños, link_propuesta_adultos para adultos) con el texto estándar de Fla.',\n  'Datos de pago: SOLO si preguntó cómo pagar o ya decidió inscribirse, y siempre junto con el monto de su caso. PRIMERO los de Mercado Pago (pago_mp_*); solo si no puede pagar por Mercado Pago, los del banco (pago_banco, pago_titular, pago_alias, pago_cbu). Ubicación: solo si preguntó dónde queda.',\n  'Hablá con la voz de Fla: mensajes cortos, sin negritas ni viñetas con guiones, casi sin emojis y sin cerrar con \"estoy acá para ayudarte\".',\n  'Links: pegá la URL sola, sin formato [texto](url). Usá únicamente el link de propuesta que figura abajo.',\n  'Si es el primer mensaje de la conversación, empezá presentándote: \"Hola! Soy Lucia, la asistente de Fla 💛\".',\n  'Nunca dejes textos entre corchetes sin completar.'\n].join('\\n');\n\nreturn [{ json: {\n  resultado: `${instruccion}\\n\\nPREGUNTA DEL CLIENTE: ${p.pregunta}\\n\\nDATOS OFICIALES:\\n${p.contexto}`,\n  confianza: 'ALTA'\n} }];\n"
       },
       "id": "a5ae67ea-cbb8-4991-8b7b-89625fd216de",
       "name": "Retornar al Agente",
@@ -443,18 +443,18 @@
         ]
       ]
     },
-    "Procesar Contextos": {
+    "Sintetizar con OpenAI": {
       "main": [
         [
           {
-            "node": "Sintetizar con OpenAI",
+            "node": "Retornar al Agente",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Sintetizar con OpenAI": {
+    "Procesar Contextos": {
       "main": [
         [
           {
@@ -469,7 +469,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

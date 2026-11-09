@@ -2,14 +2,15 @@
   "n8n_id": "DrwgkVFQvCQQ1iff",
   "n8n_name": "update-academia-config",
   "active": true,
-  "updatedAt": "2026-07-06T21:02:03.420Z",
+  "updatedAt": "2026-11-04T23:21:22.563Z",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "update-academia-config",
         "responseMode": "responseNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "id": "6c328a08-0367-4b4b-99a1-044d2329c7e9",
       "name": "Webhook",
@@ -193,7 +194,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

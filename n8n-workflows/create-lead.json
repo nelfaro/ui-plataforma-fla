@@ -2,7 +2,7 @@
   "n8n_id": "PX0V4YmHX0prZUZ7",
   "n8n_name": "create-lead",
   "active": true,
-  "updatedAt": "2026-07-18T14:13:12.055Z",
+  "updatedAt": "2026-11-05T00:22:53.957Z",
   "nodes": [
     {
       "parameters": {
@@ -30,6 +30,45 @@
             },
             {
               "name": "nombre"
+            },
+            {
+              "name": "nombre_perfil"
+            },
+            {
+              "name": "apellido"
+            },
+            {
+              "name": "email"
+            },
+            {
+              "name": "telefono"
+            },
+            {
+              "name": "lead_tipo"
+            },
+            {
+              "name": "categoria"
+            },
+            {
+              "name": "origen"
+            },
+            {
+              "name": "nivel"
+            },
+            {
+              "name": "objetivo"
+            },
+            {
+              "name": "resumen"
+            },
+            {
+              "name": "disponibilidad"
+            },
+            {
+              "name": "tags"
+            },
+            {
+              "name": "person_identifier"
             }
           ]
         }
@@ -45,7 +84,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst body = input.body || input;\nconst { nombre, apellido, whatsapp, email, telefono, lead_tipo, origen, categoria, nivel, objetivo, resumen, disponibilidad, tags, primer_contacto, person_identifier } = body;\n\nif (!nombre || !whatsapp) {\n  throw new Error('Faltan campos requeridos: nombre, whatsapp');\n}\n\nconst nom = String(nombre).replace(/'/g, \"''\");\nconst ap = apellido && apellido !== 'Sin definir' ? String(apellido).replace(/'/g, \"''\") : null;\nconst res = resumen && resumen !== 'Sin definir' ? String(resumen).replace(/'/g, \"''\") : null;\nconst obj = objetivo && objetivo !== 'Sin definir' ? String(objetivo).replace(/'/g, \"''\") : null;\nconst dis = disponibilidad && disponibilidad !== 'Sin definir' ? String(disponibilidad).replace(/'/g, \"''\") : null;\nconst pi = person_identifier ? String(person_identifier).replace(/'/g, \"''\") : nom; // Fallback: usar nombre\nconst primerContactoVal = primer_contacto && primer_contacto !== 'Sin definir' && primer_contacto !== '' ? 'CURRENT_TIMESTAMP' : 'CURRENT_TIMESTAMP';\nconst validCategories = ['KIDS', 'ADULTO', 'ADOLESCENTE', 'PERSONALIZADO'];\nconst catVal = categoria && validCategories.includes(categoria) ? categoria : (lead_tipo || 'PERSONALIZADO');\n\nconst query = `INSERT INTO leads (nombre, apellido, whatsapp, email, telefono, lead_tipo, origen, categoria, nivel, objetivo, resumen, disponibilidad, tags, person_identifier, estado, estado_motivo, estado_fecha, primer_contacto, ultimo_contacto, created_at, updated_at)\nVALUES ('${nom}', ${ap ? `'${ap}'` : 'null'}, '${whatsapp}', ${email ? `'${email}'` : 'null'}, ${telefono ? `'${telefono}'` : 'null'}, ${lead_tipo ? `'${lead_tipo}'` : 'null'}, ${origen ? `'${origen}'` : 'null'}, '${catVal}', ${nivel ? `'${nivel}'` : 'null'}, ${obj ? `'${obj}'` : 'null'}, ${res ? `'${res}'` : 'null'}, ${dis ? `'${dis}'` : 'null'}, ${tags ? `'${tags}'` : 'null'}, '${pi}', 'NUEVO', 'Nuevo contacto', CURRENT_TIMESTAMP, ${primerContactoVal}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)\nRETURNING id, nombre, whatsapp, email, person_identifier, lead_tipo, origen, nivel, estado, created_at;`;\n\nreturn [{json: {query}}];\n"
+        "jsCode": "const input = $input.first().json;\nconst b = input.body || input;\n\nconst esc = (v) => String(v).replace(/'/g, \"''\");\nconst ok = (v) => v !== undefined && v !== null && String(v).trim() !== '' &&\n  !['sin definir', 'null', 'undefined', 'n/a'].includes(String(v).trim().toLowerCase());\nconst val = (v) => (ok(v) ? `'${esc(String(v).trim())}'` : 'null');\nconst quitarAcentos = (s) => String(s).normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\n\nconst TIPOS = ['KIDS', 'ADULTO', 'ADOLESCENTE', 'AU_PAIR', 'PERSONALIZADO', 'KIDS-ADOLESCENTES'];\nconst normTipo = (v) => {\n  if (!ok(v)) return null;\n  let t = quitarAcentos(String(v).trim().toUpperCase()).replace(/\\s+/g, '_');\n  if (t === 'ADULTOS') t = 'ADULTO';\n  if (t === 'AUPAIR' || t === 'AU-PAIR') t = 'AU_PAIR';\n  return TIPOS.includes(t) ? t : null;\n};\nconst normOrigen = (v) => {\n  if (!ok(v)) return null;\n  const t = quitarAcentos(String(v).trim().toUpperCase());\n  if (t.includes('RECOMEND')) return 'RECOMENDACION';\n  if (t.includes('INSTA')) return 'INSTAGRAM';\n  if (t.includes('FACE')) return 'FACEBOOK';\n  if (t.includes('TIK')) return 'TIKTOK';\n  return 'ORGANICO';\n};\n\nconst whatsapp = String(b.whatsapp || '').replace(/[^0-9A-Za-z+@._-]/g, '');\nconst nombreReal = ok(b.nombre) ? String(b.nombre).trim() : null;\nconst nombreFinal = nombreReal || (ok(b.nombre_perfil) ? String(b.nombre_perfil).trim() : null);\n\nif (!nombreFinal || !whatsapp) {\n  throw new Error('Faltan campos requeridos: nombre, whatsapp');\n}\n\nconst lead_tipo = normTipo(b.lead_tipo);\nconst categoria = normTipo(b.categoria) || lead_tipo || 'PERSONALIZADO';\nconst origen = normOrigen(b.origen);\nconst pi = ok(b.person_identifier) ? String(b.person_identifier).trim() : nombreFinal;\n\nconst cols = 'id, nombre, whatsapp, email, person_identifier, lead_tipo, origen, nivel, estado, created_at';\n\nconst query = `WITH ex AS (SELECT id FROM leads WHERE whatsapp = '${esc(whatsapp)}' ORDER BY id LIMIT 1),\nupd AS (\n  UPDATE leads SET\n    nombre = COALESCE(${val(nombreReal)}, nombre),\n    apellido = COALESCE(${val(b.apellido)}, apellido),\n    email = COALESCE(${val(b.email)}, email),\n    telefono = COALESCE(${val(b.telefono)}, telefono),\n    lead_tipo = COALESCE(${val(lead_tipo)}, lead_tipo),\n    categoria = COALESCE(${val(normTipo(b.categoria) || lead_tipo)}, categoria),\n    origen = COALESCE(${val(origen)}, origen),\n    nivel = COALESCE(${val(b.nivel)}, nivel),\n    objetivo = COALESCE(${val(b.objetivo)}, objetivo),\n    resumen = COALESCE(${val(b.resumen)}, resumen),\n    disponibilidad = COALESCE(${val(b.disponibilidad)}, disponibilidad),\n    tags = COALESCE(${val(b.tags)}, tags),\n    person_identifier = COALESCE(${val(b.person_identifier)}, person_identifier),\n    ultimo_contacto = CURRENT_TIMESTAMP,\n    updated_at = CURRENT_TIMESTAMP\n  WHERE id IN (SELECT id FROM ex)\n  RETURNING ${cols}\n),\nins AS (\n  INSERT INTO leads (nombre, apellido, whatsapp, email, telefono, lead_tipo, origen, categoria, nivel, objetivo, resumen, disponibilidad, tags, person_identifier, estado, estado_motivo, estado_fecha, primer_contacto, ultimo_contacto, created_at, updated_at)\n  SELECT '${esc(nombreFinal)}', ${val(b.apellido)}, '${esc(whatsapp)}', ${val(b.email)}, ${val(b.telefono)}, ${val(lead_tipo)}, ${val(origen)}, '${esc(categoria)}', ${val(b.nivel)}, ${val(b.objetivo)}, ${val(b.resumen)}, ${val(b.disponibilidad)}, ${val(b.tags)}, '${esc(pi)}', 'NUEVO', 'Nuevo contacto', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP\n  WHERE NOT EXISTS (SELECT 1 FROM ex)\n  RETURNING ${cols}\n)\nSELECT * FROM upd UNION ALL SELECT * FROM ins;`;\n\nreturn [{ json: { query } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -79,7 +118,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const result = $('PostgreSQL - Insert').first().json;\n\nreturn [{json: {success: true, message: 'Lead creado correctamente', lead: {id: result.id, nombre: result.nombre, whatsapp: result.whatsapp, estado: result.estado, lead_tipo: result.lead_tipo, origen: result.origen}}}];"
+        "jsCode": "const result = $('PostgreSQL - Insert').first().json;\n\nif (!result || !result.id) {\n  return [{ json: { success: false, message: 'No se pudo guardar el lead' } }];\n}\n\nreturn [{\n  json: {\n    success: true,\n    message: `Lead guardado (id ${result.id}). Para actualizarlo usá update-lead con id=${result.id} (número, no el WhatsApp).`,\n    lead: { id: result.id, nombre: result.nombre, whatsapp: result.whatsapp, estado: result.estado, lead_tipo: result.lead_tipo, origen: result.origen }\n  }\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -134,7 +173,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

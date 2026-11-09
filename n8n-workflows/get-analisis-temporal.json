@@ -2,13 +2,14 @@
   "n8n_id": "UDHSMHCnF8QAyVGD",
   "n8n_name": "get-analisis-temporal",
   "active": true,
-  "updatedAt": "2026-06-23T01:59:02.934Z",
+  "updatedAt": "2026-11-04T23:18:04.716Z",
   "nodes": [
     {
       "parameters": {
         "path": "get-analisis-temporal",
         "responseMode": "lastNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -189,7 +190,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",
@@ -205,7 +206,7 @@
             "accept": "application/json, text/plain, */*",
             "accept-encoding": "gzip, compress, deflate, br",
             "content-type": "application/json",
-            "x-api-key": "fla-2026-Clas3sd31ngl3s",
+            "x-api-key": "<REDACTED>",
             "x-forwarded-for": "201.235.17.183",
             "x-forwarded-host": "asistente-ia-fla-n8n.x5miqk.easypanel.host",
             "x-forwarded-port": "443",

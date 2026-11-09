@@ -2,13 +2,14 @@
   "n8n_id": "CB83S0q09is5UPES",
   "n8n_name": "get-leads-origin",
   "active": true,
-  "updatedAt": "2026-07-03T02:29:36.551Z",
+  "updatedAt": "2026-11-04T23:17:25.542Z",
   "nodes": [
     {
       "parameters": {
         "path": "get-leads-origin",
         "responseMode": "lastNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -82,7 +83,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

@@ -2,13 +2,14 @@
   "n8n_id": "lqDwGXi8bLvzoEsc",
   "n8n_name": "get-leads-pipeline",
   "active": true,
-  "updatedAt": "2026-06-23T01:31:56.635Z",
+  "updatedAt": "2026-11-04T23:18:36.622Z",
   "nodes": [
     {
       "parameters": {
         "path": "get-leads-pipeline",
         "responseMode": "responseNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "id": "54fcb30c-8270-4df9-969b-a2b34b64f31c",
       "name": "Webhook",
@@ -162,7 +163,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

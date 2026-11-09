@@ -2,14 +2,15 @@
   "n8n_id": "vG5um4WhzKMrYMCX",
   "n8n_name": "verificar-pago",
   "active": true,
-  "updatedAt": "2026-09-17T22:15:10.577Z",
+  "updatedAt": "2026-11-04T23:22:04.952Z",
   "nodes": [
     {
       "parameters": {
         "path": "verificar-pago",
         "httpMethod": "POST",
         "responseMode": "lastNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -163,7 +164,8 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "availableInMCP": true
   },
   "pinData": {}
 }

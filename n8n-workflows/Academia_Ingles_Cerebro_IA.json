@@ -2,7 +2,7 @@
   "n8n_id": "pBYf6cv9kCeTwEWU",
   "n8n_name": "Academia_Ingles_Cerebro_IA",
   "active": false,
-  "updatedAt": "2026-09-07T21:18:46.400Z",
+  "updatedAt": "2026-11-04T21:54:11.988Z",
   "nodes": [
     {
       "parameters": {
@@ -62,7 +62,7 @@
           "parameters": [
             {
               "name": "api_access_token",
-              "value": "Co1Q5zNmdMucHkNczMZvv1hv"
+              "value": "<REDACTED>"
             }
           ]
         },
@@ -128,7 +128,7 @@
           "parameters": [
             {
               "name": "api_access_token",
-              "value": "Co1Q5zNmdMucHkNczMZvv1hv"
+              "value": "<REDACTED>"
             }
           ]
         },
@@ -162,13 +162,13 @@
       "alwaysOutputData": true,
       "retryOnFail": true,
       "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
       "credentials": {
         "httpBasicAuth": {
           "id": "748nzoccTGLvj9oU",
           "name": "Chawoot credential Fla"
         }
-      },
-      "onError": "continueRegularOutput"
+      }
     },
     {
       "parameters": {
@@ -180,7 +180,7 @@
           "parameters": [
             {
               "name": "api_access_token",
-              "value": "Co1Q5zNmdMucHkNczMZvv1hv"
+              "value": "<REDACTED>"
             }
           ]
         },
@@ -195,13 +195,13 @@
       "id": "eeaabb81-7ad7-4903-9c31-9392cbd507c7",
       "name": "Buscar conversacion",
       "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
       "credentials": {
         "httpBasicAuth": {
           "id": "748nzoccTGLvj9oU",
           "name": "Chawoot credential Fla"
         }
-      },
-      "onError": "continueRegularOutput"
+      }
     },
     {
       "parameters": {
@@ -247,7 +247,7 @@
           "parameters": [
             {
               "name": "api_access_token",
-              "value": "Co1Q5zNmdMucHkNczMZvv1hv"
+              "value": "<REDACTED>"
             }
           ]
         },
@@ -383,7 +383,7 @@
           "parameters": [
             {
               "name": "api_access_token",
-              "value": "Co1Q5zNmdMucHkNczMZvv1hv"
+              "value": "<REDACTED>"
             }
           ]
         },
@@ -1119,7 +1119,7 @@
           "parameters": [
             {
               "name": "api_access_token",
-              "value": "Co1Q5zNmdMucHkNczMZvv1hv"
+              "value": "<REDACTED>"
             }
           ]
         },
@@ -1275,7 +1275,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const headers = $input.first().json.headers || {};\nconst apiKey = headers['x-api-key'];\n\nconst API_KEY_VALIDA = 'fla-2026-Clas3sd31ngl3s';\n\nif (!apiKey || apiKey !== API_KEY_VALIDA) {\n  return [{\n    json: {\n      success: false,\n      error: 'Unauthorized'\n    },\n    status: 401\n  }];\n}\n\nreturn $input.first();"
+        "jsCode": "const headers = $input.first().json.headers || {};\nconst apiKey = headers['x-api-key'];\n\nconst API_KEY_VALIDA = '<REDACTED>';\n\nif (!apiKey || apiKey !== API_KEY_VALIDA) {\n  return [{\n    json: {\n      success: false,\n      error: 'Unauthorized'\n    },\n    status: 401\n  }];\n}\n\nreturn $input.first();"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -3750,7 +3750,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

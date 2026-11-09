@@ -2,7 +2,7 @@
   "n8n_id": "ezOhxxvYhWCTBVeO",
   "n8n_name": "validar-comprobante-pago",
   "active": false,
-  "updatedAt": "2026-06-18T00:09:24.023Z",
+  "updatedAt": "2026-11-04T21:54:11.988Z",
   "nodes": [
     {
       "parameters": {
@@ -253,8 +253,7 @@
         112
       ],
       "id": "7854c98d-6d44-49b7-9adf-ef2bb56073b2",
-      "name": "Subir a Google Drive",
-      "credentials": {}
+      "name": "Subir a Google Drive"
     },
     {
       "parameters": {
@@ -425,7 +424,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false
+    "availableInMCP": true
   },
   "pinData": {}
 }

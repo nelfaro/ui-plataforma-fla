@@ -2,14 +2,15 @@
   "n8n_id": "GhS0S7loHc2PPCzi",
   "n8n_name": "conocimiento-post",
   "active": true,
-  "updatedAt": "2026-06-22T23:47:12.863Z",
+  "updatedAt": "2026-11-04T23:21:28.599Z",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "conocimiento-post",
         "responseMode": "lastNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -107,7 +108,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

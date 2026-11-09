@@ -2,14 +2,15 @@
   "n8n_id": "TG2CxVQn74pEsEQx",
   "n8n_name": "create-horario",
   "active": true,
-  "updatedAt": "2026-07-18T01:52:28.748Z",
+  "updatedAt": "2026-11-04T23:21:40.384Z",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "create-horario",
         "responseMode": "lastNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -125,7 +126,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

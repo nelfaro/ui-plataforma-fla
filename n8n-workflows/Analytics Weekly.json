@@ -2,13 +2,14 @@
   "n8n_id": "PI2Hz5ZH8zKVVGBp",
   "n8n_name": "Analytics Weekly",
   "active": true,
-  "updatedAt": "2026-06-23T19:58:22.142Z",
+  "updatedAt": "2026-11-04T23:17:51.596Z",
   "nodes": [
     {
       "parameters": {
         "path": "get-analytics-weekly",
         "responseMode": "lastNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -100,7 +101,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

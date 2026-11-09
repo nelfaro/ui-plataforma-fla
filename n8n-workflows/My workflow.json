@@ -2,14 +2,15 @@
   "n8n_id": "d0MYzdvGVyoarBSF",
   "n8n_name": "My workflow",
   "active": true,
-  "updatedAt": "2026-06-19T01:10:50.068Z",
+  "updatedAt": "2026-11-04T23:21:47.451Z",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "create-alumno",
         "responseMode": "responseNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -83,7 +84,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",

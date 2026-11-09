@@ -2,7 +2,7 @@
   "n8n_id": "o9FzNUWDYQzjjJEj",
   "n8n_name": "KPIs Dashboard",
   "active": true,
-  "updatedAt": "2026-07-03T01:14:10.315Z",
+  "updatedAt": "2026-11-04T23:18:43.234Z",
   "nodes": [
     {
       "parameters": {
@@ -10,7 +10,8 @@
         "responseMode": "lastNode",
         "options": {
           "allowedOrigins": "*"
-        }
+        },
+        "authentication": "headerAuth"
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -84,7 +85,7 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "timeSavedMode": "fixed",
     "errorWorkflow": "ktDkXcf811N3FTt3",
     "timezone": "America/Argentina/Buenos_Aires",
