@@ -29,7 +29,7 @@
     "name": "Cerebro v2",
     "active": true,
     "nodeCount": 56,
-    "updatedAt": "2026-11-05T00:35:52.558Z"
+    "updatedAt": "2026-11-09T13:23:14.994Z"
   },
   {
     "file": "conocimiento-get.json",
@@ -133,7 +133,7 @@
     "name": "get-conocimiento-agente",
     "active": true,
     "nodeCount": 16,
-    "updatedAt": "2026-11-05T00:32:09.124Z"
+    "updatedAt": "2026-11-09T13:12:32.501Z"
   },
   {
     "file": "get-conversation-logs.json",
@@ -173,7 +173,7 @@
     "name": "get-horarios",
     "active": true,
     "nodeCount": 6,
-    "updatedAt": "2026-11-05T00:23:59.222Z"
+    "updatedAt": "2026-11-09T13:08:55.881Z"
   },
   {
     "file": "get-lead-by-id.json",
