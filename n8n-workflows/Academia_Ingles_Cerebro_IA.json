@@ -62,7 +62,7 @@
           "parameters": [
             {
               "name": "api_access_token",
-              "value": "Co1Q5zNmdMucHkNczMZvv1hv"
+              "value": "<REDACTED>"
             }
           ]
         },
@@ -128,7 +128,7 @@
           "parameters": [
             {
               "name": "api_access_token",
-              "value": "Co1Q5zNmdMucHkNczMZvv1hv"
+              "value": "<REDACTED>"
             }
           ]
         },
@@ -180,7 +180,7 @@
           "parameters": [
             {
               "name": "api_access_token",
-              "value": "Co1Q5zNmdMucHkNczMZvv1hv"
+              "value": "<REDACTED>"
             }
           ]
         },
@@ -247,7 +247,7 @@
           "parameters": [
             {
               "name": "api_access_token",
-              "value": "Co1Q5zNmdMucHkNczMZvv1hv"
+              "value": "<REDACTED>"
             }
           ]
         },
@@ -383,7 +383,7 @@
           "parameters": [
             {
               "name": "api_access_token",
-              "value": "Co1Q5zNmdMucHkNczMZvv1hv"
+              "value": "<REDACTED>"
             }
           ]
         },
@@ -1119,7 +1119,7 @@
           "parameters": [
             {
               "name": "api_access_token",
-              "value": "Co1Q5zNmdMucHkNczMZvv1hv"
+              "value": "<REDACTED>"
             }
           ]
         },
@@ -1275,7 +1275,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const headers = $input.first().json.headers || {};\nconst apiKey = headers['x-api-key'];\n\nconst API_KEY_VALIDA = 'fla-2026-Clas3sd31ngl3s';\n\nif (!apiKey || apiKey !== API_KEY_VALIDA) {\n  return [{\n    json: {\n      success: false,\n      error: 'Unauthorized'\n    },\n    status: 401\n  }];\n}\n\nreturn $input.first();"
+        "jsCode": "const headers = $input.first().json.headers || {};\nconst apiKey = headers['x-api-key'];\n\nconst API_KEY_VALIDA = '<REDACTED>';\n\nif (!apiKey || apiKey !== API_KEY_VALIDA) {\n  return [{\n    json: {\n      success: false,\n      error: 'Unauthorized'\n    },\n    status: 401\n  }];\n}\n\nreturn $input.first();"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,

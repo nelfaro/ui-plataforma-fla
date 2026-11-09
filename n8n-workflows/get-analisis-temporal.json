@@ -206,7 +206,7 @@
             "accept": "application/json, text/plain, */*",
             "accept-encoding": "gzip, compress, deflate, br",
             "content-type": "application/json",
-            "x-api-key": "fla-2026-Clas3sd31ngl3s",
+            "x-api-key": "<REDACTED>",
             "x-forwarded-for": "201.235.17.183",
             "x-forwarded-host": "asistente-ia-fla-n8n.x5miqk.easypanel.host",
             "x-forwarded-port": "443",
