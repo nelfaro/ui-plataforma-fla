@@ -2,7 +2,7 @@
   "n8n_id": "FjVuLaSNlsdGxhOo",
   "n8n_name": "update-lead",
   "active": true,
-  "updatedAt": "2026-11-05T00:23:22.036Z",
+  "updatedAt": "2026-11-09T14:06:28.847Z",
   "nodes": [
     {
       "parameters": {
@@ -46,7 +46,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst body = input.body || input;\nconst { id, estado, estado_motivo, resumen, disponibilidad, tags, proxima_cita, notas } = body;\n\nconst idNum = parseInt(String(id).replace(/[^0-9]/g, ''), 10);\nif (!idNum) {\n  throw new Error('Falta el campo requerido: id (número devuelto por create-lead)');\n}\n\nconst isValid = (v) => v !== undefined && v !== null && String(v).trim() !== '' &&\n  !['sin definir', 'null', 'undefined'].includes(String(v).trim().toLowerCase());\nconst toSql = (v) => `'${String(v).trim().replace(/'/g, \"''\")}'`;\n\n// La tabla leads solo acepta estos estados (CHECK leads_estado_check)\nconst ESTADOS = ['NUEVO', 'FRIO', 'TIBIO', 'CALIENTE'];\nconst estadoNorm = isValid(estado)\n  ? String(estado).trim().toUpperCase().replace('FRÍO', 'FRIO')\n  : null;\n\nconst updates = [];\nif (estadoNorm && ESTADOS.includes(estadoNorm)) updates.push(`estado = '${estadoNorm}'`);\nif (isValid(estado_motivo)) updates.push(`estado_motivo = ${toSql(estado_motivo)}`);\nif (isValid(resumen)) updates.push(`resumen = ${toSql(resumen)}`);\nif (isValid(disponibilidad)) updates.push(`disponibilidad = ${toSql(disponibilidad)}`);\nif (isValid(tags)) updates.push(`tags = ${toSql(tags)}`);\nif (isValid(proxima_cita)) {\n  const d = new Date(String(proxima_cita));\n  if (!isNaN(d.getTime())) updates.push(`proxima_cita = '${d.toISOString()}'::timestamptz`);\n}\nif (isValid(notas)) updates.push(`notas = ${toSql(notas)}`);\n\nupdates.push('estado_fecha = CURRENT_TIMESTAMP');\nupdates.push('ultimo_contacto = CURRENT_TIMESTAMP');\nupdates.push('updated_at = CURRENT_TIMESTAMP');\n\nconst query = `UPDATE leads SET ${updates.join(', ')} WHERE id = ${idNum} RETURNING id, nombre, whatsapp, estado, estado_motivo, updated_at;`;\n\nreturn [{ json: { query } }];\n"
+        "jsCode": "const input = $input.first().json;\nconst body = input.body || input;\nconst { id, estado, estado_motivo, resumen, disponibilidad, tags, proxima_cita, notas } = body;\n\nconst idNum = parseInt(String(id).replace(/[^0-9]/g, ''), 10);\nif (!idNum) {\n  throw new Error('Falta el campo requerido: id (número devuelto por create-lead)');\n}\n\nconst isValid = (v) => v !== undefined && v !== null && String(v).trim() !== '' &&\n  !['sin definir', 'null', 'undefined'].includes(String(v).trim().toLowerCase());\nconst toSql = (v) => `'${String(v).trim().replace(/'/g, \"''\")}'`;\n\n// La tabla leads solo acepta estos estados (CHECK leads_estado_check)\nconst ESTADOS = ['NUEVO', 'FRIO', 'TIBIO', 'CALIENTE'];\nconst estadoNorm = isValid(estado)\n  ? String(estado).trim().toUpperCase().replace('FRÍO', 'FRIO')\n  : null;\n\nconst updates = [];\nif (estadoNorm && ESTADOS.includes(estadoNorm)) updates.push(`estado = '${estadoNorm}'`);\nif (isValid(estado_motivo)) updates.push(`estado_motivo = ${toSql(estado_motivo)}`);\nif (isValid(resumen)) updates.push(`resumen = ${toSql(resumen)}`);\nif (isValid(disponibilidad)) updates.push(`disponibilidad = ${toSql(disponibilidad)}`);\nif (isValid(tags)) updates.push(`tags = ${toSql(tags)}`);\nif (isValid(proxima_cita)) {\n  const d = new Date(String(proxima_cita));\n  if (!isNaN(d.getTime())) updates.push(`proxima_cita = '${d.toISOString()}'::timestamptz`);\n}\nif (isValid(notas)) updates.push(`notas = ${toSql(notas)}`);\n\nupdates.push('estado_fecha = CURRENT_TIMESTAMP');\nupdates.push('ultimo_contacto = CURRENT_TIMESTAMP');\nupdates.push('updated_at = CURRENT_TIMESTAMP');\n\nconst query = `WITH ant AS (SELECT estado AS estado_anterior FROM leads WHERE id = ${idNum}) UPDATE leads SET ${updates.join(', ')} WHERE id = ${idNum} RETURNING id, nombre, whatsapp, estado, estado_motivo, updated_at, lead_tipo, origen, nivel, resumen, disponibilidad, (SELECT estado_anterior FROM ant) AS estado_anterior, (SELECT valor FROM academia_config WHERE clave = 'telegram_chat_id_avisos') AS chat_id;`;\n\nreturn [{ json: { query } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -91,6 +91,75 @@
       ],
       "id": "67de16fe-7f20-429b-b7a3-f91ba3f92249",
       "name": "Response"
+    },
+    {
+      "id": "a80d118e-1cb2-4e0d-8a25-83d01f974e94",
+      "name": "Armar aviso",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst h = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n\n// Solo avisa cuando el lead PASA a CALIENTE (no en cada actualización)\nconst enviar = !!r && r.estado === 'CALIENTE' && r.estado_anterior !== 'CALIENTE' && !!r.chat_id;\n\nconst lineas = [\n  '🔥 <b>Lead CALIENTE</b>',\n  '',\n  `👤 ${h(r.nombre || 'Sin nombre')}${r.lead_tipo ? ' · ' + h(r.lead_tipo) : ''}`,\n  `📱 ${h(r.whatsapp)}`\n];\nif (r.origen) lineas.push(`📣 Origen: ${h(r.origen)}`);\nif (r.nivel) lineas.push(`🎯 Nivel: ${h(r.nivel)}`);\nif (r.disponibilidad) lineas.push(`🕒 ${h(r.disponibilidad)}`);\nif (r.estado_motivo) lineas.push('', `💬 ${h(r.estado_motivo)}`);\nif (r.resumen) lineas.push('', h(String(r.resumen).slice(0, 400)));\n\nreturn [{ json: { enviar, chat_id: r.chat_id, texto: lineas.join('\\n') } }];\n"
+      }
+    },
+    {
+      "id": "16f540b1-9fa6-4a28-bbd7-a96602007e20",
+      "name": "CALIENTE nuevo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.enviar }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "5a3a4a58-eeb6-40cf-ba0e-acbe06b6d14a",
+      "name": "Avisar a Fla (CALIENTE)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1340,
+        220
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $json.chat_id }}",
+        "text": "={{ $json.texto }}",
+        "additionalFields": {
+          "parse_mode": "HTML",
+          "appendAttribution": false
+        }
+      },
+      "onError": "continueRegularOutput",
+      "webhookId": "dc10b83d-a2ce-46c1-8657-3df6b73d9145"
     }
   ],
   "connections": {
@@ -117,6 +186,46 @@
       ]
     },
     "PostgreSQL - Update": {
+      "main": [
+        [
+          {
+            "node": "Armar aviso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armar aviso": {
+      "main": [
+        [
+          {
+            "node": "CALIENTE nuevo?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CALIENTE nuevo?": {
+      "main": [
+        [
+          {
+            "node": "Avisar a Fla (CALIENTE)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avisar a Fla (CALIENTE)": {
       "main": [
         [
           {
